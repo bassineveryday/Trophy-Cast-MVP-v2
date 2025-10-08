@@ -1,7 +1,20 @@
+import React from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, TextInput, Button, Alert } from 'react-native';
 import { useState } from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { supabase, AuthCredentials } from './lib/supabase';
+import HomeScreen from './screens/HomeScreen';
+import TournamentsScreen from './screens/TournamentsScreen';
+import ProfileScreen from './screens/ProfileScreen';
+
+// Navigation types
+type TabParamList = {
+  Home: undefined;
+  Tournaments: undefined;
+  Profile: undefined;
+};
 
 interface LoginState {
   email: string;
@@ -14,6 +27,62 @@ interface AppState extends LoginState {
   success: string | null;
   isLoggedIn: boolean;
   userEmail: string | null;
+}
+
+const Tab = createBottomTabNavigator<TabParamList>();
+
+interface TabNavigatorProps {
+  userEmail: string | null;
+  onLogout: () => void;
+}
+
+function TabNavigator({ userEmail, onLogout }: TabNavigatorProps) {
+  return (
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        tabBarIcon: ({ focused, color, size }) => {
+          let iconText = '';
+          
+          if (route.name === 'Home') {
+            iconText = '🏠';
+          } else if (route.name === 'Tournaments') {
+            iconText = '🎣';
+          } else if (route.name === 'Profile') {
+            iconText = '👤';
+          }
+          
+          return <Text style={{ fontSize: size }}>{iconText}</Text>;
+        },
+        tabBarActiveTintColor: '#2c3e50',
+        tabBarInactiveTintColor: '#7f8c8d',
+        headerStyle: {
+          backgroundColor: '#2c3e50',
+        },
+        headerTintColor: '#fff',
+        headerTitleStyle: {
+          fontWeight: 'bold',
+        },
+      })}
+    >
+      <Tab.Screen 
+        name="Home" 
+        options={{ title: 'Trophy Cast' }}
+      >
+        {() => <HomeScreen userEmail={userEmail} />}
+      </Tab.Screen>
+      <Tab.Screen 
+        name="Tournaments" 
+        component={TournamentsScreen}
+        options={{ title: 'Tournaments' }}
+      />
+      <Tab.Screen 
+        name="Profile"
+        options={{ title: 'Profile' }}
+      >
+        {() => <ProfileScreen userEmail={userEmail} onLogout={onLogout} />}
+      </Tab.Screen>
+    </Tab.Navigator>
+  );
 }
 
 export default function App() {
@@ -79,23 +148,13 @@ export default function App() {
     }));
   };
 
-  // Show success screen if logged in
+  // Show tab navigation if logged in
   if (state.isLoggedIn) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.title}>Welcome!</Text>
-        <Text style={styles.welcomeText}>You're logged in</Text>
-        <Text style={styles.emailText}>
-          Email: {state.userEmail}
-        </Text>
-        <View style={styles.buttonContainer}>
-          <Button
-            title="Logout"
-            onPress={handleLogout}
-          />
-        </View>
+      <NavigationContainer>
+        <TabNavigator userEmail={state.userEmail} onLogout={handleLogout} />
         <StatusBar style="auto" />
-      </View>
+      </NavigationContainer>
     );
   }
 
