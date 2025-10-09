@@ -1,173 +1,324 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  StyleSheet, 
-  Text, 
-  View, 
+import {
+  StyleSheet,
+  Text,
+  View,
   FlatList,
-  RefreshControl, 
   ActivityIndicator,
   Alert,
+  RefreshControl,
 } from 'react-native';
-import { supabase } from '../lib/supabase';
-import { testConnection } from '../lib/testConnection';
-
-interface AOYStanding {
-  season_year: number;      // bigint in DB
-  aoy_rank: number;         // bigint in DB
-  total_aoy_points: number; // bigint in DB
-  member_id: string;        // text in DB
-  member_name: string;      // text in DB
-  boater_status: 'B' | 'C'; // text in DB, constrained to B/C
-}
+import { fetchTournamentEvents, TournamentEvent } from '../lib/supabase';
 
 export default function TournamentsScreen() {
-  const [standings, setStandings] = useState<AOYStanding[]>([]);
+  const [tournaments, setTournaments] = useState<TournamentEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchStandings = async () => {
+  const loadTournaments = async () => {
     try {
-      setError(null);
-      console.log('🔵 [START] Fetching AOY standings...');
-      console.log('🔵 [INIT] Supabase client:', supabase);
-      console.log('🔵 [INIT] Client ready:', !!supabase);
-      
-      const startTime = Date.now();
-      
-      const { data, error, status, statusText } = await supabase
-        .from('aoy_standings_rows')
-        .select('*')
-        .order('aoy_rank', { ascending: true });
+      console.log('🔵 Fetching tournaments...');
+      const { data, error } = await fetchTournamentEvents();
 
-      const duration = Date.now() - startTime;
-      
-      console.log(`� [DONE] Request completed in ${duration}ms`);
-      console.log('📊 [STATUS]', status, statusText);
-      console.log('📊 [DATA] Rows returned:', data?.length ?? 0);
-      console.log('📊 [ERROR]', error ? JSON.stringify(error) : 'None');
-      
       if (error) {
-        console.error('❌ [ERROR DETAIL]', error);
-        throw error;
+        console.error('❌ Error fetching tournaments:', error);
+        const errorMessage = typeof error === 'string' ? error : 'Failed to load tournaments';
+        setError(errorMessage);
+        Alert.alert('Error', 'Failed to load tournaments: ' + errorMessage);
+        return;
       }
 
-      if (data && data.length > 0) {
-        console.log('✅ [SUCCESS] First 3 rows:', data.slice(0, 3));
-        setStandings(data);
-      } else {
-        console.warn('⚠️ [EMPTY] No data returned');
-      }
-
-      console.log('✅ Setting standings:', data?.length);
-      setStandings(data || []);
-    } catch (err: any) {
-      console.error('❌ Catch block error:', err);
-      setError(err.message || 'Failed to load standings');
-      Alert.alert('Error', 'Failed to load AOY standings');
+      console.log('✅ Tournaments fetched:', data?.length || 0, 'records');
+      setTournaments(data || []);
+      setError(null);
+    } catch (err) {
+      console.error('❌ Unexpected error:', err);
+      setError('Failed to load tournaments');
+      Alert.alert('Error', 'Failed to load tournaments');
     } finally {
-      console.log('🏁 Finally block - setting loading to false');
       setLoading(false);
       setRefreshing(false);
     }
   };
 
   useEffect(() => {
-    async function init() {
-      const isConnected = await testConnection();
-      console.log('🔌 Supabase connection test:', isConnected ? '✅ Ready' : '❌ Failed');
-      if (isConnected) {
-        fetchStandings();
-      }
-    }
-    init();
+    loadTournaments();
   }, []);
 
-  const onRefresh = () => {
+  const handleRefresh = () => {
     setRefreshing(true);
-    fetchStandings();
+    loadTournaments();
   };
 
-  const renderStandingItem = ({ item, index }: { item: AOYStanding; index: number }) => (
-    <View style={[styles.standingRow, index % 2 === 0 ? styles.evenRow : styles.oddRow]}>
-      <Text style={styles.rankText}>#{item.aoy_rank}</Text>
-      <Text style={styles.nameText} numberOfLines={1}>{item.member_name}</Text>
-      <View style={[styles.boaterBadge, item.boater_status === 'B' ? styles.boaterBadgeB : styles.boaterBadgeC]}>
-        <Text style={styles.boaterText}>{item.boater_status}</Text>
+  const renderTournament = ({ item }: { item: TournamentEvent }) => (
+    <View style={styles.tournamentCard}>
+      <View style={styles.cardHeader}>
+        <Text style={styles.tournamentName}>
+          {item.tournament_name || 'Unnamed Tournament'}
+        </Text>
+        <View style={styles.participantBadge}>
+          <Text style={styles.participantCount}>
+            {item.participants || 0}
+          </Text>
+          <Text style={styles.participantLabel}>anglers</Text>
+        </View>
       </View>
-      <Text style={styles.pointsText}>{item.total_aoy_points}</Text>
+      
+      <View style={styles.detailsRow}>
+        <Text style={styles.detailIcon}>📅</Text>
+        <Text style={styles.detailText}>
+          {item.event_date || 'Date TBD'}
+        </Text>
+      </View>
+      
+      <View style={styles.detailsRow}>
+        <Text style={styles.detailIcon}>🎣</Text>
+        <Text style={styles.detailText}>
+          {item.lake || 'Lake TBD'}
+        </Text>
+      </View>
+      
+      {item.tournament_code && (
+        <View style={styles.codeRow}>
+          <Text style={styles.codeLabel}>Code:</Text>
+          <Text style={styles.codeValue}>{item.tournament_code}</Text>
+        </View>
+      )}
+    </View>
+  );
+
+  const renderEmptyState = () => (
+    <View style={styles.emptyContainer}>
+      <Text style={styles.emptyTitle}>🏆 No Tournaments Available</Text>
+      <Text style={styles.emptyDescription}>
+        Tournament events will appear here once data is available.
+      </Text>
     </View>
   );
 
   if (loading) {
     return (
-      <View style={styles.centerContainer}>
+      <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#2c3e50" />
-        <Text style={styles.loadingText}>Loading AOY Standings...</Text>
+        <Text style={styles.loadingText}>Loading Tournaments...</Text>
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>🏆 2025 Angler of the Year</Text>
-      
-      <Text style={{ fontSize: 18, color: 'red', textAlign: 'center', marginBottom: 20 }}>
-        DEBUG: Found {standings.length} standings
-      </Text>
+      <View style={styles.header}>
+        <Text style={styles.title}>🏆 Tournaments</Text>
+        <Text style={styles.subtitle}>Upcoming & Recent Events</Text>
+      </View>
 
-      {error ? (
-        <View style={styles.centerContainer}>
-          <Text style={styles.errorText}>Error loading standings</Text>
-          <Text style={styles.errorSubText}>{error}</Text>
-        </View>
-      ) : standings.length === 0 ? (
-        <View style={styles.centerContainer}>
-          <Text style={styles.emptyText}>No standings available</Text>
-        </View>
-      ) : (
-        <>
-          <View style={styles.headerRow}>
-            <Text style={styles.headerCell}>Rank</Text>
-            <Text style={styles.headerCellName}>Name</Text>
-            <Text style={styles.headerCell}>Status</Text>
-            <Text style={styles.headerCell}>Points</Text>
-          </View>
-
-          <FlatList
-            data={standings}
-            keyExtractor={(item) => item.member_id}
-            renderItem={renderStandingItem}
-            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-            style={styles.listContainer}
-            showsVerticalScrollIndicator={false}
-          />
-        </>
-      )}
+      <FlatList
+        data={tournaments}
+        renderItem={renderTournament}
+        keyExtractor={(item) => item.event_id}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+        }
+        ListEmptyComponent={renderEmptyState}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={tournaments.length === 0 ? styles.emptyList : styles.list}
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f8f9fa', padding: 16 },
-  centerContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  header: { fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginBottom: 20, color: '#2c3e50', paddingVertical: 10 },
-  loadingText: { marginTop: 10, fontSize: 16, color: '#7f8c8d' },
-  errorText: { fontSize: 18, color: '#e74c3c', fontWeight: '600', marginBottom: 5 },
-  errorSubText: { fontSize: 14, color: '#7f8c8d', textAlign: 'center' },
-  emptyText: { fontSize: 16, color: '#7f8c8d', textAlign: 'center' },
-  headerRow: { flexDirection: 'row', backgroundColor: '#2c3e50', paddingVertical: 12, paddingHorizontal: 8, marginBottom: 2, borderRadius: 8 },
-  headerCell: { flex: 1, color: '#fff', fontWeight: 'bold', fontSize: 14, textAlign: 'center' },
-  headerCellName: { flex: 2, color: '#fff', fontWeight: 'bold', fontSize: 14, textAlign: 'left', paddingLeft: 8 },
-  listContainer: { flex: 1 },
-  standingRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, paddingHorizontal: 8, marginBottom: 1 },
-  evenRow: { backgroundColor: '#ffffff' },
-  oddRow: { backgroundColor: '#f1f3f4' },
-  rankText: { flex: 1, fontSize: 16, fontWeight: 'bold', color: '#2c3e50', textAlign: 'center' },
-  nameText: { flex: 2, fontSize: 16, color: '#2c3e50', paddingLeft: 8, fontWeight: '500' },
-  boaterBadge: { flex: 1, alignItems: 'center', justifyContent: 'center', borderRadius: 12, paddingVertical: 4, paddingHorizontal: 8, marginHorizontal: 4 },
-  boaterBadgeB: { backgroundColor: '#3498db' },
-  boaterBadgeC: { backgroundColor: '#e67e22' },
-  boaterText: { color: '#fff', fontWeight: 'bold', fontSize: 14 },
-  pointsText: { flex: 1, fontSize: 16, fontWeight: 'bold', color: '#27ae60', textAlign: 'center' },
+  container: {
+    flex: 1,
+    backgroundColor: '#f8f9fa',
+  },
+  header: {
+    backgroundColor: '#2c3e50',
+    paddingVertical: 20,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 5,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#ecf0f1',
+  },
+  list: {
+    padding: 16,
+  },
+  emptyList: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  standingItem: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  rankContainer: {
+    width: 60,
+    alignItems: 'center',
+  },
+  rankText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#2c3e50',
+  },
+  memberInfo: {
+    flex: 1,
+    marginLeft: 16,
+  },
+  memberName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#2c3e50',
+    marginBottom: 4,
+  },
+  memberId: {
+    fontSize: 12,
+    color: '#7f8c8d',
+    marginBottom: 2,
+  },
+  boaterStatus: {
+    fontSize: 12,
+    color: '#34495e',
+    fontStyle: 'italic',
+  },
+  pointsContainer: {
+    alignItems: 'flex-end',
+  },
+  pointsText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#27ae60',
+  },
+  seasonText: {
+    fontSize: 12,
+    color: '#7f8c8d',
+    marginTop: 2,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f8f9fa',
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: '#7f8c8d',
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    paddingHorizontal: 32,
+  },
+  emptyTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#2c3e50',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  emptyDescription: {
+    fontSize: 16,
+    color: '#7f8c8d',
+    textAlign: 'center',
+    lineHeight: 24,
+  },
+  // Tournament-specific styles
+  tournamentCard: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+  },
+  tournamentName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#2c3e50',
+    flex: 1,
+    marginRight: 12,
+  },
+  participantBadge: {
+    backgroundColor: '#27ae60',
+    borderRadius: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    alignItems: 'center',
+    minWidth: 60,
+  },
+  participantCount: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+  participantLabel: {
+    fontSize: 10,
+    color: '#fff',
+    textTransform: 'uppercase',
+  },
+  detailsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  detailIcon: {
+    fontSize: 16,
+    marginRight: 8,
+    width: 20,
+  },
+  detailText: {
+    fontSize: 14,
+    color: '#34495e',
+    flex: 1,
+  },
+  codeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#ecf0f1',
+  },
+  codeLabel: {
+    fontSize: 12,
+    color: '#7f8c8d',
+    marginRight: 8,
+  },
+  codeValue: {
+    fontSize: 12,
+    color: '#2c3e50',
+    fontWeight: '600',
+  },
 });

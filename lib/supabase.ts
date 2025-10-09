@@ -121,3 +121,56 @@ export const fetchAOYStandingsByMember = async (memberId: string) => {
     return { data: null, error: err };
   }
 };
+
+// Tournament Events interface
+export interface TournamentEvent {
+  event_id: string;
+  tournament_code: string | null;
+  tournament_name: string | null;
+  event_date: string | null;
+  lake: string | null;
+  participants: number | null;
+}
+
+// Tournament Events functions
+export const fetchTournamentEvents = async () => {
+  try {
+    console.log('🔵 Fetching tournament events...');
+    
+    const { data, error } = await supabase
+      .from('tournament_events_rows')
+      .select('*')
+      .order('event_date', { ascending: false, nullsFirst: false });
+
+    if (error) {
+      console.error('Error fetching tournament events:', error);
+      throw error;
+    }
+
+    console.log('✅ Tournament events fetched:', data?.length || 0, 'records');
+    return { data: data || [], error: null };
+  } catch (err) {
+    console.error('Unexpected error fetching tournament events:', err);
+    return { data: [], error: err };
+  }
+};
+
+export const fetchTournamentEventById = async (eventId: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('tournament_events_rows')
+      .select('*')
+      .eq('event_id', eventId)
+      .single();
+
+    if (error) {
+      console.error('Error fetching tournament event:', error);
+      throw error;
+    }
+
+    return { data, error: null };
+  } catch (err) {
+    console.error('Unexpected error fetching tournament event:', err);
+    return { data: null, error: err };
+  }
+};
