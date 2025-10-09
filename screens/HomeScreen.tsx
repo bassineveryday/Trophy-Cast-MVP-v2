@@ -7,10 +7,11 @@ import { supabase } from '../lib/supabase';
 interface TournamentResult {
   event_date: string;
   lake: string;
-  placement: number;
-  total_weight: number;
-  points: number;
-  payout: number;
+  tournament_name: string;
+  place: number;
+  weight_lbs: number;
+  aoy_points: number;
+  cash_payout: number;
 }
 
 interface AOYData {
@@ -21,7 +22,7 @@ interface AOYData {
 interface TournamentEvent {
   event_date: string;
   lake: string;
-  entry_fee: number;
+  tournament_name: string;
 }
 
 export default function HomeScreen() {
@@ -49,9 +50,9 @@ export default function HomeScreen() {
     try {
       // Last tournament
       const { data: last, error: lastErr } = await supabase
-        .from('tournament_results_rows_rows')
-        .select('event_date, lake, placement, total_weight, points, payout')
-        .eq('member_code', profile.member_code)
+        .from('tournament_results_rows')
+        .select('event_date, lake, tournament_name, place, weight_lbs, aoy_points, cash_payout')
+        .eq('member_id', profile.member_code)
         .order('event_date', { ascending: false })
         .limit(1)
         .maybeSingle();
@@ -60,26 +61,26 @@ export default function HomeScreen() {
 
       // AOY
       const { data: aoyData, error: aoyErr } = await supabase
-        .from('aoy_standings_rows_rows')
+        .from('aoy_standings_rows')
         .select('aoy_rank, total_aoy_points')
-        .eq('member_code', profile.member_code)
+        .eq('member_id', profile.member_code)
         .maybeSingle();
       if (aoyErr) throw aoyErr;
       setAoy(aoyData);
 
       // Earnings 2025
       const { data: earningsRows, error: earnErr } = await supabase
-        .from('tournament_results_rows_rows')
-        .select('payout')
-        .eq('member_code', profile.member_code)
+        .from('tournament_results_rows')
+        .select('cash_payout')
+        .eq('member_id', profile.member_code)
         .gte('event_date', '2025-01-01');
       if (earnErr) throw earnErr;
-      setEarnings(earningsRows?.reduce((sum, r) => sum + (r.payout || 0), 0) || 0);
+      setEarnings(earningsRows?.reduce((sum, r) => sum + (parseFloat(r.cash_payout) || 0), 0) || 0);
 
       // Next tournament
       const { data: next, error: nextErr } = await supabase
-        .from('tournament_events_rows_rows')
-        .select('lake, event_date, entry_fee')
+        .from('tournament_events_rows')
+        .select('lake, event_date, tournament_name')
         .gte('event_date', new Date().toISOString().slice(0, 10))
         .order('event_date', { ascending: true })
         .limit(1)
@@ -89,15 +90,15 @@ export default function HomeScreen() {
 
       // Season stats
       const { data: statsRows, error: statsErr } = await supabase
-        .from('tournament_results_rows_rows')
-        .select('placement, total_weight, big_fish')
-        .eq('member_code', profile.member_code)
+        .from('tournament_results_rows')
+        .select('place, weight_lbs, big_fish')
+        .eq('member_id', profile.member_code)
         .gte('event_date', '2025-01-01');
       if (statsErr) throw statsErr;
       setSeasonStats({
         tournaments: statsRows?.length || 0,
-        bestFinish: statsRows?.reduce((min, r) => r.placement && (!min || r.placement < min) ? r.placement : min, null as number | null),
-        totalWeight: statsRows?.reduce((sum, r) => sum + (r.total_weight || 0), 0) || 0,
+        bestFinish: statsRows?.reduce((min, r) => r.place && (!min || r.place < min) ? r.place : min, null as number | null),
+        totalWeight: statsRows?.reduce((sum, r) => sum + (r.weight_lbs || 0), 0) || 0,
         bigFish: statsRows?.reduce((max, r) => r.big_fish && r.big_fish > max ? r.big_fish : max, 0) || 0,
       });
     } catch (err: any) {
@@ -171,10 +172,10 @@ export default function HomeScreen() {
         {lastTournament ? (
           <>
             <Text style={styles.tourneyText}>{lastTournament.lake} - {lastTournament.event_date}</Text>
-            <Text style={styles.tourneyText}>Placement: {lastTournament.placement ?? 'N/A'}</Text>
-            <Text style={styles.tourneyText}>Weight: {lastTournament.total_weight ?? 'N/A'} lbs</Text>
-            <Text style={styles.tourneyText}>Points: {lastTournament.points ?? 'N/A'}</Text>
-            <Text style={styles.tourneyText}>Payout: ${lastTournament.payout ?? 0}</Text>
+            <Text style={styles.tourneyText}>Placement: {lastTournament.place ?? 'N/A'}</Text>
+            <Text style={styles.tourneyText}>Weight: {lastTournament.weight_lbs ?? 'N/A'} lbs</Text>
+            <Text style={styles.tourneyText}>Points: {lastTournament.aoy_points ?? 'N/A'}</Text>
+            <Text style={styles.tourneyText}>Payout: ${lastTournament.cash_payout ?? 0}</Text>
           </>
         ) : <Text style={styles.tourneyText}>No tournaments found.</Text>}
       </View>
@@ -185,7 +186,6 @@ export default function HomeScreen() {
         {nextTournament ? (
           <>
             <Text style={styles.tourneyText}>{nextTournament.lake} - {nextTournament.event_date}</Text>
-            <Text style={styles.tourneyText}>Entry Fee: ${nextTournament.entry_fee ?? 0}</Text>
           </>
         ) : <Text style={styles.tourneyText}>No upcoming tournaments.</Text>}
       </View>
