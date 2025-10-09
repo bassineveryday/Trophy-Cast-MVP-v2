@@ -1,0 +1,23 @@
+  const fetchStandings = async () => {
+    try {
+      setError(null);
+      console.log('🔵 START');
+      
+      const { data, error } = await supabase
+        .from('aoy_standings_rows')
+        .select('*')
+        .order('aoy_rank', { ascending: true });
+
+      console.log('📊 DATA:', data?.length, 'rows');
+      console.log('📊 ERROR:', error);
+
+      if (error) throw error;
+      setStandings(data || []);
+    } catch (err: any) {
+      console.error('❌', err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
