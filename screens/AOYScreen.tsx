@@ -10,11 +10,7 @@ import {
 } from 'react-native';
 import { fetchAOYStandings, AOYStandingsRow } from '../lib/supabase';
 
-interface AOYScreenProps {
-  userEmail: string | null;
-}
-
-export default function AOYScreen({ userEmail }: AOYScreenProps) {
+export default function AOYScreen() {
   const [standings, setStandings] = useState<AOYStandingsRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);

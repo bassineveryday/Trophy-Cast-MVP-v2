@@ -1,12 +1,10 @@
 import React from 'react';
 import { StyleSheet, Text, View, Button } from 'react-native';
+import { useAuth } from '../lib/AuthContext';
 
-interface ProfileScreenProps {
-  userEmail: string | null;
-  onLogout: () => void;
-}
-
-export default function ProfileScreen({ userEmail, onLogout }: ProfileScreenProps) {
+export default function ProfileScreen() {
+  const { user, profile, signOut } = useAuth();
+  
   return (
     <View style={styles.container}>
       <Text style={styles.title}>👤 Profile</Text>
@@ -14,7 +12,13 @@ export default function ProfileScreen({ userEmail, onLogout }: ProfileScreenProp
       <View style={styles.profileCard}>
         <Text style={styles.sectionTitle}>Account Information</Text>
         <Text style={styles.label}>Email:</Text>
-        <Text style={styles.emailText}>{userEmail}</Text>
+        <Text style={styles.emailText}>{user?.email}</Text>
+        <Text style={styles.label}>Member Code:</Text>
+        <Text style={styles.emailText}>{profile?.member_code}</Text>
+        <Text style={styles.label}>Name:</Text>
+        <Text style={styles.emailText}>{profile?.name}</Text>
+        <Text style={styles.label}>Hometown:</Text>
+        <Text style={styles.emailText}>{profile?.hometown}</Text>
       </View>
 
       <View style={styles.profileCard}>
@@ -36,7 +40,7 @@ export default function ProfileScreen({ userEmail, onLogout }: ProfileScreenProp
       <View style={styles.buttonContainer}>
         <Button
           title="Logout"
-          onPress={onLogout}
+          onPress={signOut}
           color="#e74c3c"
         />
       </View>

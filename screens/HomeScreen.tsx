@@ -1,17 +1,19 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { useAuth } from '../lib/AuthContext';
 
-interface HomeScreenProps {
-  userEmail: string | null;
-}
-
-export default function HomeScreen({ userEmail }: HomeScreenProps) {
+export default function HomeScreen() {
+  const { user, profile } = useAuth();
+  
   return (
     <View style={styles.container}>
       <Text style={styles.title}>🏆 Trophy Cast</Text>
       <Text style={styles.welcomeText}>Welcome back!</Text>
       <Text style={styles.emailText}>
-        Logged in as: {userEmail}
+        Logged in as: {user?.email}
+      </Text>
+      <Text style={styles.profileText}>
+        Member: {profile?.name} ({profile?.member_code})
       </Text>
       <View style={styles.contentContainer}>
         <Text style={styles.subtitle}>Ready to track your fishing achievements?</Text>
@@ -44,9 +46,14 @@ const styles = StyleSheet.create({
   },
   emailText: {
     fontSize: 16,
-    marginBottom: 30,
+    marginBottom: 10,
     color: '#7f8c8d',
     fontStyle: 'italic',
+  },
+  profileText: {
+    fontSize: 16,
+    marginBottom: 30,
+    color: '#7f8c8d',
   },
   contentContainer: {
     alignItems: 'center',
