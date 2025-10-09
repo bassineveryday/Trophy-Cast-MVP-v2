@@ -8,11 +8,13 @@ import { supabase, AuthCredentials } from './lib/supabase';
 import HomeScreen from './screens/HomeScreen';
 import TournamentsScreen from './screens/TournamentsScreen';
 import ProfileScreen from './screens/ProfileScreen';
+import AOYScreen from './screens/AOYScreen';
 
 // Navigation types
 type TabParamList = {
   Home: undefined;
   Tournaments: undefined;
+  AOY: undefined;
   Profile: undefined;
 };
 
@@ -47,6 +49,8 @@ function TabNavigator({ userEmail, onLogout }: TabNavigatorProps) {
             iconText = '🏠';
           } else if (route.name === 'Tournaments') {
             iconText = '🎣';
+          } else if (route.name === 'AOY') {
+            iconText = '🏆';
           } else if (route.name === 'Profile') {
             iconText = '👤';
           }
@@ -75,6 +79,12 @@ function TabNavigator({ userEmail, onLogout }: TabNavigatorProps) {
         component={TournamentsScreen}
         options={{ title: 'Tournaments' }}
       />
+      <Tab.Screen 
+        name="AOY" 
+        options={{ title: 'AOY' }}
+      >
+        {() => <AOYScreen userEmail={userEmail} />}
+      </Tab.Screen>
       <Tab.Screen 
         name="Profile"
         options={{ title: 'Profile' }}

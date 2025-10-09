@@ -71,3 +71,53 @@ export interface AuthUser {
 export interface AuthError {
   message: string;
 }
+
+// AOY Standings interface
+export interface AOYStandingsRow {
+  member_id: string;
+  season_year: number | null;
+  aoy_rank: number | null;
+  member_name: string | null;
+  boater_status: string | null;
+  total_aoy_points: number | null;
+}
+
+// AOY Standings functions
+export const fetchAOYStandings = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('aoy_standings_rows')
+      .select('*')
+      .order('aoy_rank', { ascending: true, nullsFirst: false });
+
+    if (error) {
+      console.error('Error fetching AOY standings:', error);
+      throw error;
+    }
+
+    return { data: data || [], error: null };
+  } catch (err) {
+    console.error('Unexpected error fetching AOY standings:', err);
+    return { data: [], error: err };
+  }
+};
+
+export const fetchAOYStandingsByMember = async (memberId: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('aoy_standings_rows')
+      .select('*')
+      .eq('member_id', memberId)
+      .single();
+
+    if (error) {
+      console.error('Error fetching member AOY standing:', error);
+      throw error;
+    }
+
+    return { data, error: null };
+  } catch (err) {
+    console.error('Unexpected error fetching member AOY standing:', err);
+    return { data: null, error: err };
+  }
+};
