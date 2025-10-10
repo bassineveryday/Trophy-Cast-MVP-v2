@@ -1,9 +1,9 @@
 
-import React, { useCallback, useEffect, useState } from 'react';
-import { StyleSheet, Text, View, ScrollView, RefreshControl, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import React from 'react';
+import { StyleSheet, Text, View, ScrollView, RefreshControl, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../lib/AuthContext';
-import { supabase } from '../lib/supabase';
+import { useDashboard } from '../lib/hooks/useQueries';
 import { DashboardSkeleton } from '../components/Skeleton';
 import AnimatedCard from '../components/AnimatedCard';
 
@@ -30,95 +30,19 @@ interface TournamentEvent {
 
 export default function HomeScreen() {
   const { user, profile } = useAuth();
-  const [refreshing, setRefreshing] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  
+  // Use React Query hook for dashboard data
+  const { data, isLoading, error, refetch, isRefetching } = useDashboard(profile?.member_code);
 
-  // Dashboard data
-  const [lastTournament, setLastTournament] = useState<TournamentResult | null>(null);
-  const [aoy, setAoy] = useState<AOYData | null>(null);
-  const [earnings, setEarnings] = useState<number>(0);
-  const [nextTournament, setNextTournament] = useState<TournamentEvent | null>(null);
-  const [seasonStats, setSeasonStats] = useState<{
-    tournaments: number;
-    bestFinish: number | null;
-    totalWeight: number;
-    bigFish: number;
-  }>({ tournaments: 0, bestFinish: null, totalWeight: 0, bigFish: 0 });
-
-  const fetchDashboard = useCallback(async () => {
-    if (!profile?.member_code) return;
-    setLoading(true);
-    setError(null);
-    try {
-      // Last tournament
-      const { data: last, error: lastErr } = await supabase
-        .from('tournament_results_rows')
-        .select('event_date, lake, tournament_name, place, weight_lbs, aoy_points, cash_payout')
-        .eq('member_id', profile.member_code)
-        .order('event_date', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      if (lastErr) throw lastErr;
-      setLastTournament(last);
-
-      // AOY
-      const { data: aoyData, error: aoyErr } = await supabase
-        .from('aoy_standings_rows')
-        .select('aoy_rank, total_aoy_points')
-        .eq('member_id', profile.member_code)
-        .maybeSingle();
-      if (aoyErr) throw aoyErr;
-      setAoy(aoyData);
-
-      // Earnings 2025
-      const { data: earningsRows, error: earnErr } = await supabase
-        .from('tournament_results_rows')
-        .select('cash_payout')
-        .eq('member_id', profile.member_code)
-        .gte('event_date', '2025-01-01');
-      if (earnErr) throw earnErr;
-      setEarnings(earningsRows?.reduce((sum, r) => sum + (parseFloat(r.cash_payout) || 0), 0) || 0);
-
-      // Next tournament
-      const { data: next, error: nextErr } = await supabase
-        .from('tournament_events_rows')
-        .select('lake, event_date, tournament_name')
-        .gte('event_date', new Date().toISOString().slice(0, 10))
-        .order('event_date', { ascending: true })
-        .limit(1)
-        .maybeSingle();
-      if (nextErr) throw nextErr;
-      setNextTournament(next);
-
-      // Season stats
-      const { data: statsRows, error: statsErr } = await supabase
-        .from('tournament_results_rows')
-        .select('place, weight_lbs, big_fish')
-        .eq('member_id', profile.member_code)
-        .gte('event_date', '2025-01-01');
-      if (statsErr) throw statsErr;
-      setSeasonStats({
-        tournaments: statsRows?.length || 0,
-        bestFinish: statsRows?.reduce((min, r) => r.place && (!min || r.place < min) ? r.place : min, null as number | null),
-        totalWeight: statsRows?.reduce((sum, r) => sum + (r.weight_lbs || 0), 0) || 0,
-        bigFish: statsRows?.reduce((max, r) => r.big_fish && r.big_fish > max ? r.big_fish : max, 0) || 0,
-      });
-    } catch (err: any) {
-      setError(err.message || 'Failed to load dashboard');
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, [profile?.member_code]);
-
-  useEffect(() => {
-    if (profile?.member_code) fetchDashboard();
-  }, [profile?.member_code, fetchDashboard]);
+  // Extract data from React Query response
+  const lastTournament = data?.lastTournament || null;
+  const aoy = data?.aoyData || null;
+  const earnings = data?.earnings || 0;
+  const nextTournament = data?.nextTournament || null;
+  const seasonStats = data?.seasonStats || { tournaments: 0, bestFinish: null, totalWeight: 0, bigFish: 0 };
 
   const onRefresh = () => {
-    setRefreshing(true);
-    fetchDashboard();
+    refetch();
   };
 
   // Navigation placeholder
@@ -126,7 +50,7 @@ export default function HomeScreen() {
     Alert.alert('Club Details', 'Navigate to Denver Bassmasters club page (placeholder)');
   };
 
-  if (loading) {
+  if (isLoading && !data) {
     return (
       <ScrollView style={styles.container}>
         <DashboardSkeleton />
@@ -134,11 +58,11 @@ export default function HomeScreen() {
     );
   }
 
-  if (error) {
+  if (error && !data) {
     return (
       <View style={styles.loadingContainer}>
-        <Text style={styles.errorText}>{error}</Text>
-        <TouchableOpacity onPress={fetchDashboard} style={styles.retryBtn}>
+        <Text style={styles.errorText}>{error.message}</Text>
+        <TouchableOpacity onPress={() => refetch()} style={styles.retryBtn}>
           <Text style={styles.retryText}>Retry</Text>
         </TouchableOpacity>
       </View>
@@ -148,7 +72,7 @@ export default function HomeScreen() {
   return (
     <ScrollView
       style={styles.container}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={onRefresh} />}
       contentContainerStyle={{ paddingBottom: 32 }}
     >
       {/* Welcome */}

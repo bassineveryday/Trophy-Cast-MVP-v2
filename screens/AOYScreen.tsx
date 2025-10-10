@@ -1,55 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
   StyleSheet,
   Text,
   View,
   FlatList,
   ActivityIndicator,
-  Alert,
   RefreshControl,
 } from 'react-native';
-import { fetchAOYStandings, AOYStandingsRow } from '../lib/supabase';
+import { AOYStandingsRow } from '../lib/supabase';
+import { useAOYStandings } from '../lib/hooks/useQueries';
 import EmptyState from '../components/EmptyState';
 
 export default function AOYScreen() {
-  const [standings, setStandings] = useState<AOYStandingsRow[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const loadAOYStandings = async () => {
-    try {
-      console.log('🔵 Fetching AOY standings...');
-      const { data, error } = await fetchAOYStandings();
-
-      if (error) {
-        console.error('❌ Error fetching AOY standings:', error);
-        const errorMessage = typeof error === 'string' ? error : 'Failed to load standings';
-        setError(errorMessage);
-        Alert.alert('Error', 'Failed to load AOY standings: ' + errorMessage);
-        return;
-      }
-
-      console.log('✅ AOY standings fetched:', data?.length || 0, 'records');
-      setStandings(data || []);
-      setError(null);
-    } catch (err) {
-      console.error('❌ Unexpected error:', err);
-      setError('Failed to load standings');
-      Alert.alert('Error', 'Failed to load AOY standings');
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  };
-
-  useEffect(() => {
-    loadAOYStandings();
-  }, []);
+  const { data: standings = [], isLoading, error, refetch, isRefetching } = useAOYStandings();
 
   const handleRefresh = () => {
-    setRefreshing(true);
-    loadAOYStandings();
+    refetch();
   };
 
   const renderStandingItem = ({ item }: { item: AOYStandingsRow }) => (
@@ -93,7 +59,7 @@ export default function AOYScreen() {
     />
   );
 
-  if (loading) {
+  if (isLoading && !standings.length) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#2c3e50" />
@@ -114,7 +80,7 @@ export default function AOYScreen() {
         renderItem={renderStandingItem}
         keyExtractor={(item) => item.member_id}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+          <RefreshControl refreshing={isRefetching} onRefresh={handleRefresh} />
         }
         ListEmptyComponent={renderEmptyState}
         showsVerticalScrollIndicator={false}

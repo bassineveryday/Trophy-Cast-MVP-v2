@@ -1,57 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
   StyleSheet,
   Text,
   View,
   FlatList,
-  ActivityIndicator,
-  Alert,
   RefreshControl,
   ScrollView,
 } from 'react-native';
-import { fetchTournamentEvents, TournamentEvent } from '../lib/supabase';
+import { TournamentEvent } from '../lib/supabase';
+import { useTournaments } from '../lib/hooks/useQueries';
 import { ListSkeleton } from '../components/Skeleton';
 import EmptyState from '../components/EmptyState';
 
 export default function TournamentsScreen() {
-  const [tournaments, setTournaments] = useState<TournamentEvent[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const loadTournaments = async () => {
-    try {
-      console.log('🔵 Fetching tournaments...');
-      const { data, error } = await fetchTournamentEvents();
-
-      if (error) {
-        console.error('❌ Error fetching tournaments:', error);
-        const errorMessage = typeof error === 'string' ? error : 'Failed to load tournaments';
-        setError(errorMessage);
-        Alert.alert('Error', 'Failed to load tournaments: ' + errorMessage);
-        return;
-      }
-
-      console.log('✅ Tournaments fetched:', data?.length || 0, 'records');
-      setTournaments(data || []);
-      setError(null);
-    } catch (err) {
-      console.error('❌ Unexpected error:', err);
-      setError('Failed to load tournaments');
-      Alert.alert('Error', 'Failed to load tournaments');
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  };
-
-  useEffect(() => {
-    loadTournaments();
-  }, []);
+  const { data: tournaments = [], isLoading, error, refetch, isRefetching } = useTournaments();
 
   const handleRefresh = () => {
-    setRefreshing(true);
-    loadTournaments();
+    refetch();
   };
 
   const renderTournament = ({ item }: { item: TournamentEvent }) => (
@@ -101,7 +66,7 @@ export default function TournamentsScreen() {
     />
   );
 
-  if (loading) {
+  if (isLoading && !tournaments.length) {
     return (
       <View style={styles.container}>
         <View style={styles.header}>
@@ -127,7 +92,7 @@ export default function TournamentsScreen() {
         renderItem={renderTournament}
         keyExtractor={(item) => item.event_id}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+          <RefreshControl refreshing={isRefetching} onRefresh={handleRefresh} />
         }
         ListEmptyComponent={renderEmptyState}
         showsVerticalScrollIndicator={false}

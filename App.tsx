@@ -4,8 +4,10 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider, useAuth } from './lib/AuthContext';
 import ErrorBoundary from './components/ErrorBoundary';
+import { queryClient } from './lib/queryClient';
 
 // Import screens
 import HomeScreen from './screens/HomeScreen';
@@ -124,10 +126,12 @@ function Navigation() {
 export default function App() {
   return (
     <ErrorBoundary>
-      <AuthProvider>
-        <Navigation />
-        <Toast />
-      </AuthProvider>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <Navigation />
+          <Toast />
+        </AuthProvider>
+      </QueryClientProvider>
     </ErrorBoundary>
   );
 }
