@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { StyleSheet, Text, View, ScrollView, RefreshControl, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../lib/AuthContext';
@@ -37,18 +37,6 @@ export default function HomeScreen() {
   // Use React Query hook for dashboard data (rename `data` to `dashboard` to match TournamentsScreen pattern)
   const { data: dashboard, isLoading, error, refetch, isRefetching } = useDashboard(profile?.member_code);
 
-  // Force a remount/re-render of the UI subtree whenever the dashboard payload changes.
-  // This avoids child components' memoization or animation state keeping stale UI.
-  const [renderKey, setRenderKey] = useState(0);
-  useEffect(() => {
-    // increment key when dashboard reference changes (including undefined -> object)
-    setRenderKey(prev => {
-      console.log('🔑 renderKey changing from', prev, 'to', prev + 1, 'because dashboard changed to:', dashboard);
-      return prev + 1;
-    });
-  }, [dashboard]);
-
-  console.log('🔑 Current renderKey:', renderKey);
   console.log('Dashboard query state:', {
     hasData: !!dashboard,
     isLoading,
@@ -135,7 +123,6 @@ export default function HomeScreen() {
 
   return (
     <ScrollView
-      key={renderKey}
       style={styles.container}
       refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={onRefresh} />}
       contentContainerStyle={{ paddingBottom: 32 }}
@@ -148,23 +135,23 @@ export default function HomeScreen() {
 
       {/* Club Card */}
       <TouchableOpacity 
-        style={[styles.card, styles.clubCard]} 
-        onPress={handleClubPress}
-        accessibilityRole="button"
-        accessibilityLabel="View Denver Bassmasters club details"
-        accessibilityHint={`Shows your AOY rank of ${aoy?.aoy_rank ?? 'N/A'}, ${aoy?.total_aoy_points ?? 'N/A'} points, and $${earningsNumber.toFixed(2)} earnings`}
-      >
-        <View style={styles.cardTitleRow}>
-          <Ionicons name="trophy" size={24} color="#f39c12" />
-          <Text style={styles.clubTitle}>Denver Bassmasters</Text>
-        </View>
-        <Text style={styles.clubSubtext}>Tap to view club details →</Text>
-        <View style={styles.clubStatsRow}>
-          <View style={styles.clubStat}><Text style={styles.clubStatLabel}>AOY Rank</Text><Text style={styles.clubStatValue}>{aoy?.aoy_rank ?? 'N/A'}</Text></View>
-          <View style={styles.clubStat}><Text style={styles.clubStatLabel}>Points</Text><Text style={styles.clubStatValue}>{aoy?.total_aoy_points ?? 'N/A'}</Text></View>
-          <View style={styles.clubStat}><Text style={styles.clubStatLabel}>2025 $</Text><Text style={styles.clubStatValue}>${earnings}</Text></View>
-        </View>
-      </TouchableOpacity>
+          style={[styles.card, styles.clubCard]} 
+          onPress={handleClubPress}
+          accessibilityRole="button"
+          accessibilityLabel="View Denver Bassmasters club details"
+          accessibilityHint={`Shows your AOY rank of ${aoy?.aoy_rank ?? 'N/A'}, ${aoy?.total_aoy_points ?? 'N/A'} points, and $${earningsNumber.toFixed(2)} earnings`}
+        >
+          <View style={styles.cardTitleRow}>
+            <Ionicons name="trophy" size={24} color="#f39c12" />
+            <Text style={styles.clubTitle}>Denver Bassmasters</Text>
+          </View>
+          <Text style={styles.clubSubtext}>Tap to view club details →</Text>
+          <View style={styles.clubStatsRow}>
+            <View style={styles.clubStat}><Text style={styles.clubStatLabel}>AOY Rank</Text><Text style={styles.clubStatValue}>{aoy?.aoy_rank ?? 'N/A'}</Text></View>
+            <View style={styles.clubStat}><Text style={styles.clubStatLabel}>Points</Text><Text style={styles.clubStatValue}>{aoy?.total_aoy_points ?? 'N/A'}</Text></View>
+            <View style={styles.clubStat}><Text style={styles.clubStatLabel}>2025 $</Text><Text style={styles.clubStatValue}>${earnings}</Text></View>
+          </View>
+        </TouchableOpacity>
 
       {/* Last Tournament */}
       <View style={styles.card}>

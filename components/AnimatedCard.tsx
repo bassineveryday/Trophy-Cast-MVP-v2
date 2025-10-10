@@ -25,6 +25,9 @@ export default function AnimatedCard({
   const animValue = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
+    // Reset animation value on mount or when children change
+    animValue.setValue(0);
+    
     const timer = setTimeout(() => {
       if (animation === 'fade') {
         fadeIn(animValue, 300);
@@ -34,7 +37,7 @@ export default function AnimatedCard({
     }, delay);
 
     return () => clearTimeout(timer);
-  }, [delay, animation]);
+  }, [delay, animation, children, animValue]);
 
   const animatedStyle = animation === 'fade' 
     ? createFadeInStyle(animValue)
