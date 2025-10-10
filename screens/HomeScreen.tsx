@@ -159,7 +159,13 @@ export default function HomeScreen() {
 
       {/* Club Card */}
       <AnimatedCard delay={100}>
-      <TouchableOpacity style={[styles.card, styles.clubCard]} onPress={handleClubPress}>
+      <TouchableOpacity 
+        style={[styles.card, styles.clubCard]} 
+        onPress={handleClubPress}
+        accessibilityRole="button"
+        accessibilityLabel="View Denver Bassmasters club details"
+        accessibilityHint={`Shows your AOY rank of ${aoy?.aoy_rank ?? 'N/A'}, ${aoy?.total_aoy_points ?? 'N/A'} points, and $${earnings} earnings`}
+      >
         <View style={styles.cardTitleRow}>
           <Ionicons name="trophy" size={24} color="#f39c12" />
           <Text style={styles.clubTitle}>Denver Bassmasters</Text>

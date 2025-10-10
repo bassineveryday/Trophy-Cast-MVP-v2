@@ -40,7 +40,13 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
       <Text style={styles.message}>{message}</Text>
       
       {actionLabel && onAction && (
-        <TouchableOpacity style={styles.button} onPress={onAction}>
+        <TouchableOpacity 
+          style={styles.button} 
+          onPress={onAction}
+          accessibilityRole="button"
+          accessibilityLabel={actionLabel}
+          accessibilityHint="Reload the data to check for new items"
+        >
           <Ionicons name="refresh-outline" size={20} color="#fff" style={styles.buttonIcon} />
           <Text style={styles.buttonText}>{actionLabel}</Text>
         </TouchableOpacity>

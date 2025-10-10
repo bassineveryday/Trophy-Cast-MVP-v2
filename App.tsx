@@ -40,20 +40,26 @@ function TabNavigator() {
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
           let iconName: keyof typeof Ionicons.glyphMap = 'home';
+          let accessibilityLabel = 'Home';
           
           if (route.name === 'Home') {
             iconName = focused ? 'home' : 'home-outline';
+            accessibilityLabel = 'Home tab';
           } else if (route.name === 'Tournaments') {
             iconName = focused ? 'fish' : 'fish-outline';
+            accessibilityLabel = 'Tournaments tab';
           } else if (route.name === 'AOY') {
             iconName = focused ? 'trophy' : 'trophy-outline';
+            accessibilityLabel = 'Angler of the Year standings tab';
           } else if (route.name === 'Club') {
             iconName = focused ? 'people' : 'people-outline';
+            accessibilityLabel = 'Club information tab';
           } else if (route.name === 'Profile') {
             iconName = focused ? 'person' : 'person-outline';
+            accessibilityLabel = 'Profile tab';
           }
           
-          return <Ionicons name={iconName} size={size} color={color} />;
+          return <Ionicons name={iconName} size={size} color={color} accessibilityLabel={accessibilityLabel} />;
         },
         tabBarActiveTintColor: '#2c3e50',
         tabBarInactiveTintColor: '#7f8c8d',
