@@ -4,6 +4,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Text } from 'react-native';
 import { AuthProvider, useAuth } from './lib/AuthContext';
+import ErrorBoundary from './components/ErrorBoundary';
 
 // Import screens
 import HomeScreen from './screens/HomeScreen';
@@ -115,8 +116,10 @@ function Navigation() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <Navigation />
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <Navigation />
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }

@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, Text, View, ScrollView, RefreshControl, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { useAuth } from '../lib/AuthContext';
 import { supabase } from '../lib/supabase';
+import { DashboardSkeleton } from '../components/Skeleton';
 
 interface TournamentResult {
   event_date: string;
@@ -125,10 +126,9 @@ export default function HomeScreen() {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#0066CC" />
-        <Text style={styles.loadingText}>Loading your dashboard...</Text>
-      </View>
+      <ScrollView style={styles.container}>
+        <DashboardSkeleton />
+      </ScrollView>
     );
   }
 

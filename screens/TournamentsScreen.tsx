@@ -7,8 +7,10 @@ import {
   ActivityIndicator,
   Alert,
   RefreshControl,
+  ScrollView,
 } from 'react-native';
 import { fetchTournamentEvents, TournamentEvent } from '../lib/supabase';
+import { ListSkeleton } from '../components/Skeleton';
 
 export default function TournamentsScreen() {
   const [tournaments, setTournaments] = useState<TournamentEvent[]>([]);
@@ -99,9 +101,14 @@ export default function TournamentsScreen() {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#2c3e50" />
-        <Text style={styles.loadingText}>Loading Tournaments...</Text>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.title}>🏆 Tournaments</Text>
+          <Text style={styles.subtitle}>Upcoming & Recent Events</Text>
+        </View>
+        <ScrollView>
+          <ListSkeleton count={5} />
+        </ScrollView>
       </View>
     );
   }

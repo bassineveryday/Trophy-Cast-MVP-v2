@@ -1,4 +1,5 @@
 import { registerRootComponent } from 'expo';
+import './lib/sentry'; // Initialize Sentry for error tracking
 
 import App from './App';
 

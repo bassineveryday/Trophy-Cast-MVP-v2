@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
+import { setUser as setSentryUser } from './sentry';
 
 interface AuthContextType {
   user: User | null;
@@ -72,7 +73,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const fetchProfile = async (userId: string) => {
-    const { data, error } = await supabase
+    const { data, error} = await supabase
       .from('profiles')
       .select('*')
       .eq('id', userId)
@@ -84,6 +85,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     setProfile(data);
+    
+    // Set user context in Sentry for error tracking
+    if (data) {
+      setSentryUser({
+        id: data.id,
+        username: data.name || undefined,
+        email: undefined, // Don't send email to Sentry for privacy
+      });
+    }
   };
 
   const signIn = async (email: string, password: string) => {

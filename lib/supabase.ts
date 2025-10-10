@@ -84,7 +84,19 @@ export interface AOYStandingsRow {
   total_aoy_points: number | null;
 }
 
-// AOY Standings functions
+/**
+ * Fetch all AOY (Angler of the Year) standings ordered by rank
+ * 
+ * Returns the current season's AOY standings with member information,
+ * total points, and rankings. Results are sorted by rank (best to worst).
+ * 
+ * @returns {Promise} Object containing data array or error
+ * @example
+ * const { data, error } = await fetchAOYStandings();
+ * if (data) {
+ *   console.log('Top angler:', data[0].member_name);
+ * }
+ */
 export const fetchAOYStandings = async () => {
   try {
     const { data, error } = await supabase
@@ -134,7 +146,19 @@ export interface TournamentEvent {
   participants: number | null;
 }
 
-// Tournament Events functions
+/**
+ * Fetch all tournament events ordered by date (most recent first)
+ * 
+ * Returns tournament schedule including event name, date, lake location,
+ * and participant count. Used to display upcoming and past tournaments.
+ * 
+ * @returns {Promise} Object containing tournament events array or error
+ * @example
+ * const { data, error } = await fetchTournamentEvents();
+ * if (data) {
+ *   const nextTournament = data.find(t => new Date(t.event_date) > new Date());
+ * }
+ */
 export const fetchTournamentEvents = async () => {
   try {
     console.log('🔵 Fetching tournament events...');
