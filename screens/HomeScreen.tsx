@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, ScrollView, RefreshControl, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../lib/AuthContext';
@@ -14,7 +14,7 @@ interface TournamentResult {
   place: number;
   weight_lbs: number;
   aoy_points: number;
-  cash_payout: number;
+  payout: number;
 }
 
 interface AOYData {
@@ -29,17 +29,50 @@ interface TournamentEvent {
 }
 
 export default function HomeScreen() {
-  const { user, profile } = useAuth();
+  console.log('🏠 HomeScreen rendering');
   
-  // Use React Query hook for dashboard data
-  const { data, isLoading, error, refetch, isRefetching } = useDashboard(profile?.member_code);
+  const { user, profile } = useAuth();
+  console.log('Auth state:', { user: user?.email, profile: profile?.member_code });
+  
+  // Use React Query hook for dashboard data (rename `data` to `dashboard` to match TournamentsScreen pattern)
+  const { data: dashboard, isLoading, error, refetch, isRefetching } = useDashboard(profile?.member_code);
+
+  // Force a remount/re-render of the UI subtree whenever the dashboard payload changes.
+  // This avoids child components' memoization or animation state keeping stale UI.
+  const [renderKey, setRenderKey] = useState(0);
+  useEffect(() => {
+    // increment key when dashboard reference changes (including undefined -> object)
+    setRenderKey(prev => {
+      console.log('🔑 renderKey changing from', prev, 'to', prev + 1, 'because dashboard changed to:', dashboard);
+      return prev + 1;
+    });
+  }, [dashboard]);
+
+  console.log('🔑 Current renderKey:', renderKey);
+  console.log('Dashboard query state:', {
+    hasData: !!dashboard,
+    isLoading,
+    error: error?.message,
+    memberCode: profile?.member_code,
+  });
+
+  // 🔍 EXPLICIT DEBUG OUTPUT - Check browser console for this
+  console.group('🏠 HomeScreen Data Debug');
+  console.log('Profile:', profile);
+  console.log('Member Code:', profile?.member_code);
+  console.log('Raw dashboard data:', dashboard);
+  console.log('Loading state:', isLoading);
+  console.log('Error:', error);
+  console.groupEnd();
 
   // Extract data from React Query response
-  const lastTournament = data?.lastTournament || null;
-  const aoy = data?.aoyData || null;
-  const earnings = data?.earnings || 0;
-  const nextTournament = data?.nextTournament || null;
-  const seasonStats = data?.seasonStats || { tournaments: 0, bestFinish: null, totalWeight: 0, bigFish: 0 };
+  const lastTournament = dashboard?.lastTournament || null;
+  const aoy = dashboard?.aoyData || null;
+  const earnings = dashboard?.earnings || 0;
+  const nextTournament = dashboard?.nextTournament || null;
+  const seasonStats = dashboard?.seasonStats || { tournaments: 0, bestFinish: null, totalWeight: 0, bigFish: 0 };
+
+  const earningsNumber = Number(earnings) || 0;
 
   const onRefresh = () => {
     refetch();
@@ -50,18 +83,24 @@ export default function HomeScreen() {
     Alert.alert('Club Details', 'Navigate to Denver Bassmasters club page (placeholder)');
   };
 
-  if (isLoading && !data) {
+  // Loading state
+  if (isLoading && !dashboard) {
     return (
       <ScrollView style={styles.container}>
+        <View style={styles.card}>
+          <Text style={styles.title}>Loading your dashboard...</Text>
+        </View>
         <DashboardSkeleton />
       </ScrollView>
     );
   }
 
-  if (error && !data) {
+  // Error state
+  if (error && !dashboard) {
     return (
       <View style={styles.loadingContainer}>
-        <Text style={styles.errorText}>{error.message}</Text>
+        <Text style={styles.errorText}>Error: {error.message}</Text>
+        <Text style={styles.tourneyText}>Check the console for details (F12)</Text>
         <TouchableOpacity onPress={() => refetch()} style={styles.retryBtn}>
           <Text style={styles.retryText}>Retry</Text>
         </TouchableOpacity>
@@ -69,26 +108,51 @@ export default function HomeScreen() {
     );
   }
 
+  // No data state - only show when there's absolutely no dashboard payload.
+  // Previously we hid the dashboard when lastTournament was missing; that
+  // caused valid AOY/earnings to be hidden. Only bail out if `data` is falsy.
+  if (!dashboard) {
+    return (
+      <ScrollView style={styles.container}>
+        <View style={styles.card}>
+          <Text style={styles.title}>⚠️ No Dashboard Data</Text>
+          <Text style={styles.tourneyText}>
+            Your query returned no results. Check the browser console (F12) for details.
+          </Text>
+          <Text style={[styles.tourneyText, { marginTop: 12 }]}>
+            Member Code: {profile?.member_code || 'NOT SET'}
+          </Text>
+          <Text style={styles.tourneyText}>
+            Database may be empty or RLS policies may be blocking access.
+          </Text>
+          <TouchableOpacity onPress={() => refetch()} style={styles.retryBtn}>
+            <Text style={styles.retryText}>Retry</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    );
+  }
+
   return (
     <ScrollView
+      key={renderKey}
       style={styles.container}
       refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={onRefresh} />}
       contentContainerStyle={{ paddingBottom: 32 }}
     >
       {/* Welcome */}
-      <AnimatedCard style={styles.card} delay={0}>
+      <View style={styles.card}>
         <Text style={styles.title}>Welcome back, {profile?.name || user?.email}!</Text>
         <Text style={styles.memberCode}>Member: {profile?.member_code}</Text>
-      </AnimatedCard>
+      </View>
 
       {/* Club Card */}
-      <AnimatedCard delay={100}>
       <TouchableOpacity 
         style={[styles.card, styles.clubCard]} 
         onPress={handleClubPress}
         accessibilityRole="button"
         accessibilityLabel="View Denver Bassmasters club details"
-        accessibilityHint={`Shows your AOY rank of ${aoy?.aoy_rank ?? 'N/A'}, ${aoy?.total_aoy_points ?? 'N/A'} points, and $${earnings} earnings`}
+        accessibilityHint={`Shows your AOY rank of ${aoy?.aoy_rank ?? 'N/A'}, ${aoy?.total_aoy_points ?? 'N/A'} points, and $${earningsNumber.toFixed(2)} earnings`}
       >
         <View style={styles.cardTitleRow}>
           <Ionicons name="trophy" size={24} color="#f39c12" />
@@ -101,10 +165,9 @@ export default function HomeScreen() {
           <View style={styles.clubStat}><Text style={styles.clubStatLabel}>2025 $</Text><Text style={styles.clubStatValue}>${earnings}</Text></View>
         </View>
       </TouchableOpacity>
-      </AnimatedCard>
 
       {/* Last Tournament */}
-      <AnimatedCard style={styles.card} delay={200}>
+      <View style={styles.card}>
         <View style={styles.cardTitleRow}>
           <Ionicons name="fish" size={20} color="#3498db" />
           <Text style={styles.sectionTitle}>Last Tournament</Text>
@@ -115,13 +178,23 @@ export default function HomeScreen() {
             <Text style={styles.tourneyText}>Placement: {lastTournament.place ?? 'N/A'}</Text>
             <Text style={styles.tourneyText}>Weight: {lastTournament.weight_lbs ?? 'N/A'} lbs</Text>
             <Text style={styles.tourneyText}>Points: {lastTournament.aoy_points ?? 'N/A'}</Text>
-            <Text style={styles.tourneyText}>Payout: ${lastTournament.cash_payout ?? 0}</Text>
+            <Text style={styles.tourneyText}>Payout: ${Number(lastTournament?.payout) || 0}</Text>
           </>
         ) : <Text style={styles.tourneyText}>No tournaments found.</Text>}
-      </AnimatedCard>
+      </View>
+
+      {/* Dev-only debug panel showing raw dashboard payload to diagnose blank-screen */}
+      {typeof __DEV__ !== 'undefined' && __DEV__ && (
+        <View style={styles.card}>
+          <Text style={[styles.sectionTitle, { fontSize: 14 }]}>Debug (dev only)</Text>
+          <ScrollView style={{ maxHeight: 160 }}>
+            <Text style={styles.tourneyText}>{JSON.stringify(dashboard, null, 2)}</Text>
+          </ScrollView>
+        </View>
+      )}
 
       {/* Next Tournament */}
-      <AnimatedCard style={styles.card} delay={300}>
+      <View style={styles.card}>
         <View style={styles.cardTitleRow}>
           <Ionicons name="calendar" size={20} color="#3498db" />
           <Text style={styles.sectionTitle}>Next Tournament</Text>
@@ -131,10 +204,10 @@ export default function HomeScreen() {
             <Text style={styles.tourneyText}>{nextTournament.lake} - {nextTournament.event_date}</Text>
           </>
         ) : <Text style={styles.tourneyText}>No upcoming tournaments.</Text>}
-      </AnimatedCard>
+      </View>
 
       {/* Season Stats */}
-      <AnimatedCard style={styles.card} delay={400}>
+      <View style={styles.card}>
         <View style={styles.cardTitleRow}>
           <Ionicons name="stats-chart" size={20} color="#3498db" />
           <Text style={styles.sectionTitle}>2025 Season Stats</Text>
@@ -143,7 +216,7 @@ export default function HomeScreen() {
         <Text style={styles.tourneyText}>Best Finish: {seasonStats.bestFinish ?? 'N/A'}</Text>
         <Text style={styles.tourneyText}>Total Weight: {seasonStats.totalWeight} lbs</Text>
         <Text style={styles.tourneyText}>Big Fish: {seasonStats.bigFish} lbs</Text>
-      </AnimatedCard>
+      </View>
     </ScrollView>
   );
 }

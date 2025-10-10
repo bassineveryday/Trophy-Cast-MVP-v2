@@ -100,7 +100,7 @@ export interface AOYStandingsRow {
 export const fetchAOYStandings = async () => {
   try {
     const { data, error } = await supabase
-      .from('aoy_standings_rows')
+      .from('aoy_standings')
       .select('*')
       .order('aoy_rank', { ascending: true, nullsFirst: false });
 
@@ -119,7 +119,7 @@ export const fetchAOYStandings = async () => {
 export const fetchAOYStandingsByMember = async (memberId: string) => {
   try {
     const { data, error } = await supabase
-      .from('aoy_standings_rows')
+      .from('aoy_standings')
       .select('*')
       .eq('member_id', memberId)
       .single();
@@ -164,7 +164,7 @@ export const fetchTournamentEvents = async () => {
     console.log('🔵 Fetching tournament events...');
     
     const { data, error } = await supabase
-      .from('tournament_events_rows')
+      .from('tournament_events')
       .select('*')
       .order('event_date', { ascending: false, nullsFirst: false });
 
@@ -184,7 +184,7 @@ export const fetchTournamentEvents = async () => {
 export const fetchTournamentEventById = async (eventId: string) => {
   try {
     const { data, error } = await supabase
-      .from('tournament_events_rows')
+      .from('tournament_events')
       .select('*')
       .eq('event_id', eventId)
       .single();

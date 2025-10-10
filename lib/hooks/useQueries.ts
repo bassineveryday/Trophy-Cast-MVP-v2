@@ -1,16 +1,20 @@
-import { useQuery, UseQueryOptions } from '@tanstack/react-query';
-import { 
-  fetchAOYStandings, 
-  fetchTournamentEvents, 
-  AOYStandingsRow, 
-  TournamentEvent 
+import { useQuery } from '@tanstack/react-query';
+import {
+  fetchAOYStandings,
+  fetchTournamentEvents,
+  AOYStandingsRow,
+  TournamentEvent,
 } from '../supabase';
 import { supabase } from '../supabase';
 
-/**
- * Query Keys - Centralized query key management
- * Ensures consistent cache invalidation and refetching
- */
+// Safe number parsing helper
+function toNumber(value: any, defaultValue: number = 0): number {
+  if (value == null) return defaultValue;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : defaultValue;
+}
+
+// Centralized query key management
 export const queryKeys = {
   aoyStandings: ['aoy-standings'] as const,
   tournaments: ['tournaments'] as const,
@@ -19,121 +23,122 @@ export const queryKeys = {
   profile: (userId: string) => ['profile', userId] as const,
 };
 
-/**
- * Hook: Fetch AOY (Angler of the Year) Standings
- * 
- * Retrieves the current season's AOY rankings with automatic
- * caching and background refetching.
- * 
- * @returns Query result with standings data, loading, and error states
- */
 export function useAOYStandings() {
   return useQuery({
     queryKey: queryKeys.aoyStandings,
     queryFn: async () => {
       const { data, error } = await fetchAOYStandings();
-      if (error) throw new Error(typeof error === 'string' ? error : 'Failed to fetch AOY standings');
-      return data || [];
+      if (error) throw error;
+      return (data || []) as AOYStandingsRow[];
     },
   });
 }
 
-/**
- * Hook: Fetch Tournament Events
- * 
- * Retrieves all tournament events (past and upcoming) with
- * intelligent caching for better performance.
- * 
- * @returns Query result with tournament data, loading, and error states
- */
 export function useTournaments() {
   return useQuery({
     queryKey: queryKeys.tournaments,
     queryFn: async () => {
       const { data, error } = await fetchTournamentEvents();
-      if (error) throw new Error(typeof error === 'string' ? error : 'Failed to fetch tournaments');
-      return data || [];
+      if (error) throw error;
+      return (data || []) as TournamentEvent[];
     },
   });
 }
 
-/**
- * Hook: Fetch User Dashboard Data
- * 
- * Retrieves comprehensive dashboard data for a specific member:
- * - Last tournament result
- * - Current AOY standing
- * - Season earnings
- * - Next tournament
- * - Season statistics
- * 
- * @param memberCode - Denver Bassmasters member code (e.g., "DBM019")
- * @returns Query result with dashboard data
- */
 export function useDashboard(memberCode: string | undefined) {
   return useQuery({
     queryKey: queryKeys.dashboard(memberCode || ''),
     queryFn: async () => {
-      if (!memberCode) throw new Error('No member code provided');
+      if (!memberCode) {
+        return {
+          lastTournament: null,
+          aoyData: null,
+          earnings: 0,
+          nextTournament: null,
+          seasonStats: { tournaments: 0, bestFinish: null, totalWeight: 0, bigFish: 0 },
+        };
+      }
 
       // Last tournament
-      const { data: lastTournament } = await supabase
-        .from('tournament_results_rows')
-        .select('event_date, lake, tournament_name, place, weight_lbs, aoy_points, cash_payout')
+      // DEBUG: log the memberCode used for the query to help diagnose caching / stale bundle issues
+      // (dev-only; will show in browser console when this hook runs)
+      // eslint-disable-next-line no-console
+      console.log('🔍 DEBUG: Querying with memberCode:', memberCode);
+
+      const { data: lastRaw, error: lastError } = await supabase
+        .from('tournament_results')
+        .select('event_date, lake, tournament_name, place, weight_lbs, aoy_points, payout')
         .eq('member_id', memberCode)
         .order('event_date', { ascending: false })
         .limit(1)
         .maybeSingle();
 
+      // eslint-disable-next-line no-console
+      console.log('🔍 DEBUG: Query returned (lastTournament):', { lastRaw, lastError, memberCode });
+
+      if (lastError) throw lastError;
+
+      const lastTournament = lastRaw
+        ? {
+            event_date: lastRaw.event_date,
+            lake: lastRaw.lake,
+            tournament_name: lastRaw.tournament_name,
+            place: lastRaw.place != null ? toNumber(lastRaw.place) : null,
+            weight_lbs: toNumber(lastRaw.weight_lbs, 0),
+            aoy_points: toNumber(lastRaw.aoy_points, 0),
+            payout: toNumber(lastRaw.payout, 0),
+          }
+        : null;
+
       // AOY standing
-      const { data: aoyData } = await supabase
-        .from('aoy_standings_rows')
+      const { data: aoyRaw, error: aoyError } = await supabase
+        .from('aoy_standings')
         .select('aoy_rank, total_aoy_points')
         .eq('member_id', memberCode)
         .maybeSingle();
+      if (aoyError) throw aoyError;
+      const aoyData = aoyRaw
+        ? { aoy_rank: aoyRaw.aoy_rank ?? null, total_aoy_points: toNumber(aoyRaw.total_aoy_points, 0) }
+        : null;
 
       // Earnings for 2025
-      const { data: earningsRows } = await supabase
-        .from('tournament_results_rows')
-        .select('cash_payout')
+      const { data: earningsRows, error: earningsError } = await supabase
+        .from('tournament_results')
+        .select('payout')
         .eq('member_id', memberCode)
         .gte('event_date', '2025-01-01');
-
-      const earnings = earningsRows?.reduce(
-        (sum: number, r: any) => sum + (parseFloat(r.cash_payout) || 0), 
-        0
-      ) || 0;
+      if (earningsError) throw earningsError;
+  const earnings = (earningsRows || []).reduce((sum: number, r: any) => sum + toNumber(r.payout, 0), 0);
 
       // Next tournament
-      const { data: nextTournament } = await supabase
-        .from('tournament_events_rows')
+      const { data: nextRaw, error: nextError } = await supabase
+        .from('tournament_events')
         .select('lake, event_date, tournament_name')
         .gte('event_date', new Date().toISOString().slice(0, 10))
         .order('event_date', { ascending: true })
         .limit(1)
         .maybeSingle();
+      if (nextError) throw nextError;
+      const nextTournament = nextRaw ? { lake: nextRaw.lake, event_date: nextRaw.event_date, tournament_name: nextRaw.tournament_name } : null;
 
       // Season stats
-      const { data: statsRows } = await supabase
-        .from('tournament_results_rows')
+      const { data: statsRows, error: statsError } = await supabase
+        .from('tournament_results')
         .select('place, weight_lbs, big_fish')
         .eq('member_id', memberCode)
         .gte('event_date', '2025-01-01');
+      if (statsError) throw statsError;
 
       const seasonStats = {
         tournaments: statsRows?.length || 0,
-        bestFinish: statsRows?.reduce(
-          (min: number | null, r: any) => r.place && (!min || r.place < min) ? r.place : min, 
-          null as number | null
-        ),
-        totalWeight: statsRows?.reduce(
-          (sum: number, r: any) => sum + (r.weight_lbs || 0), 
-          0
-        ) || 0,
-        bigFish: statsRows?.reduce(
-          (max: number, r: any) => r.big_fish && r.big_fish > max ? r.big_fish : max, 
-          0
-        ) || 0,
+        bestFinish: (statsRows || []).reduce((min: number | null, r: any) => {
+          const p = r.place != null ? toNumber(r.place, Infinity) : null;
+          if (p == null) return min;
+          if (min == null) return p;
+          return p < min ? p : min;
+        }, null as number | null),
+        totalWeight: (statsRows || []).reduce((sum: number, r: any) => sum + toNumber(r.weight_lbs, 0), 0),
+        bigFish: (statsRows || []).reduce((max: number, r: any) => Math.max(max, toNumber(r.big_fish, 0)), 0),
       };
 
       return {
@@ -144,19 +149,10 @@ export function useDashboard(memberCode: string | undefined) {
         seasonStats,
       };
     },
-    enabled: !!memberCode, // Only run query if memberCode exists
+    enabled: !!memberCode,
   });
 }
 
-/**
- * Hook: Fetch Tournament Results for a Member
- * 
- * Retrieves all tournament results for a specific member,
- * useful for profile screens and detailed history views.
- * 
- * @param memberCode - Member's unique code
- * @returns Query result with tournament results
- */
 export function useMemberResults(memberCode: string | undefined) {
   return useQuery({
     queryKey: queryKeys.tournamentResults(memberCode || ''),
@@ -164,7 +160,7 @@ export function useMemberResults(memberCode: string | undefined) {
       if (!memberCode) throw new Error('No member code provided');
 
       const { data, error } = await supabase
-        .from('tournament_results_rows')
+        .from('tournament_results')
         .select('*')
         .eq('member_id', memberCode)
         .order('event_date', { ascending: false });
@@ -175,3 +171,4 @@ export function useMemberResults(memberCode: string | undefined) {
     enabled: !!memberCode,
   });
 }
+
