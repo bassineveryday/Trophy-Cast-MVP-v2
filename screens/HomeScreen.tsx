@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../lib/AuthContext';
 import { supabase } from '../lib/supabase';
 import { DashboardSkeleton } from '../components/Skeleton';
+import AnimatedCard from '../components/AnimatedCard';
 
 interface TournamentResult {
   event_date: string;
@@ -151,12 +152,13 @@ export default function HomeScreen() {
       contentContainerStyle={{ paddingBottom: 32 }}
     >
       {/* Welcome */}
-      <View style={styles.card}>
+      <AnimatedCard style={styles.card} delay={0}>
         <Text style={styles.title}>Welcome back, {profile?.name || user?.email}!</Text>
         <Text style={styles.memberCode}>Member: {profile?.member_code}</Text>
-      </View>
+      </AnimatedCard>
 
       {/* Club Card */}
+      <AnimatedCard delay={100}>
       <TouchableOpacity style={[styles.card, styles.clubCard]} onPress={handleClubPress}>
         <View style={styles.cardTitleRow}>
           <Ionicons name="trophy" size={24} color="#f39c12" />
@@ -169,9 +171,10 @@ export default function HomeScreen() {
           <View style={styles.clubStat}><Text style={styles.clubStatLabel}>2025 $</Text><Text style={styles.clubStatValue}>${earnings}</Text></View>
         </View>
       </TouchableOpacity>
+      </AnimatedCard>
 
       {/* Last Tournament */}
-      <View style={styles.card}>
+      <AnimatedCard style={styles.card} delay={200}>
         <View style={styles.cardTitleRow}>
           <Ionicons name="fish" size={20} color="#3498db" />
           <Text style={styles.sectionTitle}>Last Tournament</Text>
@@ -185,10 +188,10 @@ export default function HomeScreen() {
             <Text style={styles.tourneyText}>Payout: ${lastTournament.cash_payout ?? 0}</Text>
           </>
         ) : <Text style={styles.tourneyText}>No tournaments found.</Text>}
-      </View>
+      </AnimatedCard>
 
       {/* Next Tournament */}
-      <View style={styles.card}>
+      <AnimatedCard style={styles.card} delay={300}>
         <View style={styles.cardTitleRow}>
           <Ionicons name="calendar" size={20} color="#3498db" />
           <Text style={styles.sectionTitle}>Next Tournament</Text>
@@ -198,10 +201,10 @@ export default function HomeScreen() {
             <Text style={styles.tourneyText}>{nextTournament.lake} - {nextTournament.event_date}</Text>
           </>
         ) : <Text style={styles.tourneyText}>No upcoming tournaments.</Text>}
-      </View>
+      </AnimatedCard>
 
       {/* Season Stats */}
-      <View style={styles.card}>
+      <AnimatedCard style={styles.card} delay={400}>
         <View style={styles.cardTitleRow}>
           <Ionicons name="stats-chart" size={20} color="#3498db" />
           <Text style={styles.sectionTitle}>2025 Season Stats</Text>
@@ -210,7 +213,7 @@ export default function HomeScreen() {
         <Text style={styles.tourneyText}>Best Finish: {seasonStats.bestFinish ?? 'N/A'}</Text>
         <Text style={styles.tourneyText}>Total Weight: {seasonStats.totalWeight} lbs</Text>
         <Text style={styles.tourneyText}>Big Fish: {seasonStats.bigFish} lbs</Text>
-      </View>
+      </AnimatedCard>
     </ScrollView>
   );
 }
