@@ -96,6 +96,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  /**
+   * Sign in a user with email and password
+   * @param email - User's email address
+   * @param password - User's password
+   * @returns Object with error if sign-in failed
+   */
   const signIn = async (email: string, password: string) => {
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -144,6 +150,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     await supabase.auth.signOut();
   };
 
+  /**
+   * Create a user profile after authentication
+   * Links the authenticated user to a club member
+   * 
+   * @param memberCode - Denver Bassmasters member code (e.g., "DBM019")
+   * @param name - Member's full name
+   * @param hometown - Member's hometown
+   * @returns Object with error if profile creation failed
+   */
   const createProfile = async (memberCode: string, name: string, hometown: string) => {
     if (!user) return { error: new Error('No user authenticated') };
 

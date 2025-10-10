@@ -3,6 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Text } from 'react-native';
+import Toast from 'react-native-toast-message';
 import { AuthProvider, useAuth } from './lib/AuthContext';
 import ErrorBoundary from './components/ErrorBoundary';
 
@@ -119,6 +120,7 @@ export default function App() {
     <ErrorBoundary>
       <AuthProvider>
         <Navigation />
+        <Toast />
       </AuthProvider>
     </ErrorBoundary>
   );

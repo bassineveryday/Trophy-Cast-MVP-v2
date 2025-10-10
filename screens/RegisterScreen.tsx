@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, TextInput, Button, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { useAuth } from '../lib/AuthContext';
+import { showSuccess, showError } from '../utils/toast';
 
 type RegistrationStep = 'credentials' | 'memberInfo';
 type AuthMode = 'login' | 'register';
@@ -27,6 +28,7 @@ export default function RegisterScreen() {
     
     if (!email || !password) {
       setCredentialsError('Email and password are required');
+      showError('Login Failed', 'Please enter your email and password');
       return;
     }
 
@@ -37,13 +39,15 @@ export default function RegisterScreen() {
       const errorMsg = error.message || '';
       if (errorMsg.includes('Email not confirmed') || errorMsg.includes('verify')) {
         setCredentialsError('Signing in... (Email verification bypassed for development)');
-        // Try to force login anyway
+        showWarning('Email Not Verified', 'Attempting to sign in anyway...');
       } else {
         setCredentialsError(errorMsg);
+        showError('Login Failed', errorMsg);
       }
       return;
     }
     
+    showSuccess('Welcome back!', 'Loading your dashboard...');
     // User will be redirected automatically by AuthContext
   };
 
@@ -90,8 +94,9 @@ export default function RegisterScreen() {
     // Enable dev mode bypass in localStorage
     if (typeof window !== 'undefined') {
       localStorage.setItem('devModeBypass', 'true');
+      showSuccess('Demo Mode Activated', 'Logging in as Tai Hunt...');
       // Reload the page to trigger auth context with dev mode
-      window.location.reload();
+      setTimeout(() => window.location.reload(), 500);
     }
   };
 
