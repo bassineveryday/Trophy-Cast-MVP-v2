@@ -6,7 +6,11 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:ci": "jest --ci --coverage --maxWorkers=2"
   },
   "dependencies": {
     "@expo/metro-runtime": "~6.1.2",
@@ -37,9 +41,15 @@
   },
   "devDependencies": {
     "@expo/metro-config": "^54.0.6",
+    "@testing-library/jest-native": "^5.4.3",
+    "@testing-library/react-native": "^13.3.3",
+    "@types/jest": "^30.0.0",
     "@types/react": "~19.1.0",
     "babel-plugin-module-resolver": "^5.0.2",
     "babel-preset-expo": "^54.0.4",
+    "jest": "^30.2.0",
+    "react-test-renderer": "^19.1.0",
+    "ts-jest": "^29.4.4",
     "typescript": "~5.9.2"
   },
   "private": true
