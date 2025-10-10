@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { View, Button, StyleSheet, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { useAuth } from '../lib/AuthContext';
-import { showSuccess, showError } from '../utils/toast';
+import { showSuccess, showError, showWarning } from '../utils/toast';
+import Input from '../components/Input';
 
 type RegistrationStep = 'credentials' | 'memberInfo';
 type AuthMode = 'login' | 'register';
@@ -103,28 +104,30 @@ export default function RegisterScreen() {
   // Login screen
   if (authMode === 'login') {
     return (
-      <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.title}>🏆 Trophy Cast</Text>
         <Text style={styles.subtitle}>Login to your account</Text>
         
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
+        <Input
+          label="Email"
+          icon="mail-outline"
+          placeholder="your.email@example.com"
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"
           autoCapitalize="none"
         />
         
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
+        <Input
+          label="Password"
+          icon="lock-closed-outline"
+          placeholder="Enter your password"
           value={password}
           onChangeText={setPassword}
           secureTextEntry
         />
         
-        {credentialsError ? <Text style={styles.error}>{credentialsError}</Text> : null}
+        {credentialsError ? <Input error={credentialsError} /> : null}
         
         <View style={styles.buttonContainer}>
           <Button title="Login" onPress={handleLogin} color="#2c3e50" />
@@ -139,41 +142,44 @@ export default function RegisterScreen() {
             Don't have an account? <Text style={styles.switchLink}>Sign Up</Text>
           </Text>
         </TouchableOpacity>
-      </View>
+      </ScrollView>
     );
   }
 
   if (step === 'credentials') {
     return (
-      <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.title}>Create Account</Text>
         
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
+        <Input
+          label="Email"
+          icon="mail-outline"
+          placeholder="your.email@example.com"
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"
           autoCapitalize="none"
         />
         
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
+        <Input
+          label="Password"
+          icon="lock-closed-outline"
+          placeholder="Choose a strong password"
           value={password}
           onChangeText={setPassword}
           secureTextEntry
         />
         
-        <TextInput
-          style={styles.input}
-          placeholder="Confirm Password"
+        <Input
+          label="Confirm Password"
+          icon="lock-closed-outline"
+          placeholder="Re-enter your password"
           value={confirmPassword}
           onChangeText={setConfirmPassword}
           secureTextEntry
         />
         
-        {credentialsError ? <Text style={styles.error}>{credentialsError}</Text> : null}
+        {credentialsError ? <Input error={credentialsError} /> : null}
         
         <View style={styles.buttonContainer}>
           <Button title="Next" onPress={handleCredentialsSubmit} color="#2c3e50" />
@@ -184,37 +190,40 @@ export default function RegisterScreen() {
             Already have an account? <Text style={styles.switchLink}>Login</Text>
           </Text>
         </TouchableOpacity>
-      </View>
+      </ScrollView>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Member Information</Text>
       
-      <TextInput
-        style={styles.input}
-        placeholder="Member Code"
+      <Input
+        label="Member Code"
+        icon="card-outline"
+        placeholder="e.g., DBM019"
         value={memberCode}
         onChangeText={setMemberCode}
-        autoCapitalize="none"
+        autoCapitalize="characters"
       />
       
-      <TextInput
-        style={styles.input}
-        placeholder="Full Name"
+      <Input
+        label="Full Name"
+        icon="person-outline"
+        placeholder="Your full name"
         value={name}
         onChangeText={setName}
       />
       
-      <TextInput
-        style={styles.input}
-        placeholder="Hometown"
+      <Input
+        label="Hometown"
+        icon="location-outline"
+        placeholder="City, State"
         value={hometown}
         onChangeText={setHometown}
       />
       
-      {memberInfoError ? <Text style={styles.error}>{memberInfoError}</Text> : null}
+      {memberInfoError ? <Input error={memberInfoError} /> : null}
       
       <View style={styles.buttonContainer}>
         <Button title="Complete Registration" onPress={handleMemberInfoSubmit} color="#2c3e50" />
@@ -225,7 +234,7 @@ export default function RegisterScreen() {
           Already have an account? <Text style={styles.switchLink}>Login</Text>
         </Text>
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 }
 

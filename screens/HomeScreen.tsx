@@ -1,6 +1,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, Text, View, ScrollView, RefreshControl, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../lib/AuthContext';
 import { supabase } from '../lib/supabase';
 import { DashboardSkeleton } from '../components/Skeleton';
@@ -157,7 +158,10 @@ export default function HomeScreen() {
 
       {/* Club Card */}
       <TouchableOpacity style={[styles.card, styles.clubCard]} onPress={handleClubPress}>
-        <Text style={styles.clubTitle}>🏆 Denver Bassmasters</Text>
+        <View style={styles.cardTitleRow}>
+          <Ionicons name="trophy" size={24} color="#f39c12" />
+          <Text style={styles.clubTitle}>Denver Bassmasters</Text>
+        </View>
         <Text style={styles.clubSubtext}>Tap to view club details →</Text>
         <View style={styles.clubStatsRow}>
           <View style={styles.clubStat}><Text style={styles.clubStatLabel}>AOY Rank</Text><Text style={styles.clubStatValue}>{aoy?.aoy_rank ?? 'N/A'}</Text></View>
@@ -168,7 +172,10 @@ export default function HomeScreen() {
 
       {/* Last Tournament */}
       <View style={styles.card}>
-        <Text style={styles.sectionTitle}>🎣 Last Tournament</Text>
+        <View style={styles.cardTitleRow}>
+          <Ionicons name="fish" size={20} color="#3498db" />
+          <Text style={styles.sectionTitle}>Last Tournament</Text>
+        </View>
         {lastTournament ? (
           <>
             <Text style={styles.tourneyText}>{lastTournament.lake} - {lastTournament.event_date}</Text>
@@ -182,7 +189,10 @@ export default function HomeScreen() {
 
       {/* Next Tournament */}
       <View style={styles.card}>
-        <Text style={styles.sectionTitle}>📅 Next Tournament</Text>
+        <View style={styles.cardTitleRow}>
+          <Ionicons name="calendar" size={20} color="#3498db" />
+          <Text style={styles.sectionTitle}>Next Tournament</Text>
+        </View>
         {nextTournament ? (
           <>
             <Text style={styles.tourneyText}>{nextTournament.lake} - {nextTournament.event_date}</Text>
@@ -192,7 +202,10 @@ export default function HomeScreen() {
 
       {/* Season Stats */}
       <View style={styles.card}>
-        <Text style={styles.sectionTitle}>📈 2025 Season Stats</Text>
+        <View style={styles.cardTitleRow}>
+          <Ionicons name="stats-chart" size={20} color="#3498db" />
+          <Text style={styles.sectionTitle}>2025 Season Stats</Text>
+        </View>
         <Text style={styles.tourneyText}>Tournaments Fished: {seasonStats.tournaments}</Text>
         <Text style={styles.tourneyText}>Best Finish: {seasonStats.bestFinish ?? 'N/A'}</Text>
         <Text style={styles.tourneyText}>Total Weight: {seasonStats.totalWeight} lbs</Text>
@@ -247,6 +260,12 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 4,
     elevation: 2,
+  },
+  cardTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 4,
   },
   title: {
     fontSize: 22,

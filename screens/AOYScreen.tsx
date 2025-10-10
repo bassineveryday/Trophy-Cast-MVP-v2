@@ -9,6 +9,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { fetchAOYStandings, AOYStandingsRow } from '../lib/supabase';
+import EmptyState from '../components/EmptyState';
 
 export default function AOYScreen() {
   const [standings, setStandings] = useState<AOYStandingsRow[]>([]);
@@ -83,12 +84,13 @@ export default function AOYScreen() {
   );
 
   const renderEmptyState = () => (
-    <View style={styles.emptyContainer}>
-      <Text style={styles.emptyTitle}>🏆 No AOY Standings Available</Text>
-      <Text style={styles.emptyDescription}>
-        AOY standings will appear here once data is available.
-      </Text>
-    </View>
+    <EmptyState
+      icon="trophy-outline"
+      title="No AOY Standings Available"
+      message="Angler of the Year standings will appear here once data is available. Pull to refresh to check for updates."
+      actionLabel="Refresh"
+      onAction={handleRefresh}
+    />
   );
 
   if (loading) {

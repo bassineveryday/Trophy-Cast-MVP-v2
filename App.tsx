@@ -2,7 +2,7 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { Text } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
 import { AuthProvider, useAuth } from './lib/AuthContext';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -39,21 +39,21 @@ function TabNavigator() {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
-          let iconText = '';
+          let iconName: keyof typeof Ionicons.glyphMap = 'home';
           
           if (route.name === 'Home') {
-            iconText = '🏠';
+            iconName = focused ? 'home' : 'home-outline';
           } else if (route.name === 'Tournaments') {
-            iconText = '🎣';
+            iconName = focused ? 'fish' : 'fish-outline';
           } else if (route.name === 'AOY') {
-            iconText = '🏆';
+            iconName = focused ? 'trophy' : 'trophy-outline';
           } else if (route.name === 'Club') {
-            iconText = '🎯';
+            iconName = focused ? 'people' : 'people-outline';
           } else if (route.name === 'Profile') {
-            iconText = '👤';
+            iconName = focused ? 'person' : 'person-outline';
           }
           
-          return <Text style={{ fontSize: size }}>{iconText}</Text>;
+          return <Ionicons name={iconName} size={size} color={color} />;
         },
         tabBarActiveTintColor: '#2c3e50',
         tabBarInactiveTintColor: '#7f8c8d',
