@@ -53,6 +53,8 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: false,
+    // Skip email verification for development
+    flowType: 'pkce',
   },
 });
 

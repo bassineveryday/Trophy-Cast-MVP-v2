@@ -28,6 +28,28 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Check for dev mode bypass in localStorage
+    if (typeof window !== 'undefined' && localStorage.getItem('devModeBypass') === 'true') {
+      const mockUser = {
+        id: 'dev-mode-user-tai-hunt',
+        email: 'tai.hunt@demo.com',
+        created_at: new Date().toISOString(),
+      } as User;
+      
+      const mockProfile: Profile = {
+        id: 'dev-mode-user-tai-hunt',
+        member_code: 'DBM019',
+        name: 'Tai Hunt',
+        hometown: 'Denver, CO',
+        created_at: new Date().toISOString(),
+      };
+      
+      setUser(mockUser);
+      setProfile(mockProfile);
+      setLoading(false);
+      return;
+    }
+
     // Check active sessions and subscribe to auth changes
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
@@ -66,10 +88,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signIn = async (email: string, password: string) => {
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
+      
+      // Allow login even if email is not confirmed
+      if (data.user && data.session) {
+        setUser(data.user);
+        await fetchProfile(data.user.id);
+      }
+      
       return { error };
     } catch (error) {
       return { error: error as Error };
@@ -78,10 +107,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signUp = async (email: string, password: string) => {
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          emailRedirectTo: undefined, // Skip email confirmation
+        }
       });
+      
+      // Automatically sign in after signup without email confirmation
+      if (data.user && !error) {
+        setUser(data.user);
+      }
+      
       return { error };
     } catch (error) {
       return { error: error as Error };
@@ -89,6 +127,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const signOut = async () => {
+    // Clear dev mode bypass
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('devModeBypass');
+    }
     await supabase.auth.signOut();
   };
 

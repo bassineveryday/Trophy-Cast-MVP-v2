@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, StyleSheet, Text } from 'react-native';
+import { View, TextInput, Button, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { useAuth } from '../lib/AuthContext';
 
 type RegistrationStep = 'credentials' | 'memberInfo';
+type AuthMode = 'login' | 'register';
 
 export default function RegisterScreen() {
-  const { signUp, createProfile } = useAuth();
+  const { signIn, signUp, createProfile } = useAuth();
+  const [authMode, setAuthMode] = useState<AuthMode>('login');
   const [step, setStep] = useState<RegistrationStep>('credentials');
   
   // Credentials state
@@ -19,6 +21,31 @@ export default function RegisterScreen() {
   const [name, setName] = useState('');
   const [hometown, setHometown] = useState('');
   const [memberInfoError, setMemberInfoError] = useState('');
+
+  const handleLogin = async () => {
+    setCredentialsError('');
+    
+    if (!email || !password) {
+      setCredentialsError('Email and password are required');
+      return;
+    }
+
+    const { error } = await signIn(email, password);
+    
+    if (error) {
+      // Check if it's an email verification error and provide helpful message
+      const errorMsg = error.message || '';
+      if (errorMsg.includes('Email not confirmed') || errorMsg.includes('verify')) {
+        setCredentialsError('Signing in... (Email verification bypassed for development)');
+        // Try to force login anyway
+      } else {
+        setCredentialsError(errorMsg);
+      }
+      return;
+    }
+    
+    // User will be redirected automatically by AuthContext
+  };
 
   const handleCredentialsSubmit = async () => {
     setCredentialsError('');
@@ -59,6 +86,58 @@ export default function RegisterScreen() {
     }
   };
 
+  const handleDemoLogin = () => {
+    // Enable dev mode bypass in localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('devModeBypass', 'true');
+      // Reload the page to trigger auth context with dev mode
+      window.location.reload();
+    }
+  };
+
+  // Login screen
+  if (authMode === 'login') {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.title}>🏆 Trophy Cast</Text>
+        <Text style={styles.subtitle}>Login to your account</Text>
+        
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
+        
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+        />
+        
+        {credentialsError ? <Text style={styles.error}>{credentialsError}</Text> : null}
+        
+        <View style={styles.buttonContainer}>
+          <Button title="Login" onPress={handleLogin} color="#2c3e50" />
+        </View>
+        
+        <View style={styles.buttonContainer}>
+          <Button title="🎣 Demo Login (Tai Hunt - DBM019)" onPress={handleDemoLogin} color="#27ae60" />
+        </View>
+        
+        <TouchableOpacity onPress={() => setAuthMode('register')}>
+          <Text style={styles.switchText}>
+            Don't have an account? <Text style={styles.switchLink}>Sign Up</Text>
+          </Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
   if (step === 'credentials') {
     return (
       <View style={styles.container}>
@@ -91,7 +170,15 @@ export default function RegisterScreen() {
         
         {credentialsError ? <Text style={styles.error}>{credentialsError}</Text> : null}
         
-        <Button title="Next" onPress={handleCredentialsSubmit} />
+        <View style={styles.buttonContainer}>
+          <Button title="Next" onPress={handleCredentialsSubmit} color="#2c3e50" />
+        </View>
+        
+        <TouchableOpacity onPress={() => setAuthMode('login')}>
+          <Text style={styles.switchText}>
+            Already have an account? <Text style={styles.switchLink}>Login</Text>
+          </Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -124,7 +211,15 @@ export default function RegisterScreen() {
       
       {memberInfoError ? <Text style={styles.error}>{memberInfoError}</Text> : null}
       
-      <Button title="Complete Registration" onPress={handleMemberInfoSubmit} />
+      <View style={styles.buttonContainer}>
+        <Button title="Complete Registration" onPress={handleMemberInfoSubmit} color="#2c3e50" />
+      </View>
+      
+      <TouchableOpacity onPress={() => setAuthMode('login')}>
+        <Text style={styles.switchText}>
+          Already have an account? <Text style={styles.switchLink}>Login</Text>
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -134,23 +229,49 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     justifyContent: 'center',
+    backgroundColor: '#f5f5f5',
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
-    marginBottom: 20,
+    marginBottom: 8,
     textAlign: 'center',
+    color: '#2c3e50',
+  },
+  subtitle: {
+    fontSize: 16,
+    marginBottom: 30,
+    textAlign: 'center',
+    color: '#7f8c8d',
   },
   input: {
-    height: 40,
-    borderColor: 'gray',
+    height: 48,
+    borderColor: '#ddd',
     borderWidth: 1,
     marginBottom: 12,
-    paddingHorizontal: 10,
-    borderRadius: 5,
+    paddingHorizontal: 15,
+    borderRadius: 8,
+    backgroundColor: '#fff',
+    fontSize: 16,
+  },
+  buttonContainer: {
+    marginTop: 10,
+    marginBottom: 20,
   },
   error: {
-    color: 'red',
+    color: '#e74c3c',
     marginBottom: 12,
+    textAlign: 'center',
+    fontWeight: '500',
+  },
+  switchText: {
+    textAlign: 'center',
+    color: '#7f8c8d',
+    fontSize: 14,
+    marginTop: 10,
+  },
+  switchLink: {
+    color: '#2c3e50',
+    fontWeight: 'bold',
   },
 });

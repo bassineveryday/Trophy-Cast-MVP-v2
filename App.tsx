@@ -11,12 +11,14 @@ import TournamentsScreen from './screens/TournamentsScreen';
 import ProfileScreen from './screens/ProfileScreen';
 import AOYScreen from './screens/AOYScreen';
 import RegisterScreen from './screens/RegisterScreen';
+import ClubScreen from './screens/ClubScreen';
 
 // Navigation types
 type TabParamList = {
   Home: undefined;
   Tournaments: undefined;
   AOY: undefined;
+  Club: undefined;
   Profile: undefined;
 };
 
@@ -43,6 +45,8 @@ function TabNavigator() {
             iconText = '🎣';
           } else if (route.name === 'AOY') {
             iconText = '🏆';
+          } else if (route.name === 'Club') {
+            iconText = '🎯';
           } else if (route.name === 'Profile') {
             iconText = '👤';
           }
@@ -74,6 +78,11 @@ function TabNavigator() {
         name="AOY" 
         options={{ title: 'AOY' }}
         component={AOYScreen}
+      />
+      <Tab.Screen 
+        name="Club" 
+        options={{ title: 'Denver BM' }}
+        component={ClubScreen}
       />
       <Tab.Screen 
         name="Profile" 
