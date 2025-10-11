@@ -12,10 +12,12 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../lib/AuthContext';
+import { useTheme, createThemedStyles } from '../lib/ThemeContext';
 import { useTournaments, useAOYStandings } from '../lib/hooks/useQueries';
 import { supabase } from '../lib/supabase';
 import { showSuccess, showError } from '../utils/toast';
 import AnimatedCard from '../components/AnimatedCard';
+import ThemeToggle from '../components/ThemeToggle';
 
 const { width } = Dimensions.get('window');
 
@@ -63,6 +65,7 @@ interface RecentTournament {
 const ComprehensiveMemberProfile: React.FC = () => {
   const navigation = useNavigation();
   const { user, profile } = useAuth();
+  const { theme, isDark } = useTheme();
   const { data: tournaments } = useTournaments();
   const { data: standings } = useAOYStandings();
   
@@ -204,33 +207,35 @@ const ComprehensiveMemberProfile: React.FC = () => {
     return '➡️ Consistent';
   };
 
+  const styles = createStyles(theme);
+
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <Ionicons name="person-circle-outline" size={64} color="#4CAF50" />
-        <Text style={styles.loadingText}>Loading profile...</Text>
+      <View style={[styles.loadingContainer, { backgroundColor: theme.background }]}>
+        <Ionicons name="person-circle-outline" size={64} color={theme.primary} />
+        <Text style={[styles.loadingText, { color: theme.textMuted }]}>Loading profile...</Text>
       </View>
     );
   }
 
   if (!memberProfile) {
     return (
-      <View style={styles.errorContainer}>
-        <Ionicons name="alert-circle-outline" size={64} color="#E91E63" />
-        <Text style={styles.errorText}>Profile not found</Text>
+      <View style={[styles.errorContainer, { backgroundColor: theme.background }]}>
+        <Ionicons name="alert-circle-outline" size={64} color={theme.error} />
+        <Text style={[styles.errorText, { color: theme.error }]}>Profile not found</Text>
       </View>
     );
   }
 
   return (
     <ScrollView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: theme.background }]}
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
           onRefresh={handleRefresh}
-          colors={['#4CAF50']}
-          tintColor="#4CAF50"
+          colors={[theme.primary]}
+          tintColor={theme.primary}
         />
       }
       showsVerticalScrollIndicator={false}
@@ -434,49 +439,52 @@ const ComprehensiveMemberProfile: React.FC = () => {
       <AnimatedCard style={StyleSheet.flatten([styles.sectionCard, styles.upcomingCard])}>
         <View style={styles.sectionHeader}>
           <Ionicons name="calendar" size={20} color="#9C27B0" />
-          <Text style={styles.sectionTitle}>Upcoming Events</Text>
+          <Text style={[styles.sectionTitle, { color: theme.text }]}>Upcoming Events</Text>
         </View>
         
         <View style={styles.upcomingEvent}>
-          <Text style={styles.eventDetails}>
+          <Text style={[styles.eventDetails, { color: theme.text }]}>
             Cedar Bluff Reservoir – Oct 20, 2025 • 7:00 AM
           </Text>
           
-          <TouchableOpacity style={styles.registerButton}>
+          <TouchableOpacity style={[styles.registerButton, { backgroundColor: theme.primary }]}>
             <Text style={styles.registerButtonText}>Register Now →</Text>
           </TouchableOpacity>
         </View>
       </AnimatedCard>
+
+      {/* Theme Settings */}
+      <ThemeToggle />
     </ScrollView>
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: theme.background,
   },
   loadingContainer: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#f8f9fa',
+    backgroundColor: theme.background,
   },
   loadingText: {
     marginTop: 16,
     fontSize: 16,
-    color: '#666',
+    color: theme.textMuted,
   },
   errorContainer: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#f8f9fa',
+    backgroundColor: theme.background,
   },
   errorText: {
     marginTop: 16,
     fontSize: 18,
-    color: '#E91E63',
+    color: theme.error,
     fontWeight: '600',
   },
   heroCard: {
@@ -486,13 +494,13 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     overflow: 'hidden',
     elevation: 8,
-    shadowColor: '#000',
+    shadowColor: theme.shadow,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
   },
   heroGradient: {
-    backgroundColor: '#667eea', // Gradient will be implemented with separate library or native component
+    backgroundColor: theme.primary,
     padding: 25,
   },
   heroContent: {
@@ -555,12 +563,12 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     paddingBottom: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: theme.border,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#2c3e50',
+    color: theme.text,
     marginLeft: 8,
   },
   aboutContent: {
@@ -572,13 +580,13 @@ const styles = StyleSheet.create({
   },
   aboutLabel: {
     fontSize: 16,
-    color: '#2c3e50',
+    color: theme.text,
     fontWeight: '500',
     minWidth: 60,
   },
   aboutValue: {
     fontSize: 16,
-    color: '#34495e',
+    color: theme.textSecondary,
     flex: 1,
     marginLeft: 8,
   },
@@ -593,30 +601,30 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     paddingVertical: 12,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: theme.surface,
     borderRadius: 12,
     marginHorizontal: 4,
   },
   statLabel: {
     fontSize: 12,
-    color: '#7f8c8d',
+    color: theme.textMuted,
     marginBottom: 4,
     textAlign: 'center',
   },
   statValue: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#2c3e50',
+    color: theme.text,
   },
   fullWidthStat: {
     alignItems: 'center',
     paddingVertical: 16,
-    backgroundColor: '#f0f8f0',
+    backgroundColor: theme.surface,
     borderRadius: 12,
   },
   winningsValue: {
     fontSize: 24,
-    color: '#4CAF50',
+    color: theme.success,
   },
   seasonStats: {
     gap: 16,
@@ -629,13 +637,13 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     paddingVertical: 16,
-    backgroundColor: '#fff9e6',
+    backgroundColor: theme.surface,
     borderRadius: 12,
     marginHorizontal: 4,
   },
   seasonLabel: {
     fontSize: 12,
-    color: '#f39c12',
+    color: theme.warning,
     marginBottom: 4,
     textAlign: 'center',
     fontWeight: '600',
@@ -643,7 +651,7 @@ const styles = StyleSheet.create({
   seasonValue: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#2c3e50',
+    color: theme.text,
   },
   recentForm: {
     gap: 12,
@@ -657,7 +665,7 @@ const styles = StyleSheet.create({
   tournamentLake: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#2c3e50',
+    color: theme.text,
   },
   tournamentDetails: {
     flexDirection: 'row',
@@ -677,7 +685,7 @@ const styles = StyleSheet.create({
   },
   tournamentWeight: {
     fontSize: 14,
-    color: '#34495e',
+    color: theme.textSecondary,
     fontWeight: '500',
   },
   trendContainer: {
@@ -687,33 +695,33 @@ const styles = StyleSheet.create({
     marginTop: 16,
     paddingTop: 16,
     borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
+    borderTopColor: theme.border,
   },
   trendLabel: {
     fontSize: 16,
-    color: '#2c3e50',
+    color: theme.text,
     fontWeight: '600',
   },
   trendValue: {
     fontSize: 16,
-    color: '#4CAF50',
+    color: theme.success,
     fontWeight: 'bold',
   },
   upcomingCard: {
     borderLeftWidth: 4,
-    borderLeftColor: '#9C27B0',
+    borderLeftColor: theme.accent,
   },
   upcomingEvent: {
     gap: 16,
   },
   eventDetails: {
     fontSize: 16,
-    color: '#2c3e50',
+    color: theme.text,
     textAlign: 'center',
     fontWeight: '500',
   },
   registerButton: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: theme.primary,
     paddingVertical: 14,
     paddingHorizontal: 24,
     borderRadius: 25,

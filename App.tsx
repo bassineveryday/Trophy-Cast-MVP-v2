@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider, useAuth } from './lib/AuthContext';
+import { ThemeProvider, useTheme } from './lib/ThemeContext';
 import ErrorBoundary from './components/ErrorBoundary';
 import { queryClient } from './lib/queryClient';
 
@@ -59,6 +60,7 @@ function TournamentStackNavigator() {
 
 function TabNavigator() {
   const { profile } = useAuth();
+  const { theme } = useTheme();
   
   return (
     <Tab.Navigator
@@ -86,14 +88,19 @@ function TabNavigator() {
           
           return <Ionicons name={iconName} size={size} color={color} accessibilityLabel={accessibilityLabel} />;
         },
-        tabBarActiveTintColor: '#2c3e50',
-        tabBarInactiveTintColor: '#7f8c8d',
-        headerStyle: {
-          backgroundColor: '#2c3e50',
+        tabBarActiveTintColor: theme.primary,
+        tabBarInactiveTintColor: theme.textMuted,
+        tabBarStyle: {
+          backgroundColor: theme.surface,
+          borderTopColor: theme.border,
         },
-        headerTintColor: '#fff',
+        headerStyle: {
+          backgroundColor: theme.surface,
+        },
+        headerTintColor: theme.text,
         headerTitleStyle: {
           fontWeight: 'bold',
+          color: theme.text,
         },
       })}
     >
@@ -134,27 +141,67 @@ function Navigation() {
   }
 
   return (
-    <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {!user || !profile ? (
-          <Stack.Screen name="Register" component={RegisterScreen} />
-        ) : (
-          <Stack.Screen name="Main" component={TabNavigator} />
-        )}
-      </Stack.Navigator>
-    </NavigationContainer>
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      {!user || !profile ? (
+        <Stack.Screen name="Register" component={RegisterScreen} />
+      ) : (
+        <Stack.Screen name="Main" component={TabNavigator} />
+      )}
+    </Stack.Navigator>
   );
 }
 
 export default function App() {
   return (
     <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <Navigation />
-          <Toast />
-        </AuthProvider>
-      </QueryClientProvider>
+      <ThemeProvider>
+        <QueryClientProvider client={queryClient}>
+          <AuthProvider>
+            <ThemedNavigation />
+            <Toast />
+          </AuthProvider>
+        </QueryClientProvider>
+      </ThemeProvider>
     </ErrorBoundary>
+  );
+}
+
+function ThemedNavigation() {
+  const { theme, isDark } = useTheme();
+  
+  return (
+    <NavigationContainer
+      theme={{
+        dark: isDark,
+        colors: {
+          primary: theme.primary,
+          background: theme.background,
+          card: theme.surface,
+          text: theme.text,
+          border: theme.border,
+          notification: theme.accent,
+        },
+        fonts: {
+          regular: {
+            fontFamily: 'System',
+            fontWeight: '400',
+          },
+          medium: {
+            fontFamily: 'System',
+            fontWeight: '500',
+          },
+          bold: {
+            fontFamily: 'System',
+            fontWeight: '700',
+          },
+          heavy: {
+            fontFamily: 'System',
+            fontWeight: '900',
+          },
+        },
+      }}
+    >
+      <Navigation />
+    </NavigationContainer>
   );
 }

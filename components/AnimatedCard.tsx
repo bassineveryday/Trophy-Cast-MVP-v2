@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, StyleSheet, ViewStyle } from 'react-native';
+import { useTheme } from '../lib/ThemeContext';
 import { fadeIn, createFadeInStyle, createSlideUpStyle, slideUp } from '../utils/animations';
 
 interface AnimatedCardProps {
@@ -23,6 +24,7 @@ export default function AnimatedCard({
   animation = 'slideUp'
 }: AnimatedCardProps) {
   const animValue = useRef(new Animated.Value(0)).current;
+  const { theme } = useTheme();
 
   useEffect(() => {
     // Reset animation value on mount or when children change
@@ -44,7 +46,22 @@ export default function AnimatedCard({
     : createSlideUpStyle(animValue, 30);
 
   return (
-    <Animated.View style={[animatedStyle, style]}>
+    <Animated.View style={[
+      animatedStyle, 
+      {
+        backgroundColor: theme.card,
+        shadowColor: theme.shadow,
+        borderRadius: 12,
+        elevation: 2,
+        shadowOffset: {
+          width: 0,
+          height: 2,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+      },
+      style
+    ]}>
       {children}
     </Animated.View>
   );

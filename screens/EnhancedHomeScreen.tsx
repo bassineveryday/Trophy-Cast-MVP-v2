@@ -12,9 +12,11 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../lib/AuthContext';
+import { useTheme } from '../lib/ThemeContext';
 import { useDashboard, useTournaments, useAOYStandings } from '../lib/hooks/useQueries';
 import { DashboardSkeleton } from '../components/Skeleton';
 import AnimatedCard from '../components/AnimatedCard';
+import ThemeToggle from '../components/ThemeToggle';
 
 const { width } = Dimensions.get('window');
 
@@ -53,6 +55,7 @@ export default function EnhancedHomeScreen() {
   
   const navigation = useNavigation();
   const { user, profile } = useAuth();
+  const { theme, isDark, toggleTheme } = useTheme();
   const { data: tournaments } = useTournaments();
   const { data: standings } = useAOYStandings();
   
@@ -207,29 +210,32 @@ export default function EnhancedHomeScreen() {
 
   return (
     <ScrollView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: theme.background }]}
       refreshControl={
         <RefreshControl 
           refreshing={isRefetching} 
           onRefresh={onRefresh}
-          colors={['#4CAF50']}
-          tintColor="#4CAF50"
+          colors={[theme.primary]}
+          tintColor={theme.primary}
         />
       }
       contentContainerStyle={styles.scrollContent}
       showsVerticalScrollIndicator={false}
     >
       {/* Header Section */}
-      <View style={styles.headerContainer}>
+      <View style={[styles.headerContainer, { backgroundColor: theme.surface }]}>
         <View style={styles.welcomeSection}>
-          <Text style={styles.headerTitle}>Welcome back!</Text>
-          <Text style={styles.headerSubtitle}>
+          <Text style={[styles.headerTitle, { color: theme.text }]}>Welcome back!</Text>
+          <Text style={[styles.headerSubtitle, { color: theme.textSecondary }]}>
             {profile?.name || user?.email?.split('@')[0] || 'Angler'}
           </Text>
         </View>
-        <View style={styles.memberBadge}>
-          <Ionicons name="card" size={16} color="#4CAF50" />
-          <Text style={styles.memberCode}>{profile?.member_code || 'N/A'}</Text>
+        <View style={styles.headerActions}>
+          <ThemeToggle compact />
+          <View style={[styles.memberBadge, { backgroundColor: theme.background, borderColor: theme.border }]}>
+            <Ionicons name="card" size={16} color={theme.primary} />
+            <Text style={[styles.memberCode, { color: theme.text }]}>{profile?.member_code || 'N/A'}</Text>
+          </View>
         </View>
       </View>
 
@@ -460,18 +466,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#7f8c8d',
   },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
   memberBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#e8f5e8',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
+    borderWidth: 1,
   },
   memberCode: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#4CAF50',
     marginLeft: 6,
   },
   statsOverview: {
