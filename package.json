@@ -14,6 +14,7 @@
     "test:integration": "jest __tests__/integration-*.test.ts",
     "test:unit": "jest --testPathIgnorePatterns=__tests__/integration-",
     "test:all": "npm run type-check && npm run lint && npm run test:ci",
+    "test:db": "node -e \"const test = require('./lib/databaseTest.ts'); test.runConnectionTest();\"",
     "lint": "eslint . --ext .ts,.tsx,.js,.jsx --max-warnings 0",
     "lint:fix": "eslint . --ext .ts,.tsx,.js,.jsx --fix",
     "type-check": "tsc --noEmit",

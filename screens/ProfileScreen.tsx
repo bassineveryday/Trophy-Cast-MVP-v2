@@ -1,10 +1,27 @@
-import React from 'react';
-import { StyleSheet, Text, View, Button } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, Text, View, Button, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../lib/AuthContext';
+import DatabaseStatusScreen from '../components/DatabaseStatusScreen';
 
 export default function ProfileScreen() {
   const { user, profile, signOut } = useAuth();
+  const [showDatabaseStatus, setShowDatabaseStatus] = useState(false);
+
+  if (showDatabaseStatus) {
+    return (
+      <View style={styles.container}>
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={() => setShowDatabaseStatus(false)}
+        >
+          <Ionicons name="arrow-back" size={24} color="#007bff" />
+          <Text style={styles.backButtonText}>Back to Profile</Text>
+        </TouchableOpacity>
+        <DatabaseStatusScreen />
+      </View>
+    );
+  }
   
   return (
     <View style={styles.container}>
@@ -72,6 +89,22 @@ export default function ProfileScreen() {
           <Text style={styles.statLabel}>Best Ranking:</Text>
           <Text style={styles.statValue}>N/A</Text>
         </View>
+      </View>
+
+      {/* Developer Tools Section */}
+      <View style={styles.profileCard}>
+        <View style={styles.cardHeader}>
+          <Ionicons name="code-working" size={24} color="#2c3e50" />
+          <Text style={styles.sectionTitle}>Developer Tools</Text>
+        </View>
+        <TouchableOpacity 
+          style={styles.devButton}
+          onPress={() => setShowDatabaseStatus(true)}
+        >
+          <Ionicons name="server-outline" size={20} color="#007bff" />
+          <Text style={styles.devButtonText}>Database Status</Text>
+          <Ionicons name="chevron-forward" size={20} color="#007bff" />
+        </TouchableOpacity>
       </View>
 
       <View style={styles.buttonContainer}>
@@ -166,5 +199,32 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     marginTop: 30,
+  },
+  backButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    marginBottom: 16,
+  },
+  backButtonText: {
+    marginLeft: 8,
+    fontSize: 16,
+    color: '#007bff',
+  },
+  devButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    backgroundColor: '#f8f9fa',
+    borderRadius: 8,
+    marginTop: 8,
+  },
+  devButtonText: {
+    flex: 1,
+    marginLeft: 12,
+    fontSize: 16,
+    color: '#007bff',
+    fontWeight: '500',
   },
 });
