@@ -19,6 +19,7 @@ export const queryKeys = {
   aoyStandings: ['aoy-standings'] as const,
   tournaments: ['tournaments'] as const,
   tournamentResults: (memberId: string) => ['tournament-results', memberId] as const,
+  tournamentParticipants: (eventId: string) => ['tournament-participants', eventId] as const,
   dashboard: (memberId: string) => ['dashboard', memberId] as const,
   profile: (userId: string) => ['profile', userId] as const,
 };
@@ -169,6 +170,26 @@ export function useMemberResults(memberCode: string | undefined) {
       return data || [];
     },
     enabled: !!memberCode,
+  });
+}
+
+export function useTournamentParticipants(eventId: string | undefined) {
+  return useQuery({
+    queryKey: eventId ? queryKeys.tournamentParticipants(eventId) : ['tournament-participants', ''],
+    queryFn: async () => {
+      if (!eventId) throw new Error('No eventId provided');
+
+      // tournament_members likely contains registration rows; adjust selected fields to your schema
+      const { data, error } = await supabase
+        .from('tournament_members')
+        .select('id, member_id, member_name, registration_date, status, active')
+        .eq('event_id', eventId)
+        .order('registration_date', { ascending: true });
+
+      if (error) throw error;
+      return (data || []) as any[];
+    },
+    enabled: !!eventId,
   });
 }
 

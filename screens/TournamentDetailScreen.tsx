@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRoute, useNavigation } from '@react-navigation/native';
-import { useTournaments, useAOYStandings, useTournamentResults } from '../lib/hooks/useQueries';
+import { useTournaments, useAOYStandings, useTournamentResults, useTournamentParticipants } from '../lib/hooks/useQueries';
 import { supabase } from '../lib/supabase';
 import { showSuccess, showError } from '../utils/toast';
 import EmptyState from '../components/EmptyState';
@@ -52,12 +52,27 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
 
   // Fetch results for this tournament (event id is tournamentId)
   const { data: resultsData, isLoading: resultsLoading, error: resultsError } = useTournamentResults(tournamentId);
+  // Fetch registered participants live
+  const { data: liveParticipants, isLoading: participantsLoading, error: participantsError, refetch: refetchParticipants } = useTournamentParticipants(tournamentId);
   
   useEffect(() => {
     if (tournament) {
       loadTournamentData();
     }
   }, [tournament]);
+
+  useEffect(() => {
+    if (liveParticipants) {
+      // Map live rows into Participant shape used by the UI
+      const mapped = liveParticipants.map((p: any) => ({
+        id: p.id,
+        member_name: p.member_name || p.member_id,
+        registration_date: p.registration_date || new Date().toISOString(),
+        status: p.status || (p.active ? 'confirmed' : 'pending'),
+      }));
+      setParticipants(mapped);
+    }
+  }, [liveParticipants]);
   
   const loadTournamentData = async () => {
     setLoading(true);
@@ -92,7 +107,8 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
     setRefreshing(true);
     await Promise.all([
       refetchTournaments(),
-      loadTournamentData()
+      loadTournamentData(),
+      refetchParticipants()
     ]);
     setRefreshing(false);
   };
