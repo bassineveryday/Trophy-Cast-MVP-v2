@@ -54,6 +54,8 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
   const { data: resultsData, isLoading: resultsLoading, error: resultsError } = useTournamentResults(tournamentId);
   // Fetch registered participants live
   const { data: liveParticipants, isLoading: participantsLoading, error: participantsError, refetch: refetchParticipants } = useTournamentParticipants(tournamentId);
+  // allow refetching results explicitly
+  const { refetch: refetchResults } = useTournamentResults(tournamentId) as any;
 
   // Debug logs to help diagnose missing data
   useEffect(() => {
@@ -81,6 +83,13 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
     }
   }, [tournament]);
 
+  // Force refetch of results/participants when the tournamentId or tournament code changes
+  useEffect(() => {
+    if (!tournamentId) return;
+    refetchParticipants && refetchParticipants();
+    if (typeof refetchResults === 'function') refetchResults();
+  }, [tournamentId, tournament?.tournament_code]);
+
   useEffect(() => {
     if (liveParticipants) {
       // Map live rows into Participant shape used by the UI
@@ -93,6 +102,14 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
       setParticipants(mapped);
     }
   }, [liveParticipants]);
+
+  // Compute unique participant count (prefer results rows if available)
+  const participantCount = React.useMemo(() => {
+    const fromResults = (resultsData || []).map((r: any) => r.member_id || r.member_code || r.member?.member_code || r.member?.dbm_number).filter(Boolean);
+    const uniq = Array.from(new Set(fromResults));
+    if (uniq.length > 0) return uniq.length;
+    return participants.length;
+  }, [resultsData, participants]);
 
   // Debug: log query results/errors to browser console to diagnose missing data
   useEffect(() => {
@@ -259,7 +276,7 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
       <View style={styles.statsGrid}>
         <View style={styles.statCard}>
           <Ionicons name="people" size={24} color="#4CAF50" />
-          <Text style={styles.statNumber}>{participants.length}</Text>
+          <Text style={styles.statNumber}>{participantCount}</Text>
           <Text style={styles.statLabel}>Participants</Text>
         </View>
         
@@ -307,7 +324,7 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
           <View style={styles.detailContent}>
             <Text style={styles.detailLabel}>Current Participants</Text>
             <Text style={styles.detailValue}>
-              {tournament?.participants || 0} registered
+              {participantCount} registered
             </Text>
           </View>
         </View>

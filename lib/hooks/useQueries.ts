@@ -152,6 +152,8 @@ export function useDashboard(memberCode: string | undefined) {
     },
     enabled: !!memberCode,
   });
+
+
 }
 
 export function useMemberResults(memberCode: string | undefined) {
@@ -171,20 +173,53 @@ export function useMemberResults(memberCode: string | undefined) {
     },
     enabled: !!memberCode,
   });
+
+}
+
+// Helper: get unique participants from results rows
+function uniqueParticipants(rows: any[] = []) {
+  const map = new Map<string, { member_id: string; member_name: string }>();
+  for (const r of rows) {
+    if (!r || !r.member_id) continue;
+    if (!map.has(r.member_id)) {
+      map.set(r.member_id, { member_id: r.member_id, member_name: r.member_name || '' });
+    }
+  }
+  return Array.from(map.values());
 }
 
 export function useTournamentParticipants(eventId: string | undefined) {
   return useQuery({
-    queryKey: eventId ? queryKeys.tournamentParticipants(eventId) : ['tournament-participants', ''],
+    queryKey: queryKeys.tournamentParticipants(eventId || ''),
     queryFn: async () => {
-      if (!eventId) throw new Error('No eventId provided');
+      if (!eventId) return [] as Array<{ member_id: string; member_name: string }>;
 
-      // tournament_members likely contains registration rows; adjust selected fields to your schema
+      // Match either tournament_code or event_id to be resilient to caller params
       const { data, error } = await supabase
-        .from('tournament_members')
-        .select('id, member_id, member_name, registration_date, status, active')
-        .eq('event_id', eventId)
-        .order('registration_date', { ascending: true });
+        .from('tournament_results')
+        .select('member_id, member_name')
+        .or(`tournament_code.eq.${eventId},event_id.eq.${eventId}`);
+
+      if (error) throw error;
+
+      return uniqueParticipants(data || []);
+    },
+    enabled: !!eventId,
+  });
+}
+
+export function useTournamentResults(eventId: string | undefined) {
+  return useQuery({
+    queryKey: ['tournament-results-by-event', eventId || ''],
+    queryFn: async () => {
+      if (!eventId) return [] as any[];
+
+      // Support lookup by either tournament_code or event_id (some callers pass event_id)
+      const { data, error } = await supabase
+        .from('tournament_results')
+        .select('*')
+        .or(`tournament_code.eq.${eventId},event_id.eq.${eventId}`)
+        .order('place', { ascending: true });
 
       if (error) throw error;
       return (data || []) as any[];
@@ -193,26 +228,19 @@ export function useTournamentParticipants(eventId: string | undefined) {
   });
 }
 
-// Fetch all results for a specific tournament event (by event_id)
-export function useTournamentResults(eventId: string | undefined) {
+export function useRecentTournamentResults(limit: number = 5) {
   return useQuery({
-    queryKey: ['tournament-results-by-event', eventId || ''],
+    queryKey: ['recent-tournament-results', String(limit)],
     queryFn: async () => {
-      if (!eventId) throw new Error('No eventId provided');
-
-      // select result rows and include nested member/profile info when available
-      // Adjust the nested select to match your Supabase schema: here we try to select
-      // a joined member record (from 'members' or 'profiles' depending on your schema)
       const { data, error } = await supabase
         .from('tournament_results')
-        .select(`*, member:profiles(id, name, member_code, dbm_number, avatar_url)`)
-        .eq('event_id', eventId)
-        .order('place', { ascending: true, nullsFirst: false });
+        .select('event_date, lake, tournament_name, place, member_name, member_id, weight_lbs')
+        .order('event_date', { ascending: false })
+        .limit(limit as number);
 
       if (error) throw error;
       return (data || []) as any[];
     },
-    enabled: !!eventId,
   });
 }
 

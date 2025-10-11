@@ -3,7 +3,7 @@ import React from 'react';
 import { StyleSheet, Text, View, ScrollView, RefreshControl, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../lib/AuthContext';
-import { useDashboard } from '../lib/hooks/useQueries';
+import { useDashboard, useRecentTournamentResults } from '../lib/hooks/useQueries';
 import { DashboardSkeleton } from '../components/Skeleton';
 import AnimatedCard from '../components/AnimatedCard';
 
@@ -65,6 +65,9 @@ export default function HomeScreen() {
   const onRefresh = () => {
     refetch();
   };
+
+  // Quick QA hook: recent results across the DB to verify uploaded rows are visible
+  const { data: recentResults } = useRecentTournamentResults(5);
 
   // Navigation placeholder
   const handleClubPress = () => {
@@ -128,19 +131,20 @@ export default function HomeScreen() {
       contentContainerStyle={{ paddingBottom: 32 }}
     >
       {/* Welcome */}
-      <View style={styles.card}>
+      <AnimatedCard style={styles.card} delay={0} animation="slideUp">
         <Text style={styles.title}>Welcome back, {profile?.name || user?.email}!</Text>
         <Text style={styles.memberCode}>Member: {profile?.member_code}</Text>
-      </View>
+      </AnimatedCard>
 
       {/* Club Card */}
-      <TouchableOpacity 
-          style={[styles.card, styles.clubCard]} 
-          onPress={handleClubPress}
-          accessibilityRole="button"
-          accessibilityLabel="View Denver Bassmasters club details"
-          accessibilityHint={`Shows your AOY rank of ${aoy?.aoy_rank ?? 'N/A'}, ${aoy?.total_aoy_points ?? 'N/A'} points, and $${earningsNumber.toFixed(2)} earnings`}
-        >
+      <TouchableOpacity
+        style={[styles.card, styles.clubCard]}
+        onPress={handleClubPress}
+        accessibilityRole="button"
+        accessibilityLabel="View Denver Bassmasters club details"
+        accessibilityHint={`Shows your AOY rank of ${aoy?.aoy_rank ?? 'N/A'}, ${aoy?.total_aoy_points ?? 'N/A'} points, and $${earningsNumber.toFixed(2)} earnings`}
+      >
+        <AnimatedCard style={{ margin: 0 }} delay={60} animation="slideUp" enabled>
           <View style={styles.cardTitleRow}>
             <Ionicons name="trophy" size={24} color="#f39c12" />
             <Text style={styles.clubTitle}>Denver Bassmasters</Text>
@@ -151,10 +155,11 @@ export default function HomeScreen() {
             <View style={styles.clubStat}><Text style={styles.clubStatLabel}>Points</Text><Text style={styles.clubStatValue}>{aoy?.total_aoy_points ?? 'N/A'}</Text></View>
             <View style={styles.clubStat}><Text style={styles.clubStatLabel}>2025 $</Text><Text style={styles.clubStatValue}>${earnings}</Text></View>
           </View>
-        </TouchableOpacity>
+        </AnimatedCard>
+      </TouchableOpacity>
 
       {/* Last Tournament */}
-      <View style={styles.card}>
+      <AnimatedCard style={styles.card} delay={120} animation="slideUp">
         <View style={styles.cardTitleRow}>
           <Ionicons name="fish" size={20} color="#3498db" />
           <Text style={styles.sectionTitle}>Last Tournament</Text>
@@ -168,20 +173,35 @@ export default function HomeScreen() {
             <Text style={styles.tourneyText}>Payout: ${Number(lastTournament?.payout) || 0}</Text>
           </>
         ) : <Text style={styles.tourneyText}>No tournaments found.</Text>}
-      </View>
+      </AnimatedCard>
 
       {/* Dev-only debug panel showing raw dashboard payload to diagnose blank-screen */}
       {typeof __DEV__ !== 'undefined' && __DEV__ && (
-        <View style={styles.card}>
+        <AnimatedCard style={styles.card} delay={180} animation="fade" enabled>
           <Text style={[styles.sectionTitle, { fontSize: 14 }]}>Debug (dev only)</Text>
           <ScrollView style={{ maxHeight: 160 }}>
             <Text style={styles.tourneyText}>{JSON.stringify(dashboard, null, 2)}</Text>
           </ScrollView>
-        </View>
+        </AnimatedCard>
       )}
 
+      {/* Recent Results (dev QA) */}
+      <AnimatedCard style={styles.card} delay={200} animation="slideUp">
+        <View style={styles.cardTitleRow}>
+          <Ionicons name="list" size={18} color="#2c3e50" />
+          <Text style={styles.sectionTitle}>Recent Results (QA)</Text>
+        </View>
+        {recentResults && recentResults.length > 0 ? (
+          recentResults.map((r: any, idx: number) => (
+            <Text key={idx} style={styles.tourneyText}>{r.event_date} — {r.tournament_name} @ {r.lake} — {r.weight_lbs || '0'} lbs</Text>
+          ))
+        ) : (
+          <Text style={styles.tourneyText}>No recent results found.</Text>
+        )}
+      </AnimatedCard>
+
       {/* Next Tournament */}
-      <View style={styles.card}>
+      <AnimatedCard style={styles.card} delay={240} animation="slideUp">
         <View style={styles.cardTitleRow}>
           <Ionicons name="calendar" size={20} color="#3498db" />
           <Text style={styles.sectionTitle}>Next Tournament</Text>
@@ -191,10 +211,10 @@ export default function HomeScreen() {
             <Text style={styles.tourneyText}>{nextTournament.lake} - {nextTournament.event_date}</Text>
           </>
         ) : <Text style={styles.tourneyText}>No upcoming tournaments.</Text>}
-      </View>
+      </AnimatedCard>
 
       {/* Season Stats */}
-      <View style={styles.card}>
+      <AnimatedCard style={styles.card} delay={300} animation="slideUp">
         <View style={styles.cardTitleRow}>
           <Ionicons name="stats-chart" size={20} color="#3498db" />
           <Text style={styles.sectionTitle}>2025 Season Stats</Text>
@@ -203,7 +223,7 @@ export default function HomeScreen() {
         <Text style={styles.tourneyText}>Best Finish: {seasonStats.bestFinish ?? 'N/A'}</Text>
         <Text style={styles.tourneyText}>Total Weight: {seasonStats.totalWeight} lbs</Text>
         <Text style={styles.tourneyText}>Big Fish: {seasonStats.bigFish} lbs</Text>
-      </View>
+      </AnimatedCard>
     </ScrollView>
   );
 }
