@@ -16,6 +16,7 @@ import EnhancedProfileScreen from './components/EnhancedProfileScreen';
 import EnhancedAOYScreen from './components/EnhancedAOYScreen';
 import RegisterScreen from './screens/RegisterScreen';
 import ClubScreen from './screens/ClubScreen';
+import TournamentDetailScreen from './screens/TournamentDetailScreen';
 
 // Navigation types
 type TabParamList = {
@@ -26,6 +27,11 @@ type TabParamList = {
   Profile: undefined;
 };
 
+type TournamentStackParamList = {
+  TournamentsList: undefined;
+  TournamentDetail: { tournamentId: string };
+};
+
 type RootStackParamList = {
   Main: undefined;
   Register: undefined;
@@ -33,6 +39,22 @@ type RootStackParamList = {
 
 const Tab = createBottomTabNavigator<TabParamList>();
 const Stack = createNativeStackNavigator<RootStackParamList>();
+const TournamentStack = createNativeStackNavigator<TournamentStackParamList>();
+
+function TournamentStackNavigator() {
+  return (
+    <TournamentStack.Navigator screenOptions={{ headerShown: false }}>
+      <TournamentStack.Screen 
+        name="TournamentsList" 
+        component={EnhancedTournamentsScreen} 
+      />
+      <TournamentStack.Screen 
+        name="TournamentDetail" 
+        component={TournamentDetailScreen} 
+      />
+    </TournamentStack.Navigator>
+  );
+}
 
 function TabNavigator() {
   const { profile } = useAuth();
@@ -81,7 +103,7 @@ function TabNavigator() {
       />
       <Tab.Screen 
         name="Tournaments" 
-        component={EnhancedTournamentsScreen}
+        component={TournamentStackNavigator}
         options={{ title: 'Tournaments' }}
       />
       <Tab.Screen 

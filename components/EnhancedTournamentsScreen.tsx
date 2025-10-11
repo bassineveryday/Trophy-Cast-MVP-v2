@@ -10,6 +10,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import { TournamentEvent } from '../lib/supabase';
 import { useTournaments } from '../lib/hooks/useQueries';
 import { ListSkeleton } from '../components/Skeleton';
@@ -22,6 +23,7 @@ interface FilterOptions {
 }
 
 export default function EnhancedTournamentsScreen() {
+  const navigation = useNavigation();
   const { data: tournaments = [], isLoading, error, refetch, isRefetching } = useTournaments();
   const [filters, setFilters] = useState<FilterOptions>({
     search: '',
@@ -183,7 +185,12 @@ export default function EnhancedTournamentsScreen() {
               </View>
             </View>
 
-            <TouchableOpacity style={styles.actionButton}>
+            <TouchableOpacity 
+              style={styles.actionButton}
+              onPress={() => (navigation as any).navigate('TournamentDetail', { 
+                tournamentId: item.event_id 
+              })}
+            >
               <Ionicons name="information-circle-outline" size={18} color="#007bff" />
               <Text style={styles.actionButtonText}>View Full Details</Text>
             </TouchableOpacity>
