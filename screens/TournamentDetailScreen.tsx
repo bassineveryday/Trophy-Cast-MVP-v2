@@ -107,11 +107,16 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
   // Default selected result tab when multi-day data becomes available
   useEffect(() => {
     if (!multiDay) return;
-    // prefer first non-final day as default, otherwise first event, otherwise combined
-    const nonFinal = (multiDay.dayEvents || []).find((d: any) => !/final|overall|combined/i.test(String(d.tournament_name || '')));
-    if (nonFinal) setSelectedResultTab(nonFinal.tournament_code || nonFinal.event_id || 'combined');
-    else if (multiDay.dayEvents && multiDay.dayEvents.length > 0) setSelectedResultTab(multiDay.dayEvents[0].tournament_code || multiDay.dayEvents[0].event_id || 'combined');
-    else setSelectedResultTab('combined');
+    const dayEvents = multiDay.dayEvents || [];
+    const isMultiDay = dayEvents.length > 1;
+    
+    // For multi-day tournaments, default to first day
+    // For single-day tournaments, default to "Final" (only tab available)
+    if (isMultiDay && dayEvents.length > 0) {
+      setSelectedResultTab(dayEvents[0].tournament_code || dayEvents[0].event_id || 'combined');
+    } else {
+      setSelectedResultTab('combined');
+    }
   }, [multiDay?.dayEvents?.length]);
 
   // Debug: log multi-day data when it changes so we can verify Day1/Day2/Final
@@ -472,10 +477,17 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
   
   const renderResults = () => {
     // Use multi-day data from top-level hook to show Day tabs + Final combined
-    const tabs = [
-      ...((multiDay.dayEvents || []).map((d: any, i: number) => ({ key: d.tournament_code || d.event_id, label: `Day ${i + 1}`, date: d.event_date, isFinal: /final|overall|combined/i.test(String(d.tournament_name || '')) }))),
-      { key: 'combined', label: 'Final', isFinal: true }
-    ];
+    const dayEvents = multiDay.dayEvents || [];
+    const isMultiDay = dayEvents.length > 1;
+    
+    // For single-day tournaments, only show "Final" tab
+    // For multi-day tournaments, show "Day 1", "Day 2", etc. plus "Final"
+    const tabs = isMultiDay 
+      ? [
+          ...dayEvents.map((d: any, i: number) => ({ key: d.tournament_code || d.event_id, label: `Day ${i + 1}`, date: d.event_date, isFinal: false })),
+          { key: 'combined', label: 'Final', isFinal: true }
+        ]
+      : [{ key: 'combined', label: 'Final', isFinal: true }];
 
     const ResultsTable = ({ rows, combined }: { rows: any[]; combined?: boolean }) => {
       if (!rows || rows.length === 0) return <EmptyState icon="trophy" title={combined ? 'Final results pending' : 'Results pending'} message={combined ? 'Final combined results will appear once both days are available' : 'Results will be available after the day'} />;
