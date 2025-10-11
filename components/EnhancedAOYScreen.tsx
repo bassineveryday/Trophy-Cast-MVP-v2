@@ -11,6 +11,7 @@ import {
   Animated,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import { AOYStandingsRow } from '../lib/supabase';
 import { useAOYStandings } from '../lib/hooks/useQueries';
 import { ListSkeleton } from '../components/Skeleton';
@@ -28,6 +29,7 @@ interface StandingWithTrend extends AOYStandingsRow {
 }
 
 export default function EnhancedAOYScreen() {
+  const navigation = useNavigation();
   const { data: standings = [], isLoading, error, refetch, isRefetching } = useAOYStandings();
   const [filters, setFilters] = useState<FilterOptions>({
     search: '',
@@ -221,7 +223,7 @@ export default function EnhancedAOYScreen() {
               </View>
             </View>
 
-            <TouchableOpacity style={styles.actionButton}>
+            <TouchableOpacity style={styles.actionButton} onPress={() => (navigation as any).navigate('Profile', { memberId: item.member_id })}>
               <Ionicons name="person-outline" size={18} color="#007bff" />
               <Text style={styles.actionButtonText}>View Member Profile</Text>
             </TouchableOpacity>

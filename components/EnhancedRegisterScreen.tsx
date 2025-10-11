@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Button, StyleSheet, Text, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import TopBar from '../components/TopBar';
 import { useAuth } from '../lib/AuthContext';
 import { showSuccess, showError, showWarning } from '../utils/toast';
 import Input from '../components/Input';
@@ -269,10 +270,7 @@ export default function EnhancedRegisterScreen() {
   if (authMode === 'login') {
     return (
       <ScrollView contentContainerStyle={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.title}>🏆 Trophy Cast</Text>
-          <Text style={styles.subtitle}>Welcome back to Denver Bassmasters</Text>
-        </View>
+        <TopBar title="Trophy Cast" subtitle="Welcome back to Denver Bassmasters" />
         
         <View style={styles.formContainer}>
           <Input
@@ -362,16 +360,7 @@ export default function EnhancedRegisterScreen() {
   if (step === 'credentials') {
     return (
       <ScrollView contentContainerStyle={styles.container}>
-        <View style={styles.header}>
-          <TouchableOpacity 
-            style={styles.backButton}
-            onPress={() => setAuthMode('login')}
-          >
-            <Ionicons name="arrow-back" size={24} color="#007bff" />
-          </TouchableOpacity>
-          <Text style={styles.title}>Create Account</Text>
-          <Text style={styles.subtitle}>Step 1 of 2: Account Credentials</Text>
-        </View>
+        <TopBar showBack title="Create Account" subtitle="Step 1 of 2: Account Credentials" />
         
         <View style={styles.formContainer}>
           <Input

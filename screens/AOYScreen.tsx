@@ -10,6 +10,7 @@ import {
 import { AOYStandingsRow } from '../lib/supabase';
 import { useAOYStandings } from '../lib/hooks/useQueries';
 import EmptyState from '../components/EmptyState';
+import TopBar from '../components/TopBar';
 
 export default function AOYScreen() {
   const { data: standings = [], isLoading, error, refetch, isRefetching } = useAOYStandings();
@@ -70,10 +71,7 @@ export default function AOYScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>🏆 Angler of the Year</Text>
-        <Text style={styles.subtitle}>Current Season Standings</Text>
-      </View>
+      <TopBar title="Angler of the Year" subtitle="Current Season Standings" />
 
       <FlatList
         data={standings}

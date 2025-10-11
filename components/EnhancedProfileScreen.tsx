@@ -15,6 +15,7 @@ import { useAOYStandings, useTournaments } from '../lib/hooks/useQueries';
 import { TournamentEvent, AOYStandingsRow } from '../lib/supabase';
 import DatabaseStatusScreen from '../components/DatabaseStatusScreen';
 import { ListSkeleton } from '../components/Skeleton';
+import TopBar from '../components/TopBar';
 
 interface Achievement {
   id: string;
@@ -149,13 +150,7 @@ export default function EnhancedProfileScreen() {
   if (showDatabaseStatus) {
     return (
       <View style={styles.container}>
-        <TouchableOpacity 
-          style={styles.backButton}
-          onPress={() => setShowDatabaseStatus(false)}
-        >
-          <Ionicons name="arrow-back" size={24} color="#007bff" />
-          <Text style={styles.backButtonText}>Back to Profile</Text>
-        </TouchableOpacity>
+           <TopBar showBack title="Profile" />
         <DatabaseStatusScreen />
       </View>
     );

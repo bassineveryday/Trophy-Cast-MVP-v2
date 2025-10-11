@@ -2,32 +2,14 @@ import React from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Image, Linking, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import officersData from '../assets/imports/dbm-officers.json';
+import localOfficers from '../assets/imports/dbm-officers.local';
+import TopBar from '../components/TopBar';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import RulesDisplay from '../components/RulesDisplay';
 
-// Use a simple array of officers instead of fetching from database initially
-const officers = [
-  {
-    name: 'Tai Hunt',
-    position: 'Secretary',
-    email: 'secretary@denverbassmasters.com',
-  },
-  {
-    name: 'John Smith',
-    position: 'President',
-    email: 'president@denverbassmasters.com',
-  },
-  {
-    name: 'Jane Doe',
-    position: 'Vice President',
-    email: 'vp@denverbassmasters.com',
-  },
-  {
-    name: 'Bob Johnson',
-    position: 'Treasurer',
-    email: 'treasurer@denverbassmasters.com',
-  }
-];
+// Prefer local bundled officers (with images) when available; fall back to scraped JSON
+const officers = (localOfficers as any[])?.length ? (localOfficers as any[]) : (officersData as any[]) || [];
 
 const ClubScreen = () => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
@@ -36,13 +18,7 @@ const ClubScreen = () => {
   if (showRules) {
     return (
       <View style={styles.container}>
-        <TouchableOpacity 
-          style={styles.backButton}
-          onPress={() => setShowRules(false)}
-        >
-          <Ionicons name="arrow-back" size={24} color="#003366" />
-          <Text style={styles.backButtonText}>Back to Club</Text>
-        </TouchableOpacity>
+        <TopBar showBack title="Tournament Rules" />
         <RulesDisplay />
       </View>
     );
@@ -96,23 +72,50 @@ const ClubScreen = () => {
         <Text style={styles.cardTitle}>Club Officers</Text>
         {officers.map((officer, index) => (
           <View key={index} style={styles.officerCard}>
-            <Text style={styles.officerRole}>{officer.position}</Text>
-            <Text style={styles.officerName}>{officer.name || 'TBA'}</Text>
-            {officer.email && (
-              <Text style={styles.officerContact}>{officer.email}</Text>
-            )}
+            <View style={styles.officerRow}>
+              {officer.image ? (
+                // local require() image
+                <Image source={officer.image} style={styles.officerAvatar} />
+              ) : officer.imageUrl ? (
+                <Image source={{ uri: officer.imageUrl }} style={styles.officerAvatar} />
+              ) : null}
+              <View style={styles.officerMeta}>
+                <Text style={styles.officerRole}>{officer.role}</Text>
+                <Text style={styles.officerName}>{officer.name || 'TBA'}</Text>
+                {officer.phone && <Text style={styles.officerContact}>{officer.phone}</Text>}
+                {officer.email && (
+                  <TouchableOpacity onPress={() => Linking.openURL(`mailto:${officer.email}`)} accessible accessibilityRole="button" accessibilityLabel={`Email ${officer.name}`}>
+                    <Text style={styles.officerContact}>{officer.email}</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            </View>
           </View>
         ))}
       </View>
 
       {/* Contact Section */}
             <View style={styles.card}>
-        <Text style={styles.cardTitle}>Contact Us</Text>
-        <Text style={styles.cardContent}>Email: info@denverbassmasters.com</Text>
-        <Text style={styles.cardContent}>Website: www.denverbassmasters.com</Text>
-        <Text style={styles.cardContent}>Meeting: First Thursday of each month at 7:00 PM</Text>
-        <Text style={styles.cardContent}>Location: Gander Mountain, 9923 Grant St, Thornton, CO</Text>
-      </View>
+              <Text style={styles.cardTitle}>Contact Us</Text>
+              <TouchableOpacity onPress={() => Linking.openURL('mailto:info@denverbassmasters.com')} accessible accessibilityRole="button" accessibilityLabel="Email the club">
+                <Text style={styles.cardContent}>Email: info@denverbassmasters.com</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={() => Linking.openURL('https://www.denverbassmasters.com')} accessible accessibilityRole="link" accessibilityLabel="Open club website">
+                <Text style={[styles.cardContent, styles.websiteLink]}>Website: www.denverbassmasters.com</Text>
+              </TouchableOpacity>
+
+              <Text style={styles.cardContent}>Meeting: First Thursday of each month at 7:00 PM</Text>
+
+              <TouchableOpacity onPress={() => {
+                const url = Platform.OS === 'ios'
+                  ? 'maps:0,0?q=Gander Mountain, 9923 Grant St, Thornton, CO'
+                  : 'https://maps.google.com/?q=Gander Mountain, 9923 Grant St, Thornton, CO';
+                Linking.openURL(url);
+              }} accessible accessibilityRole="button" accessibilityLabel="Open club location in maps">
+                <Text style={styles.cardContent}>Location: Gander Mountain, 9923 Grant St, Thornton, CO</Text>
+              </TouchableOpacity>
+            </View>
     </ScrollView>
   );
 };
@@ -227,6 +230,20 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#0066cc',
     marginTop: 4,
+  },
+  officerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  officerAvatar: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    marginRight: 12,
+    backgroundColor: '#eee',
+  },
+  officerMeta: {
+    flex: 1,
   },
 });
 

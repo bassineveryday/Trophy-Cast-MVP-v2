@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, Button } from 'react-native';
 import { supabase } from '../lib/supabase';
+import { useNavigation } from '@react-navigation/native';
+import TopBar from '../components/TopBar';
 
 interface Tournament {
   tournament_id: string;
@@ -14,6 +16,7 @@ interface Tournament {
 type FilterType = 'upcoming' | 'past';
 
 export default function TournamentsListScreen() {
+  const navigation = useNavigation();
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<FilterType>('upcoming');
@@ -40,7 +43,7 @@ export default function TournamentsListScreen() {
   };
 
   const renderTournament = ({ item }: { item: Tournament }) => (
-    <TouchableOpacity style={styles.card}>
+    <TouchableOpacity style={styles.card} onPress={() => (navigation as any).navigate('TournamentDetail', { tournamentId: item.tournament_id })} activeOpacity={0.8} accessible accessibilityRole="button" accessibilityLabel={`Open ${item.name} details`}>
       <Text style={styles.title}>{item.name}</Text>
       <Text style={styles.lake}>Lake: {item.lake}</Text>
       <Text style={styles.date}>Date: {item.event_date}</Text>
@@ -50,6 +53,7 @@ export default function TournamentsListScreen() {
 
   return (
     <View style={styles.container}>
+      <TopBar title="Tournaments" subtitle="Browse and register" />
       <View style={styles.filterRow}>
         <Button
           title="Upcoming"

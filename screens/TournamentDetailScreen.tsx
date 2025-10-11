@@ -9,13 +9,15 @@ import {
   Alert,
   Share,
   Linking,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRoute, useNavigation } from '@react-navigation/native';
-import { useTournaments, useAOYStandings } from '../lib/hooks/useQueries';
+import { useTournaments, useAOYStandings, useTournamentResults } from '../lib/hooks/useQueries';
 import { supabase } from '../lib/supabase';
 import { showSuccess, showError } from '../utils/toast';
 import EmptyState from '../components/EmptyState';
+import TopBar from '../components/TopBar';
 
 interface TournamentDetailScreenProps {
   route: {
@@ -47,6 +49,9 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
   const [isRegistered, setIsRegistered] = useState(false);
   
   const tournament = tournaments?.find(t => t.event_id === tournamentId);
+
+  // Fetch results for this tournament (event id is tournamentId)
+  const { data: resultsData, isLoading: resultsLoading, error: resultsError } = useTournamentResults(tournamentId);
   
   useEffect(() => {
     if (tournament) {
@@ -294,59 +299,146 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
   const renderParticipants = () => (
     <View style={styles.tabContent}>
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Registered Participants</Text>
-        <Text style={styles.participantCount}>{participants.length} registered</Text>
+        <Text style={styles.sectionTitle}>Participants</Text>
+        <Text style={styles.participantCount}>{(resultsData?.length ?? participants.length) + ' participated'}</Text>
       </View>
-      
-      {participants.length === 0 ? (
-        <EmptyState
-          icon="people"
-          title="No Participants Yet"
-          message="Be the first to register for this tournament!"
-        />
-      ) : (
+
+      {/* If results exist, prefer showing everyone who "fishied" (had results rows) */}
+      {resultsLoading && <ActivityIndicator accessibilityLabel="participants-loading" />}
+
+      {resultsError && (
+        <View style={{ padding: 8 }}>
+          <Text accessibilityRole="alert">Error loading participants</Text>
+        </View>
+      )}
+
+      {!resultsLoading && resultsData && resultsData.length > 0 ? (
         <View style={styles.participantsList}>
-          {participants.map((participant, index) => (
-            <View key={participant.id} style={styles.participantCard}>
+          {resultsData.map((r: any, index: number) => (
+            <TouchableOpacity key={r.id} style={styles.participantCard} accessibilityRole="button" onPress={() => { /* future: navigate to profile */ }}>
               <View style={styles.participantInfo}>
                 <View style={styles.participantHeader}>
-                  <Text style={styles.participantName}>{participant.member_name}</Text>
-                  <View style={[styles.participantStatusBadge, { 
-                    backgroundColor: participant.status === 'confirmed' ? '#4CAF50' : 
-                                   participant.status === 'pending' ? '#FF9800' : '#757575'
-                  }]}>
-                    <Text style={styles.participantStatusText}>
-                      {participant.status.toUpperCase()}
-                    </Text>
+                  <Text style={styles.participantName}>{r.member_name || r.member_id}</Text>
+                  <View style={[styles.participantStatusBadge, { backgroundColor: '#4CAF50' }]}>
+                    <Text style={styles.participantStatusText}>{(r.place ? `#${r.place}` : '—')}</Text>
                   </View>
                 </View>
-                
-                <Text style={styles.registrationDate}>
-                  Registered: {new Date(participant.registration_date).toLocaleDateString()}
-                </Text>
+
+                <Text style={styles.registrationDate}>{r.boat_name ? r.boat_name : ''}</Text>
+                <Text style={{ fontSize: 14, color: '#666' }}>{r.weight_lbs ? `${r.weight_lbs} lb` : ''} {r.payout ? ` • $${r.payout}` : ''}</Text>
+                { (r.big_fish || r.big_bass) ? <Text style={{ color: '#b8860b', marginTop: 6 }}>Big Bass</Text> : null }
               </View>
-              
-              <Text style={styles.participantNumber}>#{index + 1}</Text>
-            </View>
+
+              <Text style={styles.participantNumber}>{index + 1}</Text>
+            </TouchableOpacity>
           ))}
         </View>
+      ) : (
+        // Fall back to registered participants list (if any)
+        (participants.length === 0 ? (
+          <EmptyState
+            icon="people"
+            title="No Participants Yet"
+            message="Be the first to register for this tournament!"
+          />
+        ) : (
+          <View style={styles.participantsList}>
+            {participants.map((participant, index) => (
+              <View key={participant.id} style={styles.participantCard}>
+                <View style={styles.participantInfo}>
+                  <View style={styles.participantHeader}>
+                    <Text style={styles.participantName}>{participant.member_name}</Text>
+                    <View style={[styles.participantStatusBadge, { 
+                      backgroundColor: participant.status === 'confirmed' ? '#4CAF50' : 
+                                     participant.status === 'pending' ? '#FF9800' : '#757575'
+                    }]}>
+                      <Text style={styles.participantStatusText}>
+                        {participant.status.toUpperCase()}
+                      </Text>
+                    </View>
+                  </View>
+                  
+                  <Text style={styles.registrationDate}>
+                    Registered: {new Date(participant.registration_date).toLocaleDateString()}
+                  </Text>
+                </View>
+                
+                <Text style={styles.participantNumber}>#{index + 1}</Text>
+              </View>
+            ))}
+          </View>
+        ))
       )}
     </View>
   );
   
-  const renderResults = () => (
-    <View style={styles.tabContent}>
-      <Text style={styles.sectionTitle}>Tournament Results</Text>
-      
-      <EmptyState
-        icon="trophy"
-        title="Results Pending"
-        message={getStatusText(tournament?.event_date || null) === 'Completed' ? 
-          "Results are being finalized..." : 
-          "Results will be available after the tournament"}
-      />
-    </View>
-  );
+  const renderResults = () => {
+    return (
+      <View style={styles.tabContent}>
+        <Text style={styles.sectionTitle}>Tournament Results</Text>
+
+        {resultsLoading && <ActivityIndicator accessibilityLabel="results-loading" />}
+
+        {resultsError && (
+          <View style={{ padding: 8 }}>
+            <Text accessibilityRole="alert">Error loading results</Text>
+          </View>
+        )}
+
+        {!resultsLoading && (!resultsData || resultsData.length === 0) && (
+          <EmptyState
+            icon="trophy"
+            title="Results Pending"
+            message={getStatusText(tournament?.event_date || null) === 'Completed' ? 
+              "Results are being finalized..." : 
+              "Results will be available after the tournament"}
+          />
+        )}
+
+        {!resultsLoading && resultsData && resultsData.length > 0 && (
+          <ScrollView accessibilityLabel="results-list" style={{ marginTop: 8 }}>
+            {resultsData.map((r: any) => {
+              const isBigBass = !!r.big_fish || !!r.big_bass;
+              return (
+                <TouchableOpacity
+                  key={r.id}
+                  accessibilityRole="button"
+                  accessibilityLabel={`result-${r.place}-${r.member_name || r.member_id}`}
+                  onPress={() => {
+                    // Future: navigate to member profile
+                  }}
+                  style={{
+                    padding: 12,
+                    marginVertical: 6,
+                    backgroundColor: '#fff',
+                    borderRadius: 8,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    elevation: 1,
+                  }}
+                >
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <Text style={{ fontWeight: '700', width: 40 }}>{r.place || '-'}</Text>
+                    <View>
+                      <Text style={{ fontWeight: '600' }}>{r.member_name || r.member_id}</Text>
+                      {r.boat_name ? <Text style={{ color: '#666' }}>{r.boat_name}</Text> : null}
+                    </View>
+                  </View>
+
+                  <View style={{ alignItems: 'flex-end' }}>
+                    <Text>{r.weight_lbs ? `${r.weight_lbs} lb` : '-'}</Text>
+                    <Text>{r.payout ? `$${r.payout}` : ''}</Text>
+                    {isBigBass && <Text accessibilityLabel="big-bass" style={{ color: '#b8860b' }}>Big Bass</Text>}
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        )}
+      </View>
+    );
+  };
   
   if (!tournament) {
     return (
@@ -363,20 +455,7 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.backButton} 
-          onPress={() => navigation.goBack()}
-        >
-          <Ionicons name="arrow-back" size={24} color="#333" />
-        </TouchableOpacity>
-        
-        <Text style={styles.headerTitle}>Tournament Details</Text>
-        
-        <TouchableOpacity style={styles.shareHeaderButton} onPress={handleShare}>
-          <Ionicons name="share-outline" size={24} color="#333" />
-        </TouchableOpacity>
-      </View>
+      <TopBar showBack title={tournament?.tournament_name || 'Tournament Details'} rightAction={{ icon: 'share-outline', onPress: handleShare, accessibilityLabel: 'Share tournament' }} />
       
       {/* Tab Navigation */}
       <View style={styles.tabNavigation}>

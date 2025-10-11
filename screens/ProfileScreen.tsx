@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, Button, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import TopBar from '../components/TopBar';
 import { useAuth } from '../lib/AuthContext';
 import DatabaseStatusScreen from '../components/DatabaseStatusScreen';
 import ComprehensiveMemberProfile from './ComprehensiveMemberProfile';
@@ -12,13 +13,7 @@ export default function ProfileScreen() {
   if (showDatabaseStatus) {
     return (
       <View style={styles.container}>
-        <TouchableOpacity 
-          style={styles.backButton}
-          onPress={() => setShowDatabaseStatus(false)}
-        >
-          <Ionicons name="arrow-back" size={24} color="#007bff" />
-          <Text style={styles.backButtonText}>Back to Profile</Text>
-        </TouchableOpacity>
+        <TopBar showBack title="Profile" />
         <DatabaseStatusScreen />
       </View>
     );

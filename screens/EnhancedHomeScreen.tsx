@@ -14,9 +14,10 @@ import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../lib/AuthContext';
 import { useTheme } from '../lib/ThemeContext';
 import { useDashboard, useTournaments, useAOYStandings } from '../lib/hooks/useQueries';
-import { DashboardSkeleton } from '../components/Skeleton';
+import Skeleton, { DashboardSkeleton, CardSkeleton } from '../components/Skeleton';
 import AnimatedCard from '../components/AnimatedCard';
 import ThemeToggle from '../components/ThemeToggle';
+import { showSuccess } from '../utils/toast';
 
 const { width } = Dimensions.get('window');
 
@@ -115,6 +116,47 @@ export default function EnhancedHomeScreen() {
       description: 'Denver BM'
     }
   ];
+
+  // Helper: try to match a dashboard tournament object to an event in the tournaments list
+  const findEventId = (t: { tournament_name?: string; event_date?: string; lake?: string } | null) => {
+    if (!t || !tournaments || tournaments.length === 0) return null;
+    return (
+      tournaments.find((ev: any) => {
+        if (!ev) return false;
+        // match by name and date if possible
+        const sameName = ev.tournament_name && t.tournament_name && ev.tournament_name.trim().toLowerCase() === t.tournament_name.trim().toLowerCase();
+        const sameDate = ev.event_date && t.event_date && new Date(ev.event_date).toISOString().slice(0,10) === new Date(t.event_date || '').toISOString().slice(0,10);
+        const sameLake = ev.lake && t.lake && ev.lake.trim().toLowerCase() === t.lake.trim().toLowerCase();
+        return (sameName && (sameDate || sameLake)) || sameName;
+      }) || null
+    )?.event_id || null;
+  };
+
+  const handleStatPress = (target: 'aoy' | 'points' | 'earnings') => {
+    if (target === 'aoy' || target === 'points') {
+      (navigation as any).navigate('AOY');
+    } else if (target === 'earnings') {
+      (navigation as any).navigate('Profile');
+    }
+  };
+
+  const handlePerformancePress = () => {
+    const eventId = findEventId(lastTournament as any);
+    if (eventId) {
+      (navigation as any).navigate('TournamentDetail', { tournamentId: eventId });
+    } else {
+      (navigation as any).navigate('Tournaments');
+    }
+  };
+
+  const handleUpcomingPress = () => {
+    const eventId = findEventId(nextTournament as any);
+    if (eventId) {
+      (navigation as any).navigate('TournamentDetail', { tournamentId: eventId });
+    } else {
+      (navigation as any).navigate('Tournaments');
+    }
+  };
 
   const onRefresh = () => {
     refetch();
@@ -224,12 +266,22 @@ export default function EnhancedHomeScreen() {
     >
       {/* Header Section */}
       <View style={[styles.headerContainer, { backgroundColor: theme.surface }]}>
-        <View style={styles.welcomeSection}>
-          <Text style={[styles.headerTitle, { color: theme.text }]}>Welcome back!</Text>
-          <Text style={[styles.headerSubtitle, { color: theme.textSecondary }]}>
-            {profile?.name || user?.email?.split('@')[0] || 'Angler'}
-          </Text>
-        </View>
+          <View style={styles.welcomeSection}>
+            {/* show skeletons while refreshing for perceived performance */}
+            {isRefetching ? (
+              <>
+                <Skeleton width={180} height={28} borderRadius={6} />
+                <Skeleton width={120} height={18} borderRadius={6} style={{ marginTop: 8 }} />
+              </>
+            ) : (
+              <>
+                <Text style={[styles.headerTitle, { color: theme.text }]}>Welcome back!</Text>
+                <Text style={[styles.headerSubtitle, { color: theme.textSecondary }]}>
+                  {profile?.name || user?.email?.split('@')[0] || 'Angler'}
+                </Text>
+              </>
+            )}
+          </View>
         <View style={styles.headerActions}>
           <ThemeToggle compact />
           <View style={[styles.memberBadge, { backgroundColor: theme.background, borderColor: theme.border }]}>
@@ -241,42 +293,83 @@ export default function EnhancedHomeScreen() {
 
       {/* Quick Stats Overview */}
       <View style={styles.statsOverview}>
-        <View style={styles.statCard}>
-          <View style={styles.statIconContainer}>
-            <Ionicons name="trophy" size={24} color="#FFD700" />
-          </View>
-          <Text style={styles.statLabel}>AOY Rank</Text>
-          <Text style={styles.statValue}>
-            {aoy?.aoy_rank ? `#${aoy.aoy_rank}` : 'N/A'}
-          </Text>
-          {aoy?.aoy_rank && (
-            <Text style={styles.statSuffix}>
-              {getRankSuffix(aoy.aoy_rank)}
-            </Text>
-          )}
-        </View>
+        {isRefetching ? (
+          // show three lightweight skeleton stat cards while refreshing
+          <>
+            <View style={styles.statCard}>
+              <Skeleton width={80} height={14} />
+              <Skeleton width={90} height={26} style={{ marginTop: 12 }} />
+            </View>
+            <View style={styles.statCard}>
+              <Skeleton width={80} height={14} />
+              <Skeleton width={90} height={26} style={{ marginTop: 12 }} />
+            </View>
+            <View style={styles.statCard}>
+              <Skeleton width={80} height={14} />
+              <Skeleton width={90} height={26} style={{ marginTop: 12 }} />
+            </View>
+          </>
+        ) : (
+          <>
+            <TouchableOpacity
+              style={styles.statCard}
+              activeOpacity={0.85}
+              onPress={() => handleStatPress('aoy')}
+              accessible
+              accessibilityRole="button"
+              accessibilityLabel={aoy?.aoy_rank ? `AOY rank ${aoy.aoy_rank}` : 'AOY rank not available'}
+            >
+              <View style={styles.statIconContainer}>
+                <Ionicons name="trophy" size={24} color="#FFD700" />
+              </View>
+              <Text style={styles.statLabel}>AOY Rank</Text>
+              <Text style={styles.statValue}>
+                {aoy?.aoy_rank ? `#${aoy.aoy_rank}` : 'N/A'}
+              </Text>
+              {aoy?.aoy_rank && (
+                <Text style={styles.statSuffix}>
+                  {getRankSuffix(aoy.aoy_rank)}
+                </Text>
+              )}
+            </TouchableOpacity>
 
-        <View style={styles.statCard}>
-          <View style={styles.statIconContainer}>
-            <Ionicons name="star" size={24} color="#4CAF50" />
-          </View>
-          <Text style={styles.statLabel}>Points</Text>
-          <Text style={styles.statValue}>
-            {aoy?.total_aoy_points || '0'}
-          </Text>
-          <Text style={styles.statSuffix}>pts</Text>
-        </View>
+            <TouchableOpacity
+              style={styles.statCard}
+              activeOpacity={0.85}
+              onPress={() => handleStatPress('points')}
+              accessible
+              accessibilityRole="button"
+              accessibilityLabel={`Total points ${aoy?.total_aoy_points || 0}`}
+            >
+              <View style={styles.statIconContainer}>
+                <Ionicons name="star" size={24} color="#4CAF50" />
+              </View>
+              <Text style={styles.statLabel}>Points</Text>
+              <Text style={styles.statValue}>
+                {aoy?.total_aoy_points || '0'}
+              </Text>
+              <Text style={styles.statSuffix}>pts</Text>
+            </TouchableOpacity>
 
-        <View style={styles.statCard}>
-          <View style={styles.statIconContainer}>
-            <Ionicons name="cash" size={24} color="#2196F3" />
-          </View>
-          <Text style={styles.statLabel}>Earnings</Text>
-          <Text style={styles.statValue}>
-            ${earningsNumber.toFixed(0)}
-          </Text>
-          <Text style={styles.statSuffix}>2025</Text>
-        </View>
+            <TouchableOpacity
+              style={styles.statCard}
+              activeOpacity={0.85}
+              onPress={() => handleStatPress('earnings')}
+              accessible
+              accessibilityRole="button"
+              accessibilityLabel={`Earnings ${earningsNumber.toFixed(0)} dollars`}
+            >
+              <View style={styles.statIconContainer}>
+                <Ionicons name="cash" size={24} color="#2196F3" />
+              </View>
+              <Text style={styles.statLabel}>Earnings</Text>
+              <Text style={styles.statValue}>
+                ${earningsNumber.toFixed(0)}
+              </Text>
+              <Text style={styles.statSuffix}>2025</Text>
+            </TouchableOpacity>
+          </>
+        )}
       </View>
 
       {/* Quick Actions */}
@@ -289,9 +382,12 @@ export default function EnhancedHomeScreen() {
               style={styles.actionCard}
               onPress={() => handleQuickAction(action)}
               activeOpacity={0.7}
+              accessible={true}
+              accessibilityRole="button"
+              accessibilityLabel={`${action.title} - ${action.description}`}
             >
               <View style={[styles.actionIcon, { backgroundColor: action.color }]}>
-                <Ionicons name={action.icon as any} size={24} color="#fff" />
+                <Ionicons name={action.icon as any} size={24} color="#fff" accessibilityLabel={`${action.title} icon`} />
               </View>
               <Text style={styles.actionTitle}>{action.title}</Text>
               <Text style={styles.actionDescription}>{action.description}</Text>
@@ -303,7 +399,8 @@ export default function EnhancedHomeScreen() {
       {/* Recent Tournament Performance */}
       <View style={styles.sectionContainer}>
         <Text style={styles.sectionTitle}>Recent Performance</Text>
-        <AnimatedCard style={styles.performanceCard}>
+        <TouchableOpacity onPress={handlePerformancePress} activeOpacity={0.9} accessible accessibilityRole="button" accessibilityLabel="Open last tournament details">
+          <AnimatedCard style={styles.performanceCard}>
           <View style={styles.cardHeader}>
             <View style={styles.cardTitleRow}>
               <Ionicons name="fish" size={20} color="#4CAF50" />
@@ -362,14 +459,16 @@ export default function EnhancedHomeScreen() {
               </Text>
             </View>
           )}
-        </AnimatedCard>
+          </AnimatedCard>
+        </TouchableOpacity>
       </View>
 
       {/* Upcoming Tournament */}
       {nextTournament && (
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionTitle}>Coming Up</Text>
-          <AnimatedCard style={styles.upcomingCard}>
+          <TouchableOpacity onPress={handleUpcomingPress} activeOpacity={0.9} accessible accessibilityRole="button" accessibilityLabel={`Open details for ${nextTournament.tournament_name}`}>
+            <AnimatedCard style={styles.upcomingCard}>
             <View style={styles.cardHeader}>
               <View style={styles.cardTitleRow}>
                 <Ionicons name="calendar" size={20} color="#FF9800" />
@@ -388,11 +487,21 @@ export default function EnhancedHomeScreen() {
               </Text>
             </View>
             
-            <TouchableOpacity style={styles.registerButton}>
+            <TouchableOpacity
+              style={styles.registerButton}
+              accessible={true}
+              accessibilityRole="button"
+              accessibilityLabel={`Register for ${nextTournament.tournament_name} on ${formatDate(nextTournament.event_date)}`}
+              onPress={() => {
+                // placeholder for registration flow; show success feedback for now
+                showSuccess('Registered', `You are registered for ${nextTournament.tournament_name}`);
+              }}
+            >
               <Ionicons name="add-circle" size={18} color="#fff" />
               <Text style={styles.registerButtonText}>Register Now</Text>
             </TouchableOpacity>
-          </AnimatedCard>
+            </AnimatedCard>
+          </TouchableOpacity>
         </View>
       )}
 

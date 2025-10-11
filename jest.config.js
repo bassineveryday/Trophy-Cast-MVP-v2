@@ -14,12 +14,17 @@ module.exports = {
   
   // Transform node_modules for React Native
   transformIgnorePatterns: [
-    'node_modules/(?!(react-native|@react-native|@react-navigation|expo|@expo|@supabase|react-native-toast-message)/)',
+    'node_modules/(?!(react-native|@react-native|@react-navigation|expo|@expo|@supabase|react-native-toast-message|expo-font|@expo/vector-icons)/)'
   ],
   
   // Module name mapper for assets and styles
   moduleNameMapper: {
     '\\.(jpg|jpeg|png|gif|svg)$': '<rootDir>/__mocks__/fileMock.js',
+    '^@expo/vector-icons$': '<rootDir>/__mocks__/vectorIconsMock.js',
+    '^@expo/vector-icons/(.*)$': '<rootDir>/__mocks__/vectorIconsMock.js',
+    '^expo-font$': '<rootDir>/__mocks__/fileMock.js',
+    '^expo-modules-core$': '<rootDir>/__mocks__/fileMock.js',
+    '^@react-native-async-storage/async-storage$': '<rootDir>/__mocks__/fileMock.js',
   },
   
   // Coverage configuration

@@ -172,3 +172,23 @@ export function useMemberResults(memberCode: string | undefined) {
   });
 }
 
+// Fetch all results for a specific tournament event (by event_id)
+export function useTournamentResults(eventId: string | undefined) {
+  return useQuery({
+    queryKey: ['tournament-results-by-event', eventId || ''],
+    queryFn: async () => {
+      if (!eventId) throw new Error('No eventId provided');
+
+      const { data, error } = await supabase
+        .from('tournament_results')
+        .select('*')
+        .eq('event_id', eventId)
+        .order('place', { ascending: true, nullsFirst: false });
+
+      if (error) throw error;
+      return (data || []) as any[];
+    },
+    enabled: !!eventId,
+  });
+}
+

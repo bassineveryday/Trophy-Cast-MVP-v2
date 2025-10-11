@@ -10,7 +10,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { useAuth } from '../lib/AuthContext';
 import { useTheme, createThemedStyles } from '../lib/ThemeContext';
 import { useTournaments, useAOYStandings } from '../lib/hooks/useQueries';
@@ -65,6 +65,8 @@ interface RecentTournament {
 const ComprehensiveMemberProfile: React.FC = () => {
   const navigation = useNavigation();
   const { user, profile } = useAuth();
+  const route = useRoute();
+  const routeMemberId = (route.params as any)?.memberId as string | undefined;
   const { theme, isDark } = useTheme();
   const { data: tournaments } = useTournaments();
   const { data: standings } = useAOYStandings();
@@ -78,10 +80,12 @@ const ComprehensiveMemberProfile: React.FC = () => {
 
   useEffect(() => {
     loadProfileData();
-  }, [profile?.member_code]);
+  }, [profile?.member_code, routeMemberId]);
 
   const loadProfileData = async () => {
-    if (!profile?.member_code) return;
+  // If a route param memberId is provided, prefer that (viewing another member)
+  const memberCodeToUse = routeMemberId || profile?.member_code;
+  if (!memberCodeToUse) return;
     
     setLoading(true);
     try {
@@ -89,8 +93,8 @@ const ComprehensiveMemberProfile: React.FC = () => {
       // In production, this would query Supabase with the SQL you provided
       
       const mockProfile: MemberProfile = {
-        member_id: profile.member_code,
-        name: profile.name || 'Tai Hunt',
+        member_id: memberCodeToUse,
+        name: profile?.name || 'Tai Hunt',
         role: 'DBM Secretary',
         member_since: 'Oct 2025',
         hometown: 'Denver, CO',
@@ -208,6 +212,25 @@ const ComprehensiveMemberProfile: React.FC = () => {
   };
 
   const styles = createStyles(theme);
+
+  const findEventId = (t: { tournament_name?: string; event_date?: string; lake?: string } | null) => {
+    if (!t || !tournaments || tournaments.length === 0) return null;
+    return (
+      tournaments.find((ev: any) => {
+        if (!ev) return false;
+        const sameName = ev.tournament_name && t.tournament_name && ev.tournament_name.trim().toLowerCase() === t.tournament_name.trim().toLowerCase();
+        const sameDate = ev.event_date && t.event_date && new Date(ev.event_date).toISOString().slice(0,10) === new Date(t.event_date || '').toISOString().slice(0,10);
+        const sameLake = ev.lake && t.lake && ev.lake.trim().toLowerCase() === t.lake.trim().toLowerCase();
+        return (sameName && (sameDate || sameLake)) || sameName;
+      }) || null
+    )?.event_id || null;
+  };
+
+  const handleRecentPress = (t: RecentTournament) => {
+    const id = findEventId(t as any);
+    if (id) (navigation as any).navigate('TournamentDetail', { tournamentId: id });
+    else (navigation as any).navigate('Tournaments');
+  };
 
   if (loading) {
     return (
@@ -413,7 +436,7 @@ const ComprehensiveMemberProfile: React.FC = () => {
         
         <View style={styles.recentForm}>
           {recentForm.map((tournament, index) => (
-            <View key={index} style={styles.tournamentRow}>
+            <TouchableOpacity key={index} style={styles.tournamentRow} onPress={() => handleRecentPress(tournament)} activeOpacity={0.8} accessible accessibilityRole="button" accessibilityLabel={`Open details for ${tournament.tournament_name}`}>
               <View style={styles.tournamentInfo}>
                 <Text style={styles.tournamentLake}>• {tournament.lake}:</Text>
                 <View style={styles.tournamentDetails}>
@@ -425,7 +448,7 @@ const ComprehensiveMemberProfile: React.FC = () => {
                   <Text style={styles.tournamentWeight}>• {tournament.total_weight.toFixed(1)} lbs</Text>
                 </View>
               </View>
-            </View>
+            </TouchableOpacity>
           ))}
           
           <View style={styles.trendContainer}>
@@ -447,7 +470,7 @@ const ComprehensiveMemberProfile: React.FC = () => {
             Cedar Bluff Reservoir – Oct 20, 2025 • 7:00 AM
           </Text>
           
-          <TouchableOpacity style={[styles.registerButton, { backgroundColor: theme.primary }]}>
+          <TouchableOpacity style={[styles.registerButton, { backgroundColor: theme.primary }]} onPress={() => (navigation as any).navigate('Tournaments')} accessible accessibilityRole="button" accessibilityLabel="Open tournaments to register"> 
             <Text style={styles.registerButtonText}>Register Now →</Text>
           </TouchableOpacity>
         </View>
