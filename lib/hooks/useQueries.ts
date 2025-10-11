@@ -14,6 +14,16 @@ function toNumber(value: any, defaultValue: number = 0): number {
   return Number.isFinite(n) ? n : defaultValue;
 }
 
+// Normalize member names for robust matching (trim, lowercase, unicode normalize)
+function normalizeName(n: any) {
+  if (n == null) return '';
+  try {
+    return String(n).normalize('NFKC').trim().toLowerCase();
+  } catch (e) {
+    return String(n).trim().toLowerCase();
+  }
+}
+
 // Centralized query key management
 export const queryKeys = {
   aoyStandings: ['aoy-standings'] as const,
@@ -63,8 +73,10 @@ export function useDashboard(memberCode: string | undefined) {
       // Last tournament
       // DEBUG: log the memberCode used for the query to help diagnose caching / stale bundle issues
       // (dev-only; will show in browser console when this hook runs)
-      // eslint-disable-next-line no-console
-      console.log('🔍 DEBUG: Querying with memberCode:', memberCode);
+      if (__DEV__) {
+        // eslint-disable-next-line no-console
+        console.log('🔍 DEBUG: Querying with memberCode:', memberCode);
+      }
 
       const { data: lastRaw, error: lastError } = await supabase
         .from('tournament_results')
@@ -74,8 +86,10 @@ export function useDashboard(memberCode: string | undefined) {
         .limit(1)
         .maybeSingle();
 
-      // eslint-disable-next-line no-console
-      console.log('🔍 DEBUG: Query returned (lastTournament):', { lastRaw, lastError, memberCode });
+      if (__DEV__) {
+        // eslint-disable-next-line no-console
+        console.log('🔍 DEBUG: Query returned (lastTournament):', { lastRaw, lastError, memberCode });
+      }
 
       if (lastError) throw lastError;
 
@@ -244,6 +258,209 @@ export function useRecentTournamentResults(limit: number = 5) {
   });
 }
 
+// Multi-day aggregation: detect sibling day events (same base name and nearby dates), fetch per-day results and compute combined final
+export function useMultiDayTournamentResults(tournamentCode?: string) {
+  return useQuery({
+    queryKey: ['multi-day-results', tournamentCode || ''],
+    queryFn: async () => {
+      if (!tournamentCode) return { dayEvents: [], dayResults: {}, combined: [] };
+
+      // fetch base event row: try by tournament_code first, then by event_id
+      let eventRow: any = null;
+      const { data: byCode } = await supabase
+        .from('tournament_events')
+        .select('event_id, tournament_code, tournament_name, event_date, lake')
+        .eq('tournament_code', tournamentCode)
+        .maybeSingle();
+      if (byCode) eventRow = byCode;
+      else {
+        const { data: byId } = await supabase
+          .from('tournament_events')
+          .select('event_id, tournament_code, tournament_name, event_date, lake')
+          .eq('event_id', tournamentCode)
+          .maybeSingle();
+        if (byId) eventRow = byId;
+      }
+
+      const baseName = (eventRow?.tournament_name || tournamentCode || '').replace(/\b\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4}\b/g, '').trim();
+      const refDate = eventRow?.event_date ? new Date(eventRow.event_date) : new Date();
+      const from = new Date(refDate); from.setDate(refDate.getDate() - 3);
+      const to = new Date(refDate); to.setDate(refDate.getDate() + 3);
+
+      const { data: siblingEvents } = await supabase
+        .from('tournament_events')
+        .select('event_id, tournament_code, tournament_name, event_date, lake')
+        .ilike('tournament_name', `%${baseName}%`)
+        .gte('event_date', from.toISOString().slice(0,10))
+        .lte('event_date', to.toISOString().slice(0,10));
+
+      const dayEvents = (siblingEvents || []).sort((a: any, b: any) => new Date(a.event_date).getTime() - new Date(b.event_date).getTime());
+      const codes = (dayEvents.length ? dayEvents.map((d:any) => d.tournament_code) : [tournamentCode]).filter(Boolean);
+
+      // Fetch results matching any of the discovered tournament_code or event_id values.
+      // Build an OR expression covering both fields for each code/id.
+      let allRows: any[] | null = null;
+      if (codes.length) {
+        const orParts: string[] = codes.reduce((acc: string[], c: string) => {
+          acc.push(`tournament_code.eq.${c}`);
+          acc.push(`event_id.eq.${c}`);
+          return acc;
+        }, [] as string[]);
+        const orExpr = orParts.join(',');
+        const { data } = await supabase
+          .from('tournament_results')
+          .select('*')
+          .or(orExpr as string);
+        allRows = data;
+      } else {
+        allRows = [];
+      }
+
+      const dayResults: Record<string, any[]> = {};
+      codes.forEach((c: string) => dayResults[c] = []);
+      (allRows || []).forEach((r: any) => {
+        if (!r.tournament_code) return;
+        dayResults[r.tournament_code] = dayResults[r.tournament_code] || [];
+        dayResults[r.tournament_code].push(r);
+      });
+
+      const combinedMap = new Map<string, any>();
+      // First-pass: build entries, preferring member_id as key. If member_id missing, we'll try to merge by normalized name.
+      (allRows || []).forEach((r: any) => {
+        const norm = normalizeName(r.member_name);
+        // prefer member_id when present; otherwise use normalized name as temporary key
+        let id = r.member_id ? String(r.member_id) : norm || String(r.member_name || '');
+
+        // If a member_id row arrives after a name-only row for the same angler, merge the name-keyed entry into the member_id entry
+        if (r.member_id && norm) {
+          const memberKey = String(r.member_id);
+          const normKey = norm;
+          if (combinedMap.has(normKey) && normKey !== memberKey) {
+            const normEntry = combinedMap.get(normKey);
+            const memberEntry = combinedMap.get(memberKey) || { member_id: r.member_id, member_name: normEntry.member_name || r.member_name, total_weight: 0, total_aoy: 0, total_payout: 0, big_fish: 0, places: [] };
+            // merge normEntry into memberEntry
+            memberEntry.total_weight += Number(normEntry.total_weight || 0);
+            memberEntry.total_aoy += Number(normEntry.total_aoy || 0);
+            memberEntry.total_payout += Number(normEntry.total_payout || 0);
+            memberEntry.big_fish = Math.max(memberEntry.big_fish || 0, Number(normEntry.big_fish || 0));
+            memberEntry.places = Array.from(new Set([...(memberEntry.places || []), ...(normEntry.places || [])]));
+            combinedMap.set(memberKey, memberEntry);
+            combinedMap.delete(normKey);
+          }
+          id = memberKey;
+        }
+
+        // If we don't have member_id but an existing entry exists for the same normalized name under a different key (for example an entry keyed by member_id), merge into that key
+        if (!r.member_id && norm) {
+          for (const [k, v] of combinedMap) {
+            if (normalizeName(v.member_name) === norm && k !== norm) {
+              id = k;
+              break;
+            }
+          }
+        }
+
+        const existing = combinedMap.get(id) || { member_id: r.member_id || null, member_name: r.member_name, total_weight: 0, total_aoy: 0, total_payout: 0, big_fish: 0, places: [] };
+        // prefer a real member_id when available
+        if (!existing.member_id && r.member_id) existing.member_id = r.member_id;
+        existing.member_name = existing.member_name || r.member_name;
+        existing.total_weight += Number(r.weight_lbs || 0);
+        existing.total_aoy += Number(r.aoy_points || 0);
+        existing.total_payout += Number(r.payout || 0);
+        existing.big_fish = Math.max(existing.big_fish, Number(r.big_fish || 0));
+        if (r.place != null) existing.places.push(Number(r.place));
+        combinedMap.set(id, existing);
+      });
+
+      const combined = Array.from(combinedMap.values()).map((v: any) => ({
+        ...v,
+        best_place: v.places.length ? Math.min(...v.places) : null
+      }));
+
+      // sort using the shared helper so tests can reuse same logic
+      const { sortCombinedRows } = getMultiDayHelpers();
+      sortCombinedRows(combined);
+
+      return { dayEvents, dayResults, combined };
+    },
+    enabled: !!tournamentCode,
+  });
+}
+
+// Exportable helpers for aggregation and sorting so they can be unit tested
+export function getMultiDayHelpers() {
+  function sortCombinedRows(rows: any[]) {
+    rows.sort((a: any, b: any) => {
+      if ((b.total_weight || 0) !== (a.total_weight || 0)) return (b.total_weight || 0) - (a.total_weight || 0);
+      return (a.best_place || 999) - (b.best_place || 999);
+    });
+    return rows;
+  }
+
+  function aggregateDayRows(allRows: any[]) {
+    const combinedMap = new Map<string, any>();
+    (allRows || []).forEach((r: any) => {
+      const norm = normalizeName(r.member_name);
+      
+      // Always prefer member_id as the primary key when available
+      // If no member_id, use normalized name as fallback
+      let finalKey = r.member_id ? String(r.member_id) : (norm || String(r.member_name || ''));
+      
+      // Check if this person already exists in the map (by matching normalized name)
+      if (norm) {
+        for (const [existingKey, existingValue] of combinedMap) {
+          const existingNorm = normalizeName(existingValue.member_name);
+          if (existingNorm === norm) {
+            // Found a match! Now decide which key to use
+            const existingHasId = existingValue.member_id != null;
+            const currentHasId = r.member_id != null;
+            
+            if (currentHasId) {
+              // Current row has member_id - use it as the final key
+              if (existingKey !== String(r.member_id)) {
+                // Need to migrate: remove old key, we'll re-add with new key below
+                const migratedData = combinedMap.get(existingKey)!;
+                combinedMap.delete(existingKey);
+                finalKey = String(r.member_id);
+                // Update the migrated data with member_id
+                migratedData.member_id = r.member_id;
+                combinedMap.set(finalKey, migratedData);
+              } else {
+                finalKey = existingKey;
+              }
+            } else if (existingHasId) {
+              // Existing has member_id, current doesn't - use existing key
+              finalKey = existingKey;
+            } else {
+              // Neither has member_id - use whichever key exists
+              finalKey = existingKey;
+            }
+            break;
+          }
+        }
+      }
+      
+      const existing = combinedMap.get(finalKey) || { member_id: r.member_id || null, member_name: r.member_name, total_weight: 0, total_aoy: 0, total_payout: 0, big_fish: 0, places: [] };
+      if (!existing.member_id && r.member_id) existing.member_id = r.member_id;
+      existing.member_name = existing.member_name || r.member_name;
+      existing.total_weight += Number(r.weight_lbs || 0);
+      existing.total_aoy += Number(r.aoy_points || 0);
+      existing.total_payout += Number(r.payout || 0);
+      existing.big_fish = Math.max(existing.big_fish, Number(r.big_fish || 0));
+      if (r.place != null) existing.places.push(Number(r.place));
+      combinedMap.set(finalKey, existing);
+    });
+    const combined = Array.from(combinedMap.values()).map((v: any) => ({
+      ...v,
+      best_place: v.places.length ? Math.min(...v.places) : null
+    }));
+    sortCombinedRows(combined);
+    return combined;
+  }
+
+  return { sortCombinedRows, aggregateDayRows };
+}
+
 // Fetch participant counts for a batch of tournament codes (single query)
 // Accept an array of lookup keys (objects) that may contain tournament_code and/or event_id.
 // Returns a map where the key is either the tournament_code (preferred) or the event_id when code missing.
@@ -265,7 +482,8 @@ export function useParticipantCounts(lookups: Array<{ code?: string; eventId?: s
       const orExpr = orParts.join(',');
       const { data, error } = await supabase
         .from('tournament_results')
-        .select('tournament_code, event_id, member_id');
+        .select('tournament_code, event_id, member_id')
+        .or(orExpr as string);
 
       if (error) throw error;
 

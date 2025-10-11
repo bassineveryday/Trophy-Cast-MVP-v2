@@ -321,7 +321,7 @@ export default function EnhancedTournamentsScreen() {
         <FlatList
           data={filteredTournaments}
           renderItem={renderTournamentCard}
-          keyExtractor={(item) => item.tournament_code || `tournament-${Math.random()}`}
+          keyExtractor={(item) => item.event_id || item.tournament_code || `tournament-${Math.random()}`}
           refreshControl={
             <RefreshControl refreshing={isRefetching} onRefresh={handleRefresh} />
           }

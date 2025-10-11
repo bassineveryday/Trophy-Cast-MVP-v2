@@ -16,6 +16,7 @@ import { useRoute, useNavigation } from '@react-navigation/native';
 import { useTournaments, useAOYStandings, useTournamentResults, useTournamentParticipants } from '../lib/hooks/useQueries';
 import { supabase } from '../lib/supabase';
 import { showSuccess, showError } from '../utils/toast';
+import { useMultiDayTournamentResults } from '../lib/hooks/useQueries';
 import EmptyState from '../components/EmptyState';
 import TopBar from '../components/TopBar';
 
@@ -43,6 +44,7 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
   const { data: standings } = useAOYStandings();
   
   const [activeTab, setActiveTab] = useState<'overview' | 'participants' | 'results'>('overview');
+  const [selectedResultTab, setSelectedResultTab] = useState<string | null>(null);
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -53,35 +55,47 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
   // Prefer the normalized tournament code when available (matches tournament_results.tournament_code)
   const resolvedCode = tournament?.tournament_code || tournamentId;
 
-  // Debug: indicate supabase client presence and the resolved code used for queries
-  // eslint-disable-next-line no-console
-  console.log('[TournamentDetail] Supabase client present:', !!supabase);
-  // eslint-disable-next-line no-console
-  console.log('[TournamentDetail] resolvedCode ->', resolvedCode, { tournamentId, tournamentCode: tournament?.tournament_code });
+  // Dev-only logs are gated behind __DEV__ to avoid noisy production console output
+  if (__DEV__) {
+    // eslint-disable-next-line no-console
+    console.log('[TournamentDetail] Supabase client present:', !!supabase);
+    // eslint-disable-next-line no-console
+    console.log('[TournamentDetail] resolvedCode ->', resolvedCode, { tournamentId, tournamentCode: tournament?.tournament_code });
+  }
 
   // Fetch results for this tournament (use resolvedCode which may be tournament_code or event_id)
   const { data: resultsData, isLoading: resultsLoading, error: resultsError, refetch: refetchResults } = useTournamentResults(resolvedCode) as any;
   // Fetch registered participants live
   const { data: liveParticipants, isLoading: participantsLoading, error: participantsError, refetch: refetchParticipants } = useTournamentParticipants(resolvedCode);
 
+  // Multi-day aggregation hook (call at top-level to obey Hooks rules)
+  const tournamentCode = tournament?.tournament_code || tournamentId;
+  const { data: multiDay = { dayEvents: [], dayResults: {}, combined: [] }, isLoading: multiLoading } = useMultiDayTournamentResults(tournamentCode);
+
   // Debug logs to help diagnose missing data
   useEffect(() => {
-    // eslint-disable-next-line no-console
-    console.log('[TournamentDetail] tournamentId=', tournamentId);
+    if (__DEV__) {
+      // eslint-disable-next-line no-console
+      console.log('[TournamentDetail] tournamentId=', tournamentId);
+    }
   }, [tournamentId]);
 
   useEffect(() => {
-    // eslint-disable-next-line no-console
-    console.log('[TournamentDetail] resultsData -> length=', (resultsData || []).length, resultsData);
-    // eslint-disable-next-line no-console
-    console.log('[TournamentDetail] resultsError ->', resultsError);
+    if (__DEV__) {
+      // eslint-disable-next-line no-console
+      console.log('[TournamentDetail] resultsData -> length=', (resultsData || []).length, resultsData);
+      // eslint-disable-next-line no-console
+      console.log('[TournamentDetail] resultsError ->', resultsError);
+    }
   }, [resultsData, resultsError]);
 
   useEffect(() => {
-    // eslint-disable-next-line no-console
-    console.log('[TournamentDetail] liveParticipants -> length=', (liveParticipants || []).length, liveParticipants);
-    // eslint-disable-next-line no-console
-    console.log('[TournamentDetail] participantsError ->', participantsError);
+    if (__DEV__) {
+      // eslint-disable-next-line no-console
+      console.log('[TournamentDetail] liveParticipants -> length=', (liveParticipants || []).length, liveParticipants);
+      // eslint-disable-next-line no-console
+      console.log('[TournamentDetail] participantsError ->', participantsError);
+    }
   }, [liveParticipants, participantsError]);
   
   useEffect(() => {
@@ -89,6 +103,27 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
       loadTournamentData();
     }
   }, [tournament]);
+
+  // Default selected result tab when multi-day data becomes available
+  useEffect(() => {
+    if (!multiDay) return;
+    // prefer first non-final day as default, otherwise first event, otherwise combined
+    const nonFinal = (multiDay.dayEvents || []).find((d: any) => !/final|overall|combined/i.test(String(d.tournament_name || '')));
+    if (nonFinal) setSelectedResultTab(nonFinal.tournament_code || nonFinal.event_id || 'combined');
+    else if (multiDay.dayEvents && multiDay.dayEvents.length > 0) setSelectedResultTab(multiDay.dayEvents[0].tournament_code || multiDay.dayEvents[0].event_id || 'combined');
+    else setSelectedResultTab('combined');
+  }, [multiDay?.dayEvents?.length]);
+
+  // Debug: log multi-day data when it changes so we can verify Day1/Day2/Final
+  // Keep a minimal dev-only summary log for multi-day changes
+  useEffect(() => {
+    if (!__DEV__) return;
+    // eslint-disable-next-line no-console
+    console.log('[TournamentDetail] multiDay summary ->', {
+      dayCount: (multiDay?.dayEvents || []).length,
+      combinedCount: (multiDay?.combined || []).length,
+    });
+  }, [multiDay?.dayEvents?.length, multiDay?.combined?.length]);
 
   // Force refetch of results/participants when the resolvedCode changes
   useEffect(() => {
@@ -134,19 +169,12 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
   }, [uniqueResultParticipants, participants]);
 
   // Debug: log query results/errors to browser console to diagnose missing data
+  // Reduced debug logging (dev-only)
   useEffect(() => {
+    if (!__DEV__) return;
     // eslint-disable-next-line no-console
-    console.log('TournamentDetail debug:', {
-      tournamentId,
-      resultsLoading,
-      resultsError,
-      resultsData,
-      participantsLoading,
-      participantsError,
-      liveParticipants,
-      participantsStateLength: participants.length,
-    });
-  }, [tournamentId, resultsLoading, resultsError, resultsData, participantsLoading, participantsError, liveParticipants, participants.length]);
+    console.log('TournamentDetail debug summary:', { tournamentId, resultsLoading, participantsLoading });
+  }, [tournamentId, resultsLoading, participantsLoading]);
   
   const loadTournamentData = async () => {
     setLoading(true);
@@ -443,67 +471,220 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
   );
   
   const renderResults = () => {
+    // Use multi-day data from top-level hook to show Day tabs + Final combined
+    const tabs = [
+      ...((multiDay.dayEvents || []).map((d: any, i: number) => ({ key: d.tournament_code || d.event_id, label: `Day ${i + 1}`, date: d.event_date, isFinal: /final|overall|combined/i.test(String(d.tournament_name || '')) }))),
+      { key: 'combined', label: 'Final', isFinal: true }
+    ];
+
+    const ResultsTable = ({ rows, combined }: { rows: any[]; combined?: boolean }) => {
+      if (!rows || rows.length === 0) return <EmptyState icon="trophy" title={combined ? 'Final results pending' : 'Results pending'} message={combined ? 'Final combined results will appear once both days are available' : 'Results will be available after the day'} />;
+
+      // Combined view: build table with Day1/Day2 columns and totals
+      if (combined) {
+        // multiDay.dayResults is available in outer scope; if rows is the combined array, use multiDay to build detailed table
+        const dayCodes = (multiDay?.dayEvents || []).map((d: any) => d.tournament_code || d.event_id);
+
+        // Aggregate per-day stats per member with deduplication by row id to avoid double-counting
+        const perMember: Record<string, any> = {};
+        const seenRowIds = new Set<string>();
+
+        dayCodes.forEach((code: string) => {
+          const dayRows = (multiDay?.dayResults?.[code] || []) as any[];
+          dayRows.forEach((r: any) => {
+            // Determine a stable row id if available
+            const rowId = r.id || r.result_id || `${r.member_id || r.member?.member_code || r.member_name || ''}::${r.place || ''}::${r.weight_lbs || ''}`;
+            if (!rowId) return;
+            if (seenRowIds.has(rowId)) return; // skip duplicates
+            seenRowIds.add(rowId);
+
+            const id = r.member_id || r.member?.dbm_number || r.member?.member_code || r.member_code || r.member_name;
+            if (!id) return;
+            perMember[id] = perMember[id] || { member_id: id, member_name: r.member_name || r.member?.member_name || id, days: {} , total_weight: 0, total_fish: 0, total_aoy: 0, places: [] };
+            const fish = (r.weight_lbs && Number(r.weight_lbs) > 0) ? (r.fish_count != null ? Number(r.fish_count) : 1) : 0;
+            const weight = Number(r.weight_lbs || 0);
+            perMember[id].days[code] = perMember[id].days[code] || { fish: 0, weight: 0 };
+            perMember[id].days[code].fish += fish;
+            perMember[id].days[code].weight += weight;
+            perMember[id].total_weight += weight;
+            perMember[id].total_fish += fish;
+            perMember[id].total_aoy += Number(r.aoy_points || 0);
+            if (r.place != null) perMember[id].places.push(Number(r.place));
+          });
+        });
+
+        const combinedRows = Object.values(perMember).map((m: any) => ({
+          ...m,
+          best_place: m.places.length ? Math.min(...m.places) : null,
+        }));
+
+        // If AOY points weren't provided but best_place is 1, default AOY to 100 per your rules
+        combinedRows.forEach((r: any) => {
+          if ((!r.total_aoy || r.total_aoy === 0) && r.best_place === 1) {
+            r.total_aoy = 100;
+          }
+        });
+
+  // Debug: print per-member breakdown to help diagnose aggregation math
+        // eslint-disable-next-line no-console
+        console.log('[TournamentDetail] combined perMember breakdown ->', perMember);
+        // Also print Nick Melcher's entry (if present) for quick verification
+        try {
+          const nick = Object.values(perMember).find((v: any) => String(v.member_name || '').toLowerCase().includes('nick melcher'));
+          // eslint-disable-next-line no-console
+          console.log('[TournamentDetail] Nick Melcher entry ->', nick);
+        } catch (e) {
+          // ignore
+        }
+        // Additionally, print any raw rows from each day that mention 'nick' so we can spot duplicates or wrong weights
+        try {
+          const term = 'nick';
+          (dayCodes || []).forEach((code: string) => {
+            const dayRows = (multiDay?.dayResults?.[code] || []) as any[];
+            const matching = dayRows.filter((r: any) => String(r.member_name || r.member?.member_name || '').toLowerCase().includes(term));
+            try {
+              // eslint-disable-next-line no-console
+              console.log(`[TournamentDetail] raw rows (json) for '${term}' on ${code} ->` + JSON.stringify(matching.map((r: any) => ({ id: r.id || r.result_id, member_id: r.member_id, member_name: r.member_name, weight_lbs: r.weight_lbs, place: r.place, raw: r })), null, 2));
+            } catch (e) {
+              // eslint-disable-next-line no-console
+              console.log(`[TournamentDetail] raw rows for '${term}' on ${code} ->`, matching.map((r: any) => ({ id: r.id || r.result_id, member_id: r.member_id, member_name: r.member_name, weight_lbs: r.weight_lbs, place: r.place })));
+            }
+          });
+        } catch (e) {
+          // ignore
+        }
+
+        combinedRows.sort((a: any, b: any) => {
+          if (b.total_weight !== a.total_weight) return b.total_weight - a.total_weight;
+          return (a.best_place || 999) - (b.best_place || 999);
+        });
+
+        return (
+          <ScrollView accessibilityLabel="results-list" style={{ marginTop: 8 }}>
+            {/* Header */}
+            <View style={{ flexDirection: 'row', padding: 8, backgroundColor: '#eee', borderRadius: 6 }}>
+              <Text style={{ fontWeight: '700', width: 40 }}>#</Text>
+              <Text style={{ fontWeight: '700', flex: 1 }}>Name</Text>
+              {dayCodes.map((c: string, i: number) => (
+                <View key={c} style={{ width: 140 }}>
+                  <Text style={{ fontWeight: '700', textAlign: 'center' }}>{`Day ${i + 1} #`}</Text>
+                  <Text style={{ fontWeight: '700', textAlign: 'center' }}>{`Day ${i + 1} Wt`}</Text>
+                </View>
+              ))}
+              <Text style={{ fontWeight: '700', width: 80, textAlign: 'center' }}>Total #</Text>
+              <Text style={{ fontWeight: '700', width: 100, textAlign: 'center' }}>Total Wt</Text>
+              <Text style={{ fontWeight: '700', width: 80, textAlign: 'center' }}>AOY</Text>
+            </View>
+
+            {/* Local normalize helper to create a stable fallback key when member_id is missing */}
+            {/**
+             * We purposely avoid importing hooks here; a lightweight local normalizer
+             * mirrors the same behavior used in aggregation so keys match.
+             */}
+            {(() => {
+              const normalizeNameLocal = (n: any) => {
+                if (n == null) return '';
+                try { return String(n).normalize('NFKC').trim().toLowerCase(); } catch (e) { return String(n).trim().toLowerCase(); }
+              };
+              return combinedRows.map((r: any, idx: number) => {
+                const fallbackKey = normalizeNameLocal(r.member_name) || `combined-${idx}`;
+                const rowKey = r.member_id || fallbackKey;
+                return (
+                  <TouchableOpacity key={rowKey} onPress={() => (navigation as any).navigate('Profile', { memberId: r.member_id || undefined })} style={{ flexDirection: 'row', padding: 12, marginVertical: 6, backgroundColor: '#fff', borderRadius: 8, alignItems: 'center' }}>
+                    <Text style={{ width: 40, fontWeight: '700' }}>{idx + 1}</Text>
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ fontWeight: '600' }}>{r.member_name}</Text>
+                    </View>
+                    {dayCodes.map((c: string) => (
+                      <View key={c} style={{ width: 140, alignItems: 'center' }}>
+                        <Text>{r.days[c]?.fish ?? 0}</Text>
+                        <Text>{r.days[c]?.weight ? Number(r.days[c].weight).toFixed(2) : '0.00'}</Text>
+                      </View>
+                    ))}
+                    <Text style={{ width: 80, textAlign: 'center' }}>{r.total_fish}</Text>
+                    <Text style={{ width: 100, textAlign: 'center' }}>{Number(r.total_weight).toFixed(2)}</Text>
+                    <Text style={{ width: 80, textAlign: 'center' }}>{r.total_aoy || 0}</Text>
+                  </TouchableOpacity>
+                );
+              });
+            })()}
+            
+          </ScrollView>
+        );
+      }
+
+      // Day view (single-day rows) - sort by weight descending
+      const sortedRows = [...rows].sort((a: any, b: any) => {
+        const aWeight = Number(a.weight_lbs || 0);
+        const bWeight = Number(b.weight_lbs || 0);
+        return bWeight - aWeight;
+      });
+
+      return (
+        <ScrollView accessibilityLabel="results-list" style={{ marginTop: 8 }}>
+          {/* Header */}
+          <View style={{ flexDirection: 'row', padding: 8, backgroundColor: '#eee', borderRadius: 6, marginBottom: 8 }}>
+            <Text style={{ fontWeight: '700', width: 40 }}>#</Text>
+            <Text style={{ fontWeight: '700', flex: 1 }}>Name</Text>
+            <Text style={{ fontWeight: '700', width: 60, textAlign: 'center' }}>Fish</Text>
+            <Text style={{ fontWeight: '700', width: 80, textAlign: 'center' }}>Weight</Text>
+          </View>
+
+          {sortedRows.map((r: any, idx: number) => {
+            const isBigBass = !!r.big_fish || !!r.big_bass;
+            const memberId = r.member?.dbm_number || r.member?.member_code || r.member_id || r.member_code;
+            return (
+              <TouchableOpacity
+                key={r.id}
+                accessibilityRole="button"
+                accessibilityLabel={`result-${idx + 1}-${r.member_name || r.member_id}`}
+                onPress={() => (navigation as any).navigate('Profile', { memberId })}
+                style={{ padding: 12, marginVertical: 6, backgroundColor: '#fff', borderRadius: 8, flexDirection: 'row', alignItems: 'center' }}
+              >
+                <Text style={{ fontWeight: '700', width: 40 }}>{idx + 1}</Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontWeight: '600' }}>{r.member_name || r.member_id}</Text>
+                  {r.boat_name ? <Text style={{ color: '#666', fontSize: 12 }}>{r.boat_name}</Text> : null}
+                  {isBigBass && <Text accessibilityLabel="big-bass" style={{ color: '#b8860b', fontSize: 12 }}>Big Bass</Text>}
+                </View>
+                <Text style={{ width: 60, textAlign: 'center' }}>{r.fish_count || 0}</Text>
+                <View style={{ width: 80, alignItems: 'center' }}>
+                  <Text>{r.weight_lbs ? Number(r.weight_lbs).toFixed(2) : '0.00'}</Text>
+                  {r.payout ? <Text style={{ color: '#4a7c59', fontSize: 12 }}>${r.payout}</Text> : null}
+                </View>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+      );
+    };
+
     return (
       <View style={styles.tabContent}>
         <Text style={styles.sectionTitle}>Tournament Results</Text>
 
-        {resultsLoading && <ActivityIndicator accessibilityLabel="results-loading" />}
+        {multiLoading && <ActivityIndicator accessibilityLabel="results-loading" />}
 
-        {resultsError && (
-          <View style={{ padding: 8 }}>
-            <Text accessibilityRole="alert">Error loading results</Text>
-          </View>
-        )}
-
-        {!resultsLoading && (!resultsData || resultsData.length === 0) && (
-          <EmptyState
-            icon="trophy"
-            title="Results Pending"
-            message={getStatusText(tournament?.event_date || null) === 'Completed' ? 
-              "Results are being finalized..." : 
-              "Results will be available after the tournament"}
-          />
-        )}
-
-        {!resultsLoading && resultsData && resultsData.length > 0 && (
-          <ScrollView accessibilityLabel="results-list" style={{ marginTop: 8 }}>
-            {resultsData.map((r: any) => {
-              const isBigBass = !!r.big_fish || !!r.big_bass;
-              const memberId = r.member?.dbm_number || r.member?.member_code || r.member_id || r.member_code;
-              return (
-                <TouchableOpacity
-                  key={r.id}
-                  accessibilityRole="button"
-                  accessibilityLabel={`result-${r.place}-${r.member_name || r.member_id}`}
-                  onPress={() => (navigation as any).navigate('Profile', { memberId })}
-                  style={{
-                    padding: 12,
-                    marginVertical: 6,
-                    backgroundColor: '#fff',
-                    borderRadius: 8,
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    elevation: 1,
-                  }}
-                >
-                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <Text style={{ fontWeight: '700', width: 40 }}>{r.place || '-'}</Text>
-                    <View>
-                      <Text style={{ fontWeight: '600' }}>{r.member_name || r.member_id}</Text>
-                      {r.boat_name ? <Text style={{ color: '#666' }}>{r.boat_name}</Text> : null}
-                    </View>
-                  </View>
-
-                  <View style={{ alignItems: 'flex-end' }}>
-                    <Text>{r.weight_lbs ? `${r.weight_lbs} lb` : '-'}</Text>
-                    <Text>{r.payout ? `$${r.payout}` : ''}</Text>
-                    {isBigBass && <Text accessibilityLabel="big-bass" style={{ color: '#b8860b' }}>Big Bass</Text>}
-                  </View>
+        {!multiLoading && (
+          <View>
+            {/* Tabs header */}
+            <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
+              {tabs.map((t: any) => (
+                <TouchableOpacity key={t.key} onPress={() => setSelectedResultTab(t.key)} style={{ padding: 8, backgroundColor: selectedResultTab === t.key ? '#cfe8d8' : '#f0f0f0', borderRadius: 6 }}>
+                  <Text>{t.label}</Text>
                 </TouchableOpacity>
-              );
-            })}
-          </ScrollView>
+              ))}
+            </View>
+
+            {/* Render only the active tab's content */}
+            <View>
+              {selectedResultTab === 'combined' ? (
+                <ResultsTable combined rows={multiDay.combined} />
+              ) : (
+                <ResultsTable rows={multiDay.dayResults[selectedResultTab || tabs[0]?.key] || []} />
+              )}
+            </View>
+          </View>
         )}
       </View>
     );
