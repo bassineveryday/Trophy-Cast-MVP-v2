@@ -27,10 +27,10 @@ if (SENTRY_DSN && !__DEV__) {
     
     // Enable automatic breadcrumbs
     integrations: [
-      new Sentry.ReactNativeTracing({
-        tracingOrigins: ['localhost', /^\//],
-        // ... other options
-      }),
+      // ReactNativeTracing integration for newer versions
+      // new Sentry.ReactNativeTracing({
+      //   tracingOrigins: ['localhost', /^\//],
+      // }),
     ],
     
     // Environment configuration

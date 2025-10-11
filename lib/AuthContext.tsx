@@ -1,10 +1,10 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { User } from '@supabase/supabase-js';
+// User type will be inferred from supabase.auth
 import { supabase } from '../lib/supabase';
 import { setUser as setSentryUser } from './sentry';
 
 interface AuthContextType {
-  user: User | null;
+  user: any | null; // Using any for now to avoid complex type imports
   profile: Profile | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
@@ -24,7 +24,7 @@ interface Profile {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<any | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -35,7 +35,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         id: 'dev-mode-user-tai-hunt',
         email: 'tai.hunt@demo.com',
         created_at: new Date().toISOString(),
-      } as User;
+      };
       
       const mockProfile: Profile = {
         id: 'dev-mode-user-tai-hunt',
@@ -52,7 +52,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     // Check active sessions and subscribe to auth changes
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session } }: any) => {
       setUser(session?.user ?? null);
       if (session?.user) {
         fetchProfile(session.user.id);
@@ -60,7 +60,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setLoading(false);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
       setUser(session?.user ?? null);
       if (session?.user) {
         fetchProfile(session.user.id);

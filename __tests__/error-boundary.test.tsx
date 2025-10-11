@@ -117,7 +117,7 @@ describe('ErrorBoundary', () => {
     expect(getByText(/Test error for ErrorBoundary/)).toBeTruthy();
 
     // Restore original __DEV__
-    global.__DEV__ = originalDev;
+    (global as any).__DEV__ = originalDev;
   });
 
   it('hides error details in production mode', () => {

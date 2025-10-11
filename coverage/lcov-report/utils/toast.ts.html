@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/10</span>
+                <span class='fraction'>10/10</span>
             </div>
         
             
@@ -37,16 +37,16 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/5</span>
+                <span class='fraction'>5/5</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/10</span>
+                <span class='fraction'>10/10</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -167,8 +167,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -186,8 +186,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -205,8 +205,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -224,8 +224,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -238,8 +238,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import Toast from 'react-native-toast-message';
 &nbsp;
@@ -256,8 +256,8 @@
  * @example
  * showSuccess('Tournament Saved', 'Your results have been recorded');
  */
-export const showSuccess = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(t</span>itle: string, message?: string) =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >  Toast.show({</span>
+export const showSuccess = (title: string, message?: string) =&gt; {
+  Toast.show({
     type: 'success',
     text1: title,
     text2: message,
@@ -275,8 +275,8 @@ export const showSuccess = <span class="cstat-no" title="statement not covered" 
  * @example
  * showError('Save Failed', 'Please check your connection and try again');
  */
-export const showError = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(t</span>itle: string, message?: string) =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >  Toast.show({</span>
+export const showError = (title: string, message?: string) =&gt; {
+  Toast.show({
     type: 'error',
     text1: title,
     text2: message,
@@ -294,8 +294,8 @@ export const showError = <span class="cstat-no" title="statement not covered" ><
  * @example
  * showInfo('New Feature', 'Check out the updated tournament rules');
  */
-export const showInfo = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(t</span>itle: string, message?: string) =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >  Toast.show({</span>
+export const showInfo = (title: string, message?: string) =&gt; {
+  Toast.show({
     type: 'info',
     text1: title,
     text2: message,
@@ -313,8 +313,8 @@ export const showInfo = <span class="cstat-no" title="statement not covered" ><s
  * @example
  * showWarning('Slow Connection', 'Data may take longer to load');
  */
-export const showWarning = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(t</span>itle: string, message?: string) =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >  Toast.show({</span>
+export const showWarning = (title: string, message?: string) =&gt; {
+  Toast.show({
     type: 'info', // Using 'info' type for warnings (no built-in warning type)
     text1: `⚠️ ${title}`,
     text2: message,
@@ -327,8 +327,8 @@ export const showWarning = <span class="cstat-no" title="statement not covered" 
 /**
  * Hide any currently displayed toast
  */
-export const hideToast = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >()</span> =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >  Toast.hide();</span>
+export const hideToast = () =&gt; {
+  Toast.hide();
 };
 &nbsp;</pre></td></tr></table></pre>
 
@@ -337,7 +337,7 @@ export const hideToast = <span class="cstat-no" title="statement not covered" ><
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-10-11T03:47:22.267Z
+                at 2025-10-11T04:03:39.069Z
             </div>
         <script src="../prettify.js"></script>
         <script>

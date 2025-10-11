@@ -1,6 +1,5 @@
 import React from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Image, Linking, Platform } from 'react-native';
-import { Card } from 'react-native-elements';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -85,42 +84,35 @@ const ClubScreen = () => {
       </View>
 
       {/* Club Description */}
-      <Card>
-        <Card.Title>About Denver Bassmasters</Card.Title>
-        <Text style={styles.aboutText}>
-          Denver Bassmasters is one of Colorado's premier bass fishing clubs, established in 1975. 
-          We promote the sport of bass fishing through education, conservation, and friendly competition. 
-          Our club hosts regular tournaments and social events throughout the year.
+            <View style={styles.card}>
+        <Text style={styles.cardTitle}>About Denver Bassmasters</Text>
+        <Text style={styles.cardContent}>
+          Founded in 1977, Denver Bassmasters is a premier fishing club in Colorado dedicated to promoting bass fishing, conservation, and sportsmanship.
         </Text>
-      </Card>
+      </View>
 
       {/* Officers Section */}
-      <Card>
-        <Card.Title>Club Officers</Card.Title>
+            <View style={styles.card}>
+        <Text style={styles.cardTitle}>Club Officers</Text>
         {officers.map((officer, index) => (
           <View key={index} style={styles.officerCard}>
-            <View style={styles.officerInfo}>
-              <View>
-                <Text style={styles.officerName}>{officer.name}</Text>
-                <Text style={styles.officerRole}>{officer.position}</Text>
-                {officer.email && <Text style={styles.officerEmail}>{officer.email}</Text>}
-              </View>
-            </View>
+            <Text style={styles.officerRole}>{officer.position}</Text>
+            <Text style={styles.officerName}>{officer.name || 'TBA'}</Text>
+            {officer.email && (
+              <Text style={styles.officerContact}>{officer.email}</Text>
+            )}
           </View>
         ))}
-      </Card>
+      </View>
 
       {/* Contact Section */}
-      <Card>
-        <Card.Title>Contact Us</Card.Title>
-        <TouchableOpacity 
-          onPress={() => Linking.openURL('https://www.denverbassmasters.com')}
-          style={styles.contactLink}
-        >
-          <Ionicons name="globe" size={20} color="#0066cc" />
-          <Text style={[styles.linkText, styles.websiteLink]}>www.denverbassmasters.com</Text>
-        </TouchableOpacity>
-      </Card>
+            <View style={styles.card}>
+        <Text style={styles.cardTitle}>Contact Us</Text>
+        <Text style={styles.cardContent}>Email: info@denverbassmasters.com</Text>
+        <Text style={styles.cardContent}>Website: www.denverbassmasters.com</Text>
+        <Text style={styles.cardContent}>Meeting: First Thursday of each month at 7:00 PM</Text>
+        <Text style={styles.cardContent}>Location: Gander Mountain, 9923 Grant St, Thornton, CO</Text>
+      </View>
     </ScrollView>
   );
 };
@@ -204,6 +196,34 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   officerEmail: {
+    fontSize: 12,
+    color: '#0066cc',
+    marginTop: 4,
+  },
+  card: {
+    backgroundColor: 'white',
+    padding: 15,
+    marginBottom: 15,
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: '#003366',
+  },
+  cardContent: {
+    fontSize: 14,
+    lineHeight: 20,
+    color: '#333',
+    marginBottom: 5,
+  },
+  officerContact: {
     fontSize: 12,
     color: '#0066cc',
     marginTop: 4,

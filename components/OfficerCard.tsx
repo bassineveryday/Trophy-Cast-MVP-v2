@@ -1,11 +1,10 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, Linking, TouchableOpacity } from 'react-native';
-import { Card } from 'react-native-elements';
 import { Ionicons } from '@expo/vector-icons';
 import { ClubOfficer } from '../lib/types/club';
 
 interface OfficerCardProps {
-  officer: Partial<ClubOfficer>;
+  officer: Partial<ClubOfficer & { name?: string }>;
 }
 
 const OfficerCard: React.FC<OfficerCardProps> = ({ officer }) => {
@@ -22,7 +21,7 @@ const OfficerCard: React.FC<OfficerCardProps> = ({ officer }) => {
   };
 
   return (
-    <Card containerStyle={styles.officerCard}>
+    <View style={styles.officerCard}>
       <View style={styles.officerContent}>
         <View style={styles.officerInfo}>
           <Image 
@@ -47,7 +46,7 @@ const OfficerCard: React.FC<OfficerCardProps> = ({ officer }) => {
           )}
         </View>
       </View>
-    </Card>
+    </View>
   );
 };
 

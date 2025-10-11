@@ -14,9 +14,9 @@ function TestComponent() {
   
   return (
     <>
-      {loading && <div testID="loading">Loading...</div>}
-      {user && <div testID="user">{user.email}</div>}
-      {profile && <div testID="profile">{profile.name}</div>}
+      {loading && <div data-testid="loading">Loading...</div>}
+      {user && <div data-testid="user">{user.email}</div>}
+      {profile && <div data-testid="profile">{profile.name}</div>}
     </>
   );
 }
@@ -31,14 +31,14 @@ describe('AuthContext', () => {
   });
 
   it('should provide auth context to children', () => {
-    const { getByTestId } = render(
+    const { getByTestId, getByText } = render(
       <AuthProvider>
         <TestComponent />
       </AuthProvider>
     );
 
     // Initially should be loading
-    expect(getByTestId('loading')).toBeTruthy();
+    expect(getByText('Loading...')).toBeTruthy();
   });
 
   it('should handle dev mode bypass', async () => {

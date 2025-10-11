@@ -1,5 +1,6 @@
 import 'react-native-url-polyfill/auto';
-import { createClient } from '@supabase/supabase-js';
+// Use require for better compatibility with current setup
+const { createClient } = require('@supabase/supabase-js');
 import { Platform } from 'react-native';
 
 // Load Supabase credentials from environment variables
