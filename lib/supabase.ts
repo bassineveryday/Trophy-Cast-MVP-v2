@@ -4,43 +4,8 @@ const { createClient } = require('@supabase/supabase-js');
 import { Platform } from 'react-native';
 
 // Load Supabase credentials from environment variables
-const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL
-const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  // In CI/production we should fail hard if env vars are missing.
-  // For local development, provide a minimal mock so the app can run
-  // while allowing the developer to add `.env.local` with real values.
-  // NOTE: If you deploy, ensure the real env vars are set and this
-  // fallback will not be used.
-  // eslint-disable-next-line no-console
-  console.warn(
-    'Warning: Supabase environment variables are missing. Using a lightweight mock Supabase client for local development. Create a .env.local with EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY to enable real backend.'
-  );
-
-  // Minimal mock client implementing the subset used by the app.
-  const mock = {
-    from: () => ({
-      select: async () => ({ data: [], error: null }),
-      single: async () => ({ data: null, error: null }),
-      eq: function () { return this; },
-      order: function () { return this; },
-    }),
-    auth: {
-      signIn: async () => ({ user: null, error: null }),
-      signUp: async () => ({ user: null, error: null }),
-      signOut: async () => ({ error: null }),
-    },
-  } as any;
-
-  // Export the mock so rest of the app can import `supabase` as usual.
-  // @ts-ignore
-  export const supabase: any = mock;
-
-  // Skip real client creation below
-  // eslint-disable-next-line no-undef
-} 
-
+const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
 
 // Create a cross-platform storage adapter
 const createStorageAdapter = () => {
@@ -82,17 +47,108 @@ const createStorageAdapter = () => {
   }
 };
 
-// Create Supabase client with cross-platform storage
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    storage: createStorageAdapter(),
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: false,
-    // Skip email verification for development
-    flowType: 'pkce',
-  },
-});
+// Minimal mock client implementing the subset used by the app.
+const makeMockClient = () => {
+  const chain = {
+    select: async () => ({ data: [], error: null }),
+    single: async () => ({ data: null, error: null }),
+    eq: function () { return this; },
+    order: function () { return this; },
+  };
+
+  // Minimal in-memory auth state to mirror the supabase client shape
+  let currentSession: any = null;
+
+  const auth = {
+    // Matches the modern @supabase/supabase-js method used in AuthProvider
+    getSession: async () => ({ data: { session: currentSession }, error: null }),
+
+    // onAuthStateChange should return the same shape as the real client
+    // and call the callback immediately with the current session so
+    // consumers receive an initial state.
+    onAuthStateChange: (callback: (event: any, session: any) => void) => {
+      // Invoke callback immediately with current session
+      try {
+        callback(currentSession ? 'SIGNED_IN' : 'SIGNED_OUT', currentSession);
+      } catch (e) {
+        // swallow in mock
+      }
+
+      const subscription = {
+        unsubscribe: () => {
+          /* noop for mock */
+        },
+      };
+
+      return { data: { subscription } };
+    },
+
+    // Common sign-in / sign-up helpers used by the app (async shape)
+    signInWithPassword: async ({ email, password }: any) => {
+      // Create a lightweight mock session/user so AuthProvider can proceed
+      const mockUser = {
+        id: `mock-${email || 'user'}`,
+        email: email || 'dev@local',
+        created_at: new Date().toISOString(),
+      };
+
+      currentSession = { user: mockUser, expires_at: Date.now() + 1000 * 60 * 60 };
+
+      // Call listeners (no-op in this simple mock beyond onAuthStateChange immediate call)
+      return { data: { user: mockUser, session: currentSession }, error: null };
+    },
+
+    signUp: async ({ email }: any) => {
+      const mockUser = {
+        id: `mock-${email || 'user'}`,
+        email: email || 'dev@local',
+        created_at: new Date().toISOString(),
+      };
+
+      currentSession = { user: mockUser, expires_at: Date.now() + 1000 * 60 * 60 };
+      return { data: { user: mockUser, session: currentSession }, error: null };
+    },
+
+    signOut: async () => {
+      currentSession = null;
+      return { error: null };
+    },
+
+    // Older / auxiliary helpers sometimes used in tests or utilities
+    getUser: async () => ({ data: { user: currentSession?.user ?? null }, error: null }),
+  };
+
+  return {
+    from: () => chain,
+    auth,
+  } as any;
+};
+
+// Decide at runtime which client to use, but export a single top-level symbol
+let supabaseClient: any;
+if (supabaseUrl && supabaseAnonKey) {
+  supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      storage: createStorageAdapter(),
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: false,
+      // Skip email verification for development
+      flowType: 'pkce',
+    },
+  });
+} else {
+  // eslint-disable-next-line no-console
+  console.warn(
+    'Warning: Supabase environment variables are missing. Using a lightweight mock Supabase client for local development. Create a .env.local with EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY to enable real backend.'
+  );
+
+  supabaseClient = makeMockClient();
+}
+
+// Export a top-level supabase constant for the app to use
+export const supabase = supabaseClient;
+export default supabase;
 
 // TypeScript types for authentication
 export interface AuthCredentials {
