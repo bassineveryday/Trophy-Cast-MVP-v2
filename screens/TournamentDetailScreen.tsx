@@ -50,12 +50,19 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
   
   const tournament = tournaments?.find(t => t.event_id === tournamentId);
 
-  // Fetch results for this tournament (event id is tournamentId)
-  const { data: resultsData, isLoading: resultsLoading, error: resultsError } = useTournamentResults(tournamentId);
+  // Prefer the normalized tournament code when available (matches tournament_results.tournament_code)
+  const resolvedCode = tournament?.tournament_code || tournamentId;
+
+  // Debug: indicate supabase client presence and the resolved code used for queries
+  // eslint-disable-next-line no-console
+  console.log('[TournamentDetail] Supabase client present:', !!supabase);
+  // eslint-disable-next-line no-console
+  console.log('[TournamentDetail] resolvedCode ->', resolvedCode, { tournamentId, tournamentCode: tournament?.tournament_code });
+
+  // Fetch results for this tournament (use resolvedCode which may be tournament_code or event_id)
+  const { data: resultsData, isLoading: resultsLoading, error: resultsError, refetch: refetchResults } = useTournamentResults(resolvedCode) as any;
   // Fetch registered participants live
-  const { data: liveParticipants, isLoading: participantsLoading, error: participantsError, refetch: refetchParticipants } = useTournamentParticipants(tournamentId);
-  // allow refetching results explicitly
-  const { refetch: refetchResults } = useTournamentResults(tournamentId) as any;
+  const { data: liveParticipants, isLoading: participantsLoading, error: participantsError, refetch: refetchParticipants } = useTournamentParticipants(resolvedCode);
 
   // Debug logs to help diagnose missing data
   useEffect(() => {
@@ -65,14 +72,14 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
 
   useEffect(() => {
     // eslint-disable-next-line no-console
-    console.log('[TournamentDetail] resultsData ->', resultsData);
+    console.log('[TournamentDetail] resultsData -> length=', (resultsData || []).length, resultsData);
     // eslint-disable-next-line no-console
     console.log('[TournamentDetail] resultsError ->', resultsError);
   }, [resultsData, resultsError]);
 
   useEffect(() => {
     // eslint-disable-next-line no-console
-    console.log('[TournamentDetail] liveParticipants ->', liveParticipants);
+    console.log('[TournamentDetail] liveParticipants -> length=', (liveParticipants || []).length, liveParticipants);
     // eslint-disable-next-line no-console
     console.log('[TournamentDetail] participantsError ->', participantsError);
   }, [liveParticipants, participantsError]);
@@ -83,12 +90,12 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
     }
   }, [tournament]);
 
-  // Force refetch of results/participants when the tournamentId or tournament code changes
+  // Force refetch of results/participants when the resolvedCode changes
   useEffect(() => {
-    if (!tournamentId) return;
+    if (!resolvedCode) return;
     refetchParticipants && refetchParticipants();
     if (typeof refetchResults === 'function') refetchResults();
-  }, [tournamentId, tournament?.tournament_code]);
+  }, [resolvedCode]);
 
   useEffect(() => {
     if (liveParticipants) {
@@ -103,13 +110,28 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
     }
   }, [liveParticipants]);
 
-  // Compute unique participant count (prefer results rows if available)
+  // Compute deduped participants from results rows (use tournament_results as the primary source)
+  const uniqueResultParticipants = React.useMemo(() => {
+    const rows = resultsData || [];
+    const map = new Map<string, { member_id: string; member_name: string }>();
+    rows.forEach((r: any) => {
+      const id = r.member_id || r.member?.dbm_number || r.member?.member_code || r.member_code;
+      if (!id) return;
+      if (!map.has(id)) {
+        map.set(id, {
+          member_id: id,
+          member_name: r.member_name || r.member?.member_name || r.member?.member_code || id,
+        });
+      }
+    });
+    return Array.from(map.values());
+  }, [resultsData]);
+
+  // Compute unique participant count (prefer deduped results rows if available)
   const participantCount = React.useMemo(() => {
-    const fromResults = (resultsData || []).map((r: any) => r.member_id || r.member_code || r.member?.member_code || r.member?.dbm_number).filter(Boolean);
-    const uniq = Array.from(new Set(fromResults));
-    if (uniq.length > 0) return uniq.length;
+    if (uniqueResultParticipants && uniqueResultParticipants.length > 0) return uniqueResultParticipants.length;
     return participants.length;
-  }, [resultsData, participants]);
+  }, [uniqueResultParticipants, participants]);
 
   // Debug: log query results/errors to browser console to diagnose missing data
   useEffect(() => {
@@ -356,7 +378,6 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
         <Text style={styles.participantCount}>{(resultsData?.length ?? participants.length) + ' participated'}</Text>
       </View>
 
-      {/* If results exist, prefer showing everyone who "fishied" (had results rows) */}
       {resultsLoading && <ActivityIndicator accessibilityLabel="participants-loading" />}
 
       {resultsError && (
@@ -365,64 +386,25 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
         </View>
       )}
 
-      {!resultsLoading && resultsData && resultsData.length > 0 ? (
-        <View>
-          {/* Header row */}
-          <View style={[styles.resultsHeader, { marginBottom: 8 }]}>
-            <Text style={[styles.resultsHeaderText, { flex: 0.5 }]}>Place</Text>
-            <Text style={[styles.resultsHeaderText, { flex: 2 }]}>Angler</Text>
-            <Text style={[styles.resultsHeaderText, { flex: 1, textAlign: 'right' }]}>Weight</Text>
-            <Text style={[styles.resultsHeaderText, { flex: 1, textAlign: 'right' }]}>Payout</Text>
-          </View>
-
-          <View style={styles.participantsList}>
-            {resultsData
-              .slice()
-              .sort((a: any, b: any) => ((a.place ?? 9999) - (b.place ?? 9999)))
-              .map((r: any, index: number) => {
-              const isBigBass = !!r.big_fish || !!r.big_bass;
-              const placeNum = r.place ?? (index + 1);
-              const isTop3 = placeNum >= 1 && placeNum <= 3;
-              const memberId = r.member?.dbm_number || r.member?.member_code || r.member_id || r.member_code;
-              return (
-                <TouchableOpacity
-                  key={r.id}
-                  style={styles.participantCard}
-                  accessibilityRole="button"
-                  onPress={() => (navigation as any).navigate('Profile', { memberId })}
-                >
-                  <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
-                    <View style={{ width: 48, alignItems: 'center' }}>
-                      {isTop3 ? (
-                        <Ionicons name={placeNum === 1 ? 'trophy' : 'medal'} size={24} color={placeNum === 1 ? '#FFD700' : placeNum === 2 ? '#C0C0C0' : '#cd7f32'} />
-                      ) : (
-                        <Text style={{ fontWeight: '700', width: 40, textAlign: 'center' }}>{placeNum}</Text>
-                      )}
-                    </View>
-
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.participantName}>{r.member_name || r.member_id}</Text>
-                      {r.boat_name ? <Text style={{ color: '#666' }}>{r.boat_name}</Text> : null}
-                    </View>
-                  </View>
-
-                  <View style={{ flex: 1, alignItems: 'flex-end' }}>
-                    <Text>{r.weight_lbs ? `${r.weight_lbs} lb` : '-'}</Text>
-                    <Text>{r.payout ? `$${r.payout}` : ''}</Text>
-                    {isBigBass && (
-                      <View style={styles.bigBassBadge}>
-                        <Ionicons name="fish" size={14} color="#fff" />
-                        <Text style={styles.bigBassText}> Big Bass</Text>
-                      </View>
-                    )}
-                  </View>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
+      {/* Prefer deduped participant list from resultsData */}
+      {!resultsLoading && uniqueResultParticipants && uniqueResultParticipants.length > 0 ? (
+        <View style={styles.participantsList}>
+          {uniqueResultParticipants.map((p, idx) => (
+            <TouchableOpacity
+              key={p.member_id}
+              style={styles.participantCard}
+              accessibilityRole="button"
+              onPress={() => (navigation as any).navigate('Profile', { memberId: p.member_id })}
+            >
+              <View style={styles.participantInfo}>
+                <Text style={styles.participantName}>{p.member_name}</Text>
+              </View>
+              <Text style={styles.participantNumber}>#{idx + 1}</Text>
+            </TouchableOpacity>
+          ))}
         </View>
       ) : (
-        // Fall back to registered participants list (if any)
+        // No results rows — show registered participants if present, otherwise an empty state
         (participants.length === 0 ? (
           <EmptyState
             icon="people"

@@ -314,13 +314,15 @@ export default function RegisterScreen() {
             )}
           </TouchableOpacity>
           
-          <TouchableOpacity
-            style={[styles.secondaryButton, loading && styles.disabledButton]}
-            onPress={handleDemoLogin}
-            disabled={loading}
-          >
-            <Text style={styles.secondaryButtonText}>🎣 Demo Login (Tai Hunt)</Text>
-          </TouchableOpacity>
+          {__DEV__ && (
+            <TouchableOpacity
+              style={[styles.secondaryButton, loading && styles.disabledButton]}
+              onPress={handleDemoLogin}
+              disabled={loading}
+            >
+              <Text style={styles.secondaryButtonText}>🎣 Demo Login (Tai Hunt)</Text>
+            </TouchableOpacity>
+          )}
           
           <TouchableOpacity onPress={() => setAuthMode('register')} disabled={loading}>
             <Text style={styles.switchText}>

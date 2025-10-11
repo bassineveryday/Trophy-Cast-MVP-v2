@@ -72,110 +72,37 @@ const SocialScreen: React.FC = () => {
   useEffect(() => {
     loadSocialData();
   }, []);
-  
+
   const loadSocialData = async () => {
     try {
-      // Mock data for demonstration - in real app this would come from Supabase
-      const mockPosts: CommunityPost[] = [
-        {
-          id: '1',
-          author_name: 'Mike Johnson',
-          author_avatar: 'https://via.placeholder.com/50',
-          post_type: 'photo',
-          content: 'Just caught this beauty at Lake Chatfield! 4.2 lbs largemouth bass. Perfect day on the water! 🎣',
-          image_url: 'https://via.placeholder.com/300x200',
-          created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
-          likes_count: 15,
-          comments_count: 7,
-          is_liked: false
-        },
-        {
-          id: '2',
-          author_name: 'Sarah Davis',
-          author_avatar: 'https://via.placeholder.com/50',
-          post_type: 'achievement',
-          content: 'Just earned my "Tournament Champion" badge by winning the Fall Classic! Thanks to everyone for the great competition! 🏆',
-          created_at: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(), // 5 hours ago
-          likes_count: 23,
-          comments_count: 12,
-          is_liked: true
-        },
-        {
-          id: '3',
-          author_name: 'Denver Bass Masters',
-          author_avatar: 'https://via.placeholder.com/50',
-          post_type: 'tournament_update',
-          content: 'Registration is now open for the Winter Championship at Cherry Creek Reservoir! Early bird pricing ends this Friday.',
-          tournament_id: 'winter_2025',
-          created_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
-          likes_count: 8,
-          comments_count: 3,
-          is_liked: false
-        }
-      ];
-      
-      const mockMembers: Member[] = [
-        {
-          id: '1',
-          name: 'Mike Johnson',
-          avatar_url: 'https://via.placeholder.com/50',
-          total_points: 487,
-          tournaments_participated: 12,
-          current_rank: 3,
-          status: 'online'
-        },
-        {
-          id: '2',
-          name: 'Sarah Davis',
-          avatar_url: 'https://via.placeholder.com/50',
-          total_points: 623,
-          tournaments_participated: 15,
-          current_rank: 1,
-          status: 'in_tournament'
-        },
-        {
-          id: '3',
-          name: 'Bob Wilson',
-          avatar_url: 'https://via.placeholder.com/50',
-          total_points: 356,
-          tournaments_participated: 8,
-          current_rank: 5,
-          status: 'offline',
-          last_seen: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString()
-        }
-      ];
-      
-      const mockChatMessages: ChatMessage[] = [
-        {
-          id: '1',
-          sender_name: 'Mike Johnson',
-          sender_avatar: 'https://via.placeholder.com/30',
-          message: 'Weather looking great for this weekend\'s tournament!',
-          timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
-          tournament_id: 'fall_classic_2025'
-        },
-        {
-          id: '2',
-          sender_name: 'Sarah Davis',
-          sender_avatar: 'https://via.placeholder.com/30',
-          message: 'Anyone know the best spots at Cherry Creek?',
-          timestamp: new Date(Date.now() - 45 * 60 * 1000).toISOString(),
-          tournament_id: 'fall_classic_2025'
-        },
-        {
-          id: '3',
-          sender_name: 'Tournament Director',
-          sender_avatar: 'https://via.placeholder.com/30',
-          message: 'Reminder: Weigh-in closes at 4:00 PM sharp. Good luck everyone!',
-          timestamp: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
-          tournament_id: 'fall_classic_2025'
-        }
-      ];
-      
-      setPosts(mockPosts);
-      setMembers(mockMembers);
-      setChatMessages(mockChatMessages);
-      
+      // Try to load community posts from Supabase (table: community_posts)
+      const [{ data: postsData, error: postsError }, { data: membersData, error: membersError }, { data: chatData, error: chatError }] = await Promise.all([
+        supabase.from('community_posts').select('*').order('created_at', { ascending: false }).limit(50),
+        supabase.from('members').select('id, member_name as name, avatar_url, total_points, tournaments_participated, current_rank, status, last_seen').limit(50),
+        supabase.from('community_chat').select('*').order('timestamp', { ascending: false }).limit(100),
+      ] as any);
+
+      if (postsError) {
+        console.warn('No community_posts table or error fetching posts:', postsError);
+        setPosts([]);
+      } else {
+        setPosts(postsData || []);
+      }
+
+      if (membersError) {
+        console.warn('No members table or error fetching members:', membersError);
+        setMembers([]);
+      } else {
+        setMembers(membersData || []);
+      }
+
+      if (chatError) {
+        console.warn('No community_chat table or error fetching chat:', chatError);
+        setChatMessages([]);
+      } else {
+        setChatMessages(chatData || []);
+      }
+
     } catch (error) {
       console.error('Error loading social data:', error);
       showError('Failed to load community data');

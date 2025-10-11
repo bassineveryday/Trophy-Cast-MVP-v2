@@ -244,3 +244,50 @@ export function useRecentTournamentResults(limit: number = 5) {
   });
 }
 
+// Fetch participant counts for a batch of tournament codes (single query)
+// Accept an array of lookup keys (objects) that may contain tournament_code and/or event_id.
+// Returns a map where the key is either the tournament_code (preferred) or the event_id when code missing.
+export function useParticipantCounts(lookups: Array<{ code?: string; eventId?: string }> = []) {
+  const key = lookups.map(l => `${l.code || ''}::${l.eventId || ''}`).join(',');
+  return useQuery({
+    queryKey: ['participant-counts', key],
+    queryFn: async () => {
+      if (!lookups || lookups.length === 0) return {} as Record<string, number>;
+
+      // Build OR expression supporting both tournament_code and event_id
+      const orParts: string[] = [];
+      for (const l of lookups) {
+        if (l.code) orParts.push(`tournament_code.eq.${l.code}`);
+        if (l.eventId) orParts.push(`event_id.eq.${l.eventId}`);
+      }
+      if (orParts.length === 0) return {} as Record<string, number>;
+
+      const orExpr = orParts.join(',');
+      const { data, error } = await supabase
+        .from('tournament_results')
+        .select('tournament_code, event_id, member_id');
+
+      if (error) throw error;
+
+      const rows = data || [];
+      const map: Record<string, Set<string>> = {};
+      for (const r of rows) {
+        const code = r.tournament_code || null;
+        const evt = r.event_id || null;
+        const memberId = r.member_id || null;
+        if (!memberId) continue;
+        // prefer code as key, otherwise use event id
+        const k = code || evt;
+        if (!k) continue;
+        map[k] = map[k] || new Set<string>();
+        map[k].add(memberId);
+      }
+
+      const counts: Record<string, number> = {};
+      for (const k of Object.keys(map)) counts[k] = map[k].size;
+      return counts;
+    },
+    enabled: lookups.length > 0,
+  });
+}
+

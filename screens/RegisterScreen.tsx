@@ -133,9 +133,11 @@ export default function RegisterScreen() {
           <Button title="Login" onPress={handleLogin} color="#2c3e50" />
         </View>
         
-        <View style={styles.buttonContainer}>
-          <Button title="🎣 Demo Login (Tai Hunt - DBM019)" onPress={handleDemoLogin} color="#27ae60" />
-        </View>
+        {__DEV__ && (
+          <View style={styles.buttonContainer}>
+            <Button title="🎣 Demo Login (Tai Hunt - DBM019)" onPress={handleDemoLogin} color="#27ae60" />
+          </View>
+        )}
         
         <TouchableOpacity onPress={() => setAuthMode('register')}>
           <Text style={styles.switchText}>

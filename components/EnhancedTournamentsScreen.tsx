@@ -12,7 +12,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { TournamentEvent } from '../lib/supabase';
-import { useTournaments } from '../lib/hooks/useQueries';
+import { useTournaments, useTournamentParticipants, useParticipantCounts } from '../lib/hooks/useQueries';
 import { ListSkeleton } from '../components/Skeleton';
 import EmptyState from '../components/EmptyState';
 
@@ -31,6 +31,13 @@ export default function EnhancedTournamentsScreen() {
     status: 'all'
   });
   const [selectedTournament, setSelectedTournament] = useState<string | null>(null);
+
+  // Fetch participants for the currently selected (expanded) tournament code.
+  // The hook is enabled only when a tournament code is selected, so it won't fire for every list item.
+  const { data: selectedParticipants = [], isLoading: participantsLoading } = useTournamentParticipants(selectedTournament || undefined);
+
+  // Compute visible tournament codes and fetch participant counts for them
+  // (moved below where filteredTournaments is computed to avoid duplicate declarations)
 
   const formatDate = (dateString: string) => {
     if (!dateString) return 'Date TBD';
@@ -131,11 +138,11 @@ export default function EnhancedTournamentsScreen() {
           </View>
           
           <View style={styles.participantBadge}>
-            <Text style={styles.participantCount}>
-              {item.participants || 0}
-            </Text>
-            <Text style={styles.participantLabel}>anglers</Text>
-          </View>
+              <Text style={styles.participantCount}>
+                {participantCounts[item.tournament_code || ''] ?? (isExpanded ? (selectedParticipants?.length ?? 0) : (item.participants || 0))}
+              </Text>
+              <Text style={styles.participantLabel}>anglers</Text>
+            </View>
         </View>
         
         {/* Basic Info */}
@@ -171,10 +178,10 @@ export default function EnhancedTournamentsScreen() {
             
             <View style={styles.detailSection}>
               <Text style={styles.sectionTitle}>Tournament Details</Text>
-              <View style={styles.detailGrid}>
+                <View style={styles.detailGrid}>
                 <View style={styles.detailItem}>
                   <Text style={styles.detailLabel}>Participants</Text>
-                  <Text style={styles.detailValue}>{item.participants || 0} anglers</Text>
+                  <Text style={styles.detailValue}>{isExpanded && selectedTournament === item.tournament_code ? (participantsLoading ? 'Loading...' : `${selectedParticipants?.length ?? 0} anglers`) : `${item.participants || 0} anglers`}</Text>
                 </View>
                 <View style={styles.detailItem}>
                   <Text style={styles.detailLabel}>Status</Text>
@@ -286,6 +293,10 @@ export default function EnhancedTournamentsScreen() {
   }
 
   const filteredTournaments = filterTournaments(tournaments);
+
+  // Fetch participant counts for visible tournaments (support code or event_id)
+  const lookups = filteredTournaments.map(t => ({ code: t.tournament_code, eventId: t.event_id }));
+  const { data: participantCounts = {}, isLoading: countsLoading } = useParticipantCounts(lookups as any);
 
   return (
     <View style={styles.container}>

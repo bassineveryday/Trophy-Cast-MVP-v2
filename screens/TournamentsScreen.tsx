@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -6,9 +6,10 @@ import {
   FlatList,
   RefreshControl,
   ScrollView,
+  TouchableOpacity,
 } from 'react-native';
 import { TournamentEvent } from '../lib/supabase';
-import { useTournaments } from '../lib/hooks/useQueries';
+import { useTournaments, useTournamentParticipants } from '../lib/hooks/useQueries';
 import { ListSkeleton } from '../components/Skeleton';
 import EmptyState from '../components/EmptyState';
 
@@ -19,15 +20,22 @@ export default function TournamentsScreen() {
     refetch();
   };
 
-  const renderTournament = ({ item }: { item: TournamentEvent }) => (
-    <View style={styles.tournamentCard}>
+  const [selectedTournament, setSelectedTournament] = useState<string | null>(null);
+
+  // fetch participants for the selected (expanded) tournament code
+  const { data: selectedParticipants = [], isLoading: selectedParticipantsLoading } = useTournamentParticipants(selectedTournament || undefined);
+
+  const renderTournament = ({ item }: { item: TournamentEvent }) => {
+    const isExpanded = selectedTournament === item.tournament_code;
+    return (
+    <TouchableOpacity style={[styles.tournamentCard, isExpanded && styles.expandedCard]} onPress={() => setSelectedTournament(isExpanded ? null : item.tournament_code || null)} activeOpacity={0.8}>
       <View style={styles.cardHeader}>
         <Text style={styles.tournamentName}>
           {item.tournament_name || 'Unnamed Tournament'}
         </Text>
         <View style={styles.participantBadge}>
           <Text style={styles.participantCount}>
-            {item.participants || 0}
+            {isExpanded ? (selectedParticipantsLoading ? '...' : (selectedParticipants?.length ?? 0)) : (item.participants || 0)}
           </Text>
           <Text style={styles.participantLabel}>anglers</Text>
         </View>
@@ -53,8 +61,9 @@ export default function TournamentsScreen() {
           <Text style={styles.codeValue}>{item.tournament_code}</Text>
         </View>
       )}
-    </View>
+    </TouchableOpacity>
   );
+  };
 
   const renderEmptyState = () => (
     <EmptyState
@@ -230,6 +239,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+  },
+  expandedCard: {
+    borderColor: '#007bff',
+    borderWidth: 2,
   },
   cardHeader: {
     flexDirection: 'row',
