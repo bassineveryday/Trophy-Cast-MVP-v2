@@ -12,7 +12,7 @@ import { queryClient } from './lib/queryClient';
 // Import screens
 import HomeScreen from './screens/HomeScreen';
 import EnhancedTournamentsScreen from './components/EnhancedTournamentsScreen';
-import ProfileScreen from './screens/ProfileScreen';
+import EnhancedProfileScreen from './components/EnhancedProfileScreen';
 import EnhancedAOYScreen from './components/EnhancedAOYScreen';
 import RegisterScreen from './screens/RegisterScreen';
 import ClubScreen from './screens/ClubScreen';
@@ -97,7 +97,7 @@ function TabNavigator() {
       <Tab.Screen 
         name="Profile" 
         options={{ title: 'Profile' }}
-        component={ProfileScreen}
+        component={EnhancedProfileScreen}
       />
     </Tab.Navigator>
   );
