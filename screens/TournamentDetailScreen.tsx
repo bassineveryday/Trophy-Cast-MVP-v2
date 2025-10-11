@@ -313,25 +313,56 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
       )}
 
       {!resultsLoading && resultsData && resultsData.length > 0 ? (
-        <View style={styles.participantsList}>
-          {resultsData.map((r: any, index: number) => (
-            <TouchableOpacity key={r.id} style={styles.participantCard} accessibilityRole="button" onPress={() => { /* future: navigate to profile */ }}>
-              <View style={styles.participantInfo}>
-                <View style={styles.participantHeader}>
-                  <Text style={styles.participantName}>{r.member_name || r.member_id}</Text>
-                  <View style={[styles.participantStatusBadge, { backgroundColor: '#4CAF50' }]}>
-                    <Text style={styles.participantStatusText}>{(r.place ? `#${r.place}` : '—')}</Text>
+        <View>
+          {/* Header row */}
+          <View style={[styles.resultsHeader, { marginBottom: 8 }]}>
+            <Text style={[styles.resultsHeaderText, { flex: 0.5 }]}>Place</Text>
+            <Text style={[styles.resultsHeaderText, { flex: 2 }]}>Angler</Text>
+            <Text style={[styles.resultsHeaderText, { flex: 1, textAlign: 'right' }]}>Weight</Text>
+            <Text style={[styles.resultsHeaderText, { flex: 1, textAlign: 'right' }]}>Payout</Text>
+          </View>
+
+          <View style={styles.participantsList}>
+            {resultsData.map((r: any, index: number) => {
+              const isBigBass = !!r.big_fish || !!r.big_bass;
+              const placeNum = r.place || index + 1;
+              const isTop3 = placeNum >= 1 && placeNum <= 3;
+              return (
+                <TouchableOpacity
+                  key={r.id}
+                  style={styles.participantCard}
+                  accessibilityRole="button"
+                  onPress={() => (navigation as any).navigate('Profile', { memberId: r.member_id || r.member_code || r.member_id })}
+                >
+                  <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+                    <View style={{ width: 48, alignItems: 'center' }}>
+                      {isTop3 ? (
+                        <Ionicons name={placeNum === 1 ? 'trophy' : 'medal'} size={24} color={placeNum === 1 ? '#FFD700' : placeNum === 2 ? '#C0C0C0' : '#cd7f32'} />
+                      ) : (
+                        <Text style={{ fontWeight: '700', width: 40, textAlign: 'center' }}>{placeNum}</Text>
+                      )}
+                    </View>
+
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.participantName}>{r.member_name || r.member_id}</Text>
+                      {r.boat_name ? <Text style={{ color: '#666' }}>{r.boat_name}</Text> : null}
+                    </View>
                   </View>
-                </View>
 
-                <Text style={styles.registrationDate}>{r.boat_name ? r.boat_name : ''}</Text>
-                <Text style={{ fontSize: 14, color: '#666' }}>{r.weight_lbs ? `${r.weight_lbs} lb` : ''} {r.payout ? ` • $${r.payout}` : ''}</Text>
-                { (r.big_fish || r.big_bass) ? <Text style={{ color: '#b8860b', marginTop: 6 }}>Big Bass</Text> : null }
-              </View>
-
-              <Text style={styles.participantNumber}>{index + 1}</Text>
-            </TouchableOpacity>
-          ))}
+                  <View style={{ flex: 1, alignItems: 'flex-end' }}>
+                    <Text>{r.weight_lbs ? `${r.weight_lbs} lb` : '-'}</Text>
+                    <Text>{r.payout ? `$${r.payout}` : ''}</Text>
+                    {isBigBass && (
+                      <View style={styles.bigBassBadge}>
+                        <Ionicons name="fish" size={14} color="#fff" />
+                        <Text style={styles.bigBassText}> Big Bass</Text>
+                      </View>
+                    )}
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
         </View>
       ) : (
         // Fall back to registered participants list (if any)
@@ -754,6 +785,33 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: '#4CAF50',
+  },
+  resultsHeader: {
+    flexDirection: 'row',
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  resultsHeaderText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#666',
+  },
+  bigBassBadge: {
+    marginTop: 6,
+    backgroundColor: '#b8860b',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  bigBassText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '700',
   },
 });
 

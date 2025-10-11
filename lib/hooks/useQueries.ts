@@ -179,9 +179,12 @@ export function useTournamentResults(eventId: string | undefined) {
     queryFn: async () => {
       if (!eventId) throw new Error('No eventId provided');
 
+      // select result rows and include nested member/profile info when available
+      // Adjust the nested select to match your Supabase schema: here we try to select
+      // a joined member record (from 'members' or 'profiles' depending on your schema)
       const { data, error } = await supabase
         .from('tournament_results')
-        .select('*')
+        .select(`*, member:profiles(id, name, member_code, dbm_number, avatar_url)`)
         .eq('event_id', eventId)
         .order('place', { ascending: true, nullsFirst: false });
 

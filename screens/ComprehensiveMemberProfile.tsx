@@ -89,84 +89,96 @@ const ComprehensiveMemberProfile: React.FC = () => {
     
     setLoading(true);
     try {
-      // For demo purposes, using mock data that matches your design
-      // In production, this would query Supabase with the SQL you provided
-      
-      const mockProfile: MemberProfile = {
-        member_id: memberCodeToUse,
-        name: profile?.name || 'Tai Hunt',
-        role: 'DBM Secretary',
-        member_since: 'Oct 2025',
-        hometown: 'Denver, CO',
-        home_waters: 'Cherry Creek Reservoir',
-        birthdate: 'May 30, 1994',
-        hobbies: 'Hunting, offshore fishing, outdoors',
-        signature_technique: 'Deep water structure fishing',
-        avatar_url: 'https://via.placeholder.com/150'
-      };
+      // Try to fetch a real profile from Supabase by dbm_number, member_code, or id
+      const { data: found, error: findError } = await supabase
+        .from('profiles')
+        .select('*')
+        .or(`dbm_number.eq.${memberCodeToUse},member_code.eq.${memberCodeToUse},id.eq.${memberCodeToUse}`)
+        .limit(1)
+        .maybeSingle();
 
-      const mockCareerStats: CareerStats = {
-        years_in_dbm: 1,
-        total_tournaments: 12,
-        time_in_money: 8,
-        first_place_finishes: 2,
-        second_place_finishes: 1,
-        third_place_finishes: 2,
-        top_ten_finishes: 9,
-        total_weight: 89.7,
-        career_winnings: 1250.00
-      };
+      if (findError) {
+        console.error('Error querying profile by memberId:', findError);
+      }
 
-      const mockSeasonPerformance: SeasonPerformance = {
-        aoy_points: 487,
-        season_rank: 3,
-        win_rate: 0.42,
-        avg_tournament_weight: 7.48,
-        personal_best: 9.1
-      };
+      if (found && Object.keys(found).length > 0) {
+        // Map found record to MemberProfile shape
+        const fetched: MemberProfile = {
+          member_id: (found.id || found.member_code || memberCodeToUse) as string,
+          name: (found.name || found.full_name || 'Unknown') as string,
+          role: (found.role || 'Member') as string,
+          member_since: (found.member_since || 'Unknown') as string,
+          hometown: (found.hometown || 'Unknown') as string,
+          home_waters: (found.home_waters || '') as string,
+          birthdate: found.birthdate || undefined,
+          hobbies: found.hobbies || undefined,
+          signature_technique: found.signature_technique || undefined,
+          avatar_url: found.avatar_url || undefined,
+        };
 
-      const mockRecentForm: RecentTournament[] = [
-        {
-          tournament_name: 'Fall Championship',
-          lake: 'Cedar Bluff Reservoir',
-          placement: 3,
-          total_weight: 7.6,
-          event_date: '2025-10-05'
-        },
-        {
-          tournament_name: 'Late Summer Classic',
-          lake: 'Hartwell Lake',
-          placement: 1,
-          total_weight: 8.2,
-          event_date: '2025-09-21'
-        },
-        {
-          tournament_name: 'Summer Showdown',
-          lake: 'Lake Lanier',
-          placement: 5,
-          total_weight: 6.4,
-          event_date: '2025-09-07'
-        },
-        {
-          tournament_name: 'Labor Day Tournament',
-          lake: 'Lake Sinclair',
-          placement: 2,
-          total_weight: 9.1,
-          event_date: '2025-09-02'
-        },
-        {
-          tournament_name: 'August Heat',
-          lake: 'Wheeler Reservoir',
-          placement: 4,
-          total_weight: 7.0,
-          event_date: '2025-08-17'
-        }
-      ];
+        setMemberProfile(fetched);
 
-      setMemberProfile(mockProfile);
-      setCareerStats(mockCareerStats);
-      setSeasonPerformance(mockSeasonPerformance);
-      setRecentForm(mockRecentForm);
+        // Optionally, fetch career/season stats from tournament_results for this member
+        const memberKey = found.member_code || found.dbm_number || found.id;
+        const { data: statsRows } = await supabase
+          .from('tournament_results')
+          .select('place, weight_lbs, event_date, payout, big_fish')
+          .eq('member_id', memberKey)
+          .order('event_date', { ascending: false });
+
+        // derive simple career stats and recent form
+        const career: CareerStats = {
+          years_in_dbm: 1,
+          total_tournaments: statsRows?.length || 0,
+          time_in_money: (statsRows || []).filter((r: any) => r.payout && r.payout > 0).length,
+          first_place_finishes: (statsRows || []).filter((r: any) => r.place === 1).length,
+          second_place_finishes: (statsRows || []).filter((r: any) => r.place === 2).length,
+          third_place_finishes: (statsRows || []).filter((r: any) => r.place === 3).length,
+          top_ten_finishes: (statsRows || []).filter((r: any) => r.place && r.place <= 10).length,
+          total_weight: (statsRows || []).reduce((s: number, r: any) => s + (Number(r.weight_lbs) || 0), 0),
+          career_winnings: (statsRows || []).reduce((s: number, r: any) => s + (Number(r.payout) || 0), 0),
+        };
+
+        setCareerStats(career);
+
+        const recent: RecentTournament[] = (statsRows || []).slice(0, 5).map((r: any) => ({
+          tournament_name: r.tournament_name || 'Tournament',
+          lake: r.lake || '',
+          placement: r.place || 0,
+          total_weight: r.weight_lbs || 0,
+          event_date: r.event_date || '',
+        }));
+
+        setRecentForm(recent);
+
+        // derive simple season performance
+        setSeasonPerformance({
+          aoy_points: 0,
+          season_rank: 0,
+          win_rate: career.total_tournaments ? career.first_place_finishes / career.total_tournaments : 0,
+          avg_tournament_weight: career.total_tournaments ? career.total_weight / career.total_tournaments : 0,
+          personal_best: recent.length ? Math.max(...recent.map(r => r.total_weight)) : 0,
+        });
+      } else {
+        // keep fallback mock data if no record found
+        const mockProfile: MemberProfile = {
+          member_id: memberCodeToUse,
+          name: profile?.name || 'Tai Hunt',
+          role: 'DBM Member',
+          member_since: 'Oct 2025',
+          hometown: 'Denver, CO',
+          home_waters: 'Cherry Creek Reservoir',
+          birthdate: undefined,
+          hobbies: undefined,
+          signature_technique: undefined,
+          avatar_url: 'https://via.placeholder.com/150'
+        };
+
+        setMemberProfile(mockProfile);
+        setCareerStats(null);
+        setSeasonPerformance(null);
+        setRecentForm([]);
+      }
 
     } catch (error) {
       console.error('Error loading profile data:', error);
