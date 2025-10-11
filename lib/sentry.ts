@@ -6,15 +6,15 @@ import * as Sentry from '@sentry/react-native';
  * To use Sentry in production:
  * 1. Sign up at https://sentry.io
  * 2. Create a new React Native project
- * 3. Copy your DSN and replace the placeholder below
- * 4. Set environment variables for different environments
+ * 3. Add your DSN to .env.local as SENTRY_DSN
+ * 4. Deploy with environment variables configured
  * 
  * @example
  * // In your app entry point:
  * import './lib/sentry';
  */
 
-const SENTRY_DSN = process.env.SENTRY_DSN || ''; // Add your Sentry DSN here
+const SENTRY_DSN = process.env.SENTRY_DSN || '';
 
 // Only initialize Sentry in production or if DSN is provided
 if (SENTRY_DSN && !__DEV__) {
@@ -40,7 +40,7 @@ if (SENTRY_DSN && !__DEV__) {
     // release: 'trophy-cast@' + process.env.APP_VERSION,
     
     // Before sending events, you can filter or modify them
-    beforeSend(event, hint) {
+    beforeSend(event: any, hint: any) {
       // Don't send events in development
       if (__DEV__) {
         console.log('Sentry Event (Dev Mode - not sent):', event);

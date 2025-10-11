@@ -2,9 +2,15 @@ import 'react-native-url-polyfill/auto';
 import { createClient } from '@supabase/supabase-js';
 import { Platform } from 'react-native';
 
-// Your actual Supabase credentials
-const supabaseUrl = 'https://pxmffkaiwpvnpfrhfeco.supabase.co'
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB4bWZma2Fpd3B2bnBmcmhmZWNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4NDc3MzEsImV4cCI6MjA3NTQyMzczMX0.tzynuCSnR1_2ZdJaqa7cWZrkrgwMvBeFZvS7Vmhg22M'
+// Load Supabase credentials from environment variables
+const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL
+const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error(
+    'Missing Supabase environment variables. Please check your .env.local file and ensure EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY are set.'
+  );
+}
 
 // Create a cross-platform storage adapter
 const createStorageAdapter = () => {
