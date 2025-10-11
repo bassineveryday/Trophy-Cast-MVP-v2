@@ -54,6 +54,26 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
   const { data: resultsData, isLoading: resultsLoading, error: resultsError } = useTournamentResults(tournamentId);
   // Fetch registered participants live
   const { data: liveParticipants, isLoading: participantsLoading, error: participantsError, refetch: refetchParticipants } = useTournamentParticipants(tournamentId);
+
+  // Debug logs to help diagnose missing data
+  useEffect(() => {
+    // eslint-disable-next-line no-console
+    console.log('[TournamentDetail] tournamentId=', tournamentId);
+  }, [tournamentId]);
+
+  useEffect(() => {
+    // eslint-disable-next-line no-console
+    console.log('[TournamentDetail] resultsData ->', resultsData);
+    // eslint-disable-next-line no-console
+    console.log('[TournamentDetail] resultsError ->', resultsError);
+  }, [resultsData, resultsError]);
+
+  useEffect(() => {
+    // eslint-disable-next-line no-console
+    console.log('[TournamentDetail] liveParticipants ->', liveParticipants);
+    // eslint-disable-next-line no-console
+    console.log('[TournamentDetail] participantsError ->', participantsError);
+  }, [liveParticipants, participantsError]);
   
   useEffect(() => {
     if (tournament) {
@@ -73,27 +93,27 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
       setParticipants(mapped);
     }
   }, [liveParticipants]);
+
+  // Debug: log query results/errors to browser console to diagnose missing data
+  useEffect(() => {
+    // eslint-disable-next-line no-console
+    console.log('TournamentDetail debug:', {
+      tournamentId,
+      resultsLoading,
+      resultsError,
+      resultsData,
+      participantsLoading,
+      participantsError,
+      liveParticipants,
+      participantsStateLength: participants.length,
+    });
+  }, [tournamentId, resultsLoading, resultsError, resultsData, participantsLoading, participantsError, liveParticipants, participants.length]);
   
   const loadTournamentData = async () => {
     setLoading(true);
     try {
-      // Simulate participants data - in real app this would come from Supabase
-      const mockParticipants: Participant[] = [
-        {
-          id: '1',
-          member_name: 'John Smith',
-          registration_date: new Date().toISOString(),
-          status: 'confirmed'
-        },
-        {
-          id: '2', 
-          member_name: 'Mike Johnson',
-          registration_date: new Date().toISOString(),
-          status: 'confirmed'
-        }
-      ];
-      
-      setParticipants(mockParticipants);
+      // Keep this function for any future preload work.
+      // Live participants are provided by useTournamentParticipants hook.
       
     } catch (error) {
       console.error('Error loading tournament data:', error);
@@ -107,7 +127,7 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
     setRefreshing(true);
     await Promise.all([
       refetchTournaments(),
-      loadTournamentData(),
+      // refetchParticipants will refresh live participant data
       refetchParticipants()
     ]);
     setRefreshing(false);
@@ -339,16 +359,20 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
           </View>
 
           <View style={styles.participantsList}>
-            {resultsData.map((r: any, index: number) => {
+            {resultsData
+              .slice()
+              .sort((a: any, b: any) => ((a.place ?? 9999) - (b.place ?? 9999)))
+              .map((r: any, index: number) => {
               const isBigBass = !!r.big_fish || !!r.big_bass;
-              const placeNum = r.place || index + 1;
+              const placeNum = r.place ?? (index + 1);
               const isTop3 = placeNum >= 1 && placeNum <= 3;
+              const memberId = r.member?.dbm_number || r.member?.member_code || r.member_id || r.member_code;
               return (
                 <TouchableOpacity
                   key={r.id}
                   style={styles.participantCard}
                   accessibilityRole="button"
-                  onPress={() => (navigation as any).navigate('Profile', { memberId: r.member_id || r.member_code || r.member_id })}
+                  onPress={() => (navigation as any).navigate('Profile', { memberId })}
                 >
                   <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
                     <View style={{ width: 48, alignItems: 'center' }}>
@@ -446,14 +470,13 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
           <ScrollView accessibilityLabel="results-list" style={{ marginTop: 8 }}>
             {resultsData.map((r: any) => {
               const isBigBass = !!r.big_fish || !!r.big_bass;
+              const memberId = r.member?.dbm_number || r.member?.member_code || r.member_id || r.member_code;
               return (
                 <TouchableOpacity
                   key={r.id}
                   accessibilityRole="button"
                   accessibilityLabel={`result-${r.place}-${r.member_name || r.member_id}`}
-                  onPress={() => {
-                    // Future: navigate to member profile
-                  }}
+                  onPress={() => (navigation as any).navigate('Profile', { memberId })}
                   style={{
                     padding: 12,
                     marginVertical: 6,
