@@ -3,6 +3,10 @@ import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, 
 import { supabase } from '../lib/supabase';
 import { useNavigation } from '@react-navigation/native';
 import TopBar from '../components/TopBar';
+import Card from '../components/Card';
+import ListRow from '../components/ListRow';
+import { useTheme } from '../lib/ThemeContext';
+import { makeStyles, spacing, borderRadius, fontSize, fontWeight, shadows } from '../lib/designTokens';
 
 interface Tournament {
   tournament_id: string;
@@ -15,8 +19,32 @@ interface Tournament {
 
 type FilterType = 'upcoming' | 'past';
 
+const styles = makeStyles((theme) => ({
+  container: {
+    flex: 1,
+    backgroundColor: theme.background,
+    padding: spacing.lg,
+  },
+  filterRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: spacing.lg,
+  },
+  cardContainer: {
+    marginBottom: spacing.md,
+  },
+  empty: {
+    textAlign: 'center',
+    color: theme.textMuted,
+    marginTop: spacing.huge,
+    fontSize: fontSize.md,
+  },
+}));
+
 export default function TournamentsListScreen() {
   const navigation = useNavigation();
+  const { theme } = useTheme();
+  const themedStyles = styles(theme);
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<FilterType>('upcoming');
@@ -42,91 +70,77 @@ export default function TournamentsListScreen() {
     setLoading(false);
   };
 
-  const renderTournament = ({ item }: { item: Tournament }) => (
-    <TouchableOpacity style={styles.card} onPress={() => (navigation as any).navigate('TournamentDetail', { tournamentId: item.tournament_id })} activeOpacity={0.8} accessible accessibilityRole="button" accessibilityLabel={`Open ${item.name} details`}>
-      <Text style={styles.title}>{item.name}</Text>
-      <Text style={styles.lake}>Lake: {item.lake}</Text>
-      <Text style={styles.date}>Date: {item.event_date}</Text>
-      <Text style={styles.fee}>Entry Fee: ${item.entry_fee}</Text>
-    </TouchableOpacity>
-  );
+  const formatDate = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      });
+    } catch {
+      return dateString;
+    }
+  };
+
+  const isUpcoming = (dateString: string) => {
+    const tournamentDate = new Date(dateString);
+    const today = new Date();
+    return tournamentDate >= today;
+  };
+
+  const renderTournament = ({ item }: { item: Tournament }) => {
+    const upcoming = isUpcoming(item.event_date);
+    const formattedDate = formatDate(item.event_date);
+    
+    return (
+      <View style={themedStyles.cardContainer}>
+        <Card padding="xs" elevation="md">
+          <ListRow
+            icon="trophy"
+            iconColor={upcoming ? theme.warning : theme.textMuted}
+            title={item.name}
+            subtitle={`📍 ${item.lake}`}
+            metadata={`📅 ${formattedDate}`}
+            rightValue={`$${item.entry_fee}`}
+            rightLabel="entry fee"
+            rightColor={theme.accent}
+            onPress={() => (navigation as any).navigate('TournamentDetail', { tournamentId: item.tournament_id })}
+            showChevron
+            accessibilityLabel={`${item.name} at ${item.lake}, ${formattedDate}, entry fee $${item.entry_fee}`}
+            accessibilityHint="Tap to view tournament details"
+          />
+        </Card>
+      </View>
+    );
+  };
 
   return (
-    <View style={styles.container}>
+    <View style={themedStyles.container}>
       <TopBar title="Tournaments" subtitle="Browse and register" />
-      <View style={styles.filterRow}>
+      <View style={themedStyles.filterRow}>
         <Button
           title="Upcoming"
           onPress={() => setFilter('upcoming')}
-          color={filter === 'upcoming' ? '#0066CC' : '#bbb'}
+          color={filter === 'upcoming' ? theme.accent : theme.textMuted}
         />
         <Button
           title="Past"
           onPress={() => setFilter('past')}
-          color={filter === 'past' ? '#0066CC' : '#bbb'}
+          color={filter === 'past' ? theme.accent : theme.textMuted}
         />
       </View>
       {loading ? (
-        <ActivityIndicator size="large" color="#0066CC" style={{ marginTop: 40 }} />
+        <ActivityIndicator size="large" color={theme.accent} style={{ marginTop: spacing.huge }} />
       ) : (
         <FlatList
           data={tournaments}
           keyExtractor={item => item.tournament_id}
           renderItem={renderTournament}
-          ListEmptyComponent={<Text style={styles.empty}>No tournaments found.</Text>}
+          ListEmptyComponent={<Text style={themedStyles.empty}>No tournaments found.</Text>}
         />
       )}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f4f6fa',
-    padding: 16,
-  },
-  filterRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 16,
-  },
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#2c3e50',
-    marginBottom: 4,
-  },
-  lake: {
-    fontSize: 15,
-    color: '#34495e',
-    marginBottom: 2,
-  },
-  date: {
-    fontSize: 15,
-    color: '#34495e',
-    marginBottom: 2,
-  },
-  fee: {
-    fontSize: 15,
-    color: '#0066CC',
-    marginBottom: 2,
-  },
-  empty: {
-    textAlign: 'center',
-    color: '#888',
-    marginTop: 40,
-    fontSize: 16,
-  },
-});

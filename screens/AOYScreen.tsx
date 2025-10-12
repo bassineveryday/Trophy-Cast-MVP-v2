@@ -11,44 +11,99 @@ import { AOYStandingsRow } from '../lib/supabase';
 import { useAOYStandings } from '../lib/hooks/useQueries';
 import EmptyState from '../components/EmptyState';
 import TopBar from '../components/TopBar';
+import Card from '../components/Card';
+import ListRow from '../components/ListRow';
+import { useTheme } from '../lib/ThemeContext';
+import { makeStyles, spacing, borderRadius, fontSize, fontWeight, shadows } from '../lib/designTokens';
+
+const styles = makeStyles((theme) => ({
+  container: {
+    flex: 1,
+    backgroundColor: theme.background,
+  },
+  list: {
+    padding: spacing.lg,
+  },
+  emptyList: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  cardContainer: {
+    marginBottom: spacing.md,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: theme.background,
+  },
+  loadingText: {
+    marginTop: spacing.lg,
+    fontSize: fontSize.md,
+    color: theme.textMuted,
+  },
+}));
 
 export default function AOYScreen() {
+  const { theme } = useTheme();
+  const themedStyles = styles(theme);
   const { data: standings = [], isLoading, error, refetch, isRefetching } = useAOYStandings();
 
   const handleRefresh = () => {
     refetch();
   };
 
-  const renderStandingItem = ({ item }: { item: AOYStandingsRow }) => (
-    <View style={styles.standingItem}>
-      <View style={styles.rankContainer}>
-        <Text style={styles.rankText}>
-          {item.aoy_rank ? `#${item.aoy_rank}` : 'N/A'}
-        </Text>
-      </View>
-      
-      <View style={styles.memberInfo}>
-        <Text style={styles.memberName}>
-          {item.member_name || 'Unknown Member'}
-        </Text>
-        <Text style={styles.memberId}>ID: {item.member_id}</Text>
-        {item.boater_status && (
-          <Text style={styles.boaterStatus}>
-            Status: {item.boater_status}
-          </Text>
-        )}
-      </View>
+  const getInitials = (name: string | null): string => {
+    if (!name) return '?';
+    const parts = name.trim().split(' ');
+    if (parts.length >= 2) {
+      return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+  };
 
-      <View style={styles.pointsContainer}>
-        <Text style={styles.pointsText}>
-          {item.total_aoy_points !== null ? `${item.total_aoy_points} pts` : '0 pts'}
-        </Text>
-        {item.season_year && (
-          <Text style={styles.seasonText}>{item.season_year}</Text>
-        )}
+  const getRankBadge = (rank: number | null): string | undefined => {
+    if (!rank) return undefined;
+    if (rank === 1) return '🥇';
+    if (rank === 2) return '🥈';
+    if (rank === 3) return '🥉';
+    return undefined;
+  };
+
+  const getRankBadgeColor = (rank: number | null): string | undefined => {
+    if (!rank) return undefined;
+    if (rank === 1) return theme.gold;
+    if (rank === 2) return theme.silver;
+    if (rank === 3) return theme.bronze;
+    return undefined;
+  };
+
+  const renderStandingItem = ({ item }: { item: AOYStandingsRow }) => {
+    const initials = getInitials(item.member_name);
+    const rankBadge = getRankBadge(item.aoy_rank);
+    const points = item.total_aoy_points !== null ? item.total_aoy_points : 0;
+    const rankText = item.aoy_rank ? `#${item.aoy_rank}` : 'N/A';
+    
+    return (
+      <View style={themedStyles.cardContainer}>
+        <Card padding="xs" elevation="md">
+          <ListRow
+            avatarText={initials}
+            title={item.member_name || 'Unknown Member'}
+            subtitle={`Member ID: ${item.member_id}`}
+            metadata={item.boater_status ? `Status: ${item.boater_status}` : undefined}
+            badge={rankBadge}
+            badgeColor={getRankBadgeColor(item.aoy_rank)}
+            rightValue={`${points}`}
+            rightLabel="points"
+            rightColor={theme.success}
+            accessibilityLabel={`${rankText}, ${item.member_name || 'Unknown Member'}, ${points} points`}
+            accessibilityHint={`AOY standing for ${item.season_year || 'current season'}`}
+          />
+        </Card>
       </View>
-    </View>
-  );
+    );
+  };
 
   const renderEmptyState = () => (
     <EmptyState
@@ -62,15 +117,15 @@ export default function AOYScreen() {
 
   if (isLoading && !standings.length) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#2c3e50" />
-        <Text style={styles.loadingText}>Loading AOY Standings...</Text>
+      <View style={themedStyles.loadingContainer}>
+        <ActivityIndicator size="large" color={theme.text} />
+        <Text style={themedStyles.loadingText}>Loading AOY Standings...</Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View style={themedStyles.container}>
       <TopBar title="Angler of the Year" subtitle="Current Season Standings" />
 
       <FlatList
@@ -78,128 +133,17 @@ export default function AOYScreen() {
         renderItem={renderStandingItem}
         keyExtractor={(item) => item.member_id}
         refreshControl={
-          <RefreshControl refreshing={isRefetching} onRefresh={handleRefresh} />
+          <RefreshControl 
+            refreshing={isRefetching} 
+            onRefresh={handleRefresh}
+            colors={[theme.primary]}
+            tintColor={theme.primary}
+          />
         }
         ListEmptyComponent={renderEmptyState}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={standings.length === 0 ? styles.emptyList : styles.list}
+        contentContainerStyle={standings.length === 0 ? themedStyles.emptyList : themedStyles.list}
       />
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f8f9fa',
-  },
-  header: {
-    backgroundColor: '#2c3e50',
-    paddingVertical: 20,
-    paddingHorizontal: 20,
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 5,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#ecf0f1',
-  },
-  list: {
-    padding: 16,
-  },
-  emptyList: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  standingItem: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  rankContainer: {
-    width: 60,
-    alignItems: 'center',
-  },
-  rankText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#2c3e50',
-  },
-  memberInfo: {
-    flex: 1,
-    marginLeft: 16,
-  },
-  memberName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#2c3e50',
-    marginBottom: 4,
-  },
-  memberId: {
-    fontSize: 12,
-    color: '#7f8c8d',
-    marginBottom: 2,
-  },
-  boaterStatus: {
-    fontSize: 12,
-    color: '#34495e',
-    fontStyle: 'italic',
-  },
-  pointsContainer: {
-    alignItems: 'flex-end',
-  },
-  pointsText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#27ae60',
-  },
-  seasonText: {
-    fontSize: 12,
-    color: '#7f8c8d',
-    marginTop: 2,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f8f9fa',
-  },
-  loadingText: {
-    marginTop: 16,
-    fontSize: 16,
-    color: '#7f8c8d',
-  },
-  emptyContainer: {
-    alignItems: 'center',
-    paddingHorizontal: 32,
-  },
-  emptyTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#2c3e50',
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  emptyDescription: {
-    fontSize: 16,
-    color: '#7f8c8d',
-    textAlign: 'center',
-    lineHeight: 24,
-  },
-});

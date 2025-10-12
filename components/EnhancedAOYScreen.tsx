@@ -94,7 +94,7 @@ export default function EnhancedAOYScreen() {
     switch (trend) {
       case 'up': return { name: 'trending-up', color: '#28a745' };
       case 'down': return { name: 'trending-down', color: '#dc3545' };
-      case 'same': return { name: 'trending-flat', color: '#6c757d' };
+      case 'same': return { name: 'remove', color: '#6c757d' };
       default: return { name: 'remove', color: '#6c757d' };
     }
   };

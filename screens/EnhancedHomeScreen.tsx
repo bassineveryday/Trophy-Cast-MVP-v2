@@ -18,6 +18,7 @@ import Skeleton, { DashboardSkeleton, CardSkeleton } from '../components/Skeleto
 import AnimatedCard from '../components/AnimatedCard';
 import ThemeToggle from '../components/ThemeToggle';
 import { showSuccess } from '../utils/toast';
+import { makeStyles, spacing, borderRadius, fontSize, fontWeight, shadows } from '../lib/designTokens';
 
 const { width } = Dimensions.get('window');
 
@@ -51,6 +52,372 @@ interface QuickAction {
   description?: string;
 }
 
+const styles = makeStyles((theme) => ({
+  container: {
+    flex: 1,
+    backgroundColor: theme.background,
+  },
+  scrollContent: {
+    paddingBottom: spacing.xxxl,
+  },
+  headerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: spacing.xl,
+    paddingTop: spacing.giant,
+    paddingBottom: spacing.xl,
+    backgroundColor: theme.surface,
+  },
+  welcomeSection: {
+    flex: 1,
+  },
+  headerTitle: {
+    fontSize: fontSize.xxxl,
+    fontWeight: fontWeight.bold,
+    color: theme.text,
+    marginBottom: spacing.xs,
+  },
+  headerSubtitle: {
+    fontSize: fontSize.md,
+    color: theme.textSecondary,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+  },
+  memberBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs + 2,
+    borderRadius: borderRadius.xxl,
+    borderWidth: 1,
+    backgroundColor: theme.background,
+    borderColor: theme.border,
+  },
+  memberCode: {
+    fontSize: fontSize.sm,
+    fontWeight: fontWeight.semibold,
+    marginLeft: spacing.xs + 2,
+    color: theme.text,
+  },
+  statsOverview: {
+    flexDirection: 'row',
+    paddingHorizontal: spacing.xl,
+    marginBottom: spacing.xxxl,
+  },
+  statCard: {
+    flex: 1,
+    backgroundColor: theme.surface,
+    borderRadius: borderRadius.xl,
+    padding: spacing.xl,
+    alignItems: 'center',
+    marginHorizontal: spacing.xs,
+    ...shadows.lg,
+  },
+  statIconContainer: {
+    marginBottom: spacing.md,
+  },
+  statLabel: {
+    fontSize: fontSize.xs,
+    color: theme.textMuted,
+    marginBottom: spacing.xs,
+  },
+  statValue: {
+    fontSize: fontSize.xl,
+    fontWeight: fontWeight.bold,
+    color: theme.text,
+  },
+  statSuffix: {
+    fontSize: fontSize.xs,
+    color: theme.textSecondary,
+    marginTop: 2,
+  },
+  sectionContainer: {
+    marginBottom: spacing.xxxl,
+  },
+  sectionTitle: {
+    fontSize: fontSize.xl,
+    fontWeight: fontWeight.bold,
+    color: theme.text,
+    marginBottom: spacing.lg,
+    paddingHorizontal: spacing.xl,
+  },
+  quickActionsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    paddingHorizontal: spacing.xl,
+  },
+  actionCard: {
+    width: (width - 60) / 2,
+    backgroundColor: theme.surface,
+    borderRadius: borderRadius.xl,
+    padding: spacing.xl,
+    marginBottom: spacing.lg,
+    marginHorizontal: spacing.xs,
+    alignItems: 'center',
+    ...shadows.md,
+  },
+  actionIcon: {
+    width: spacing.massive,
+    height: spacing.massive,
+    borderRadius: spacing.xxl,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.md,
+  },
+  actionTitle: {
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.semibold,
+    color: theme.text,
+    marginBottom: spacing.xs,
+  },
+  actionDescription: {
+    fontSize: fontSize.xs,
+    color: theme.textMuted,
+    textAlign: 'center',
+  },
+  card: {
+    backgroundColor: theme.surface,
+    borderRadius: borderRadius.xl,
+    padding: spacing.xl,
+    marginHorizontal: spacing.xl,
+    marginBottom: spacing.xl,
+    ...shadows.lg,
+  },
+  performanceCard: {
+    marginHorizontal: spacing.xl,
+  },
+  upcomingCard: {
+    marginHorizontal: spacing.xl,
+    borderLeftWidth: 4,
+    borderLeftColor: theme.warning,
+  },
+  progressCard: {
+    marginHorizontal: spacing.xl,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing.lg,
+  },
+  cardTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  cardTitle: {
+    fontSize: fontSize.lg,
+    fontWeight: fontWeight.semibold,
+    color: theme.text,
+    marginLeft: spacing.sm,
+  },
+  placementBadge: {
+    backgroundColor: theme.success,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.lg,
+  },
+  placementText: {
+    color: '#fff',
+    fontSize: fontSize.sm,
+    fontWeight: fontWeight.bold,
+  },
+  tournamentDetails: {
+    // No additional styles needed
+  },
+  tournamentName: {
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.semibold,
+    color: theme.text,
+    marginBottom: spacing.xs,
+  },
+  tournamentLocation: {
+    fontSize: fontSize.sm,
+    color: theme.textMuted,
+    marginBottom: spacing.lg,
+  },
+  performanceStats: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  performanceStat: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  performanceLabel: {
+    fontSize: fontSize.xs,
+    color: theme.textMuted,
+    marginTop: spacing.xs,
+    marginBottom: 2,
+  },
+  performanceValue: {
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.semibold,
+    color: theme.text,
+  },
+  emptyTournament: {
+    alignItems: 'center',
+    paddingVertical: spacing.xxxl,
+  },
+  emptyTournamentText: {
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.medium,
+    color: theme.textMuted,
+    marginTop: spacing.md,
+  },
+  emptyTournamentSubtext: {
+    fontSize: fontSize.sm,
+    color: theme.textSecondary,
+    textAlign: 'center',
+    marginTop: spacing.xs,
+  },
+  upcomingBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: theme.surface,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.md,
+  },
+  upcomingText: {
+    fontSize: fontSize.xs,
+    color: theme.warning,
+    fontWeight: fontWeight.semibold,
+    marginLeft: spacing.xs,
+  },
+  upcomingDetails: {
+    marginBottom: spacing.lg,
+  },
+  upcomingName: {
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.semibold,
+    color: theme.text,
+    marginBottom: spacing.xs,
+  },
+  upcomingLocation: {
+    fontSize: fontSize.sm,
+    color: theme.textMuted,
+  },
+  registerButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: theme.success,
+    paddingVertical: spacing.md,
+    borderRadius: borderRadius.lg,
+  },
+  registerButtonText: {
+    color: '#fff',
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.semibold,
+    marginLeft: spacing.sm,
+  },
+  progressStats: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  progressStat: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  progressValue: {
+    fontSize: fontSize.lg,
+    fontWeight: fontWeight.bold,
+    color: theme.text,
+    marginBottom: spacing.xs,
+  },
+  progressLabel: {
+    fontSize: fontSize.xs,
+    color: theme.textMuted,
+    textAlign: 'center',
+    marginBottom: spacing.sm,
+  },
+  progressBar: {
+    width: '80%',
+    height: 4,
+    backgroundColor: theme.border,
+    borderRadius: 2,
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: theme.success,
+    borderRadius: 2,
+  },
+  errorContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing.xxxl,
+    backgroundColor: theme.background,
+  },
+  errorTitle: {
+    fontSize: fontSize.xxl,
+    fontWeight: fontWeight.bold,
+    color: theme.text,
+    marginTop: spacing.lg,
+    marginBottom: spacing.sm,
+  },
+  errorText: {
+    color: theme.error,
+    fontSize: fontSize.md,
+    textAlign: 'center',
+    marginBottom: spacing.xxl,
+  },
+  retryButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: theme.success,
+    paddingHorizontal: spacing.xxl,
+    paddingVertical: spacing.md,
+    borderRadius: 25,
+  },
+  retryText: {
+    color: '#fff',
+    fontWeight: fontWeight.bold,
+    fontSize: fontSize.md,
+    marginLeft: spacing.sm,
+  },
+  emptyStateContainer: {
+    alignItems: 'center',
+    paddingVertical: spacing.xxxl,
+  },
+  emptyStateTitle: {
+    fontSize: fontSize.xl,
+    fontWeight: fontWeight.bold,
+    color: theme.text,
+    marginTop: spacing.lg,
+    marginBottom: spacing.sm,
+  },
+  emptyStateText: {
+    fontSize: fontSize.md,
+    color: theme.textMuted,
+    textAlign: 'center',
+    marginBottom: spacing.lg,
+    lineHeight: spacing.xxl,
+  },
+  memberInfoText: {
+    fontSize: fontSize.sm,
+    color: theme.textSecondary,
+    marginBottom: spacing.xl,
+  },
+  refreshButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: theme.surface,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.xxl,
+  },
+  refreshButtonText: {
+    color: theme.success,
+    fontWeight: fontWeight.semibold,
+    marginLeft: spacing.xs + 2,
+  },
+}));
+
 export default function EnhancedHomeScreen() {
   console.log('🏠 Enhanced HomeScreen rendering');
   
@@ -59,6 +426,9 @@ export default function EnhancedHomeScreen() {
   const { theme, isDark, toggleTheme } = useTheme();
   const { data: tournaments } = useTournaments();
   const { data: standings } = useAOYStandings();
+  
+  // Get themed styles
+  const themedStyles = styles(theme);
   
   console.log('Auth state:', { user: user?.email, profile: profile?.member_code });
   
@@ -196,10 +566,10 @@ export default function EnhancedHomeScreen() {
   // Loading state
   if (isLoading && !dashboard) {
     return (
-      <ScrollView style={styles.container}>
-        <View style={styles.headerContainer}>
-          <Text style={styles.headerTitle}>Trophy Cast</Text>
-          <Text style={styles.headerSubtitle}>Loading your dashboard...</Text>
+      <ScrollView style={themedStyles.container}>
+        <View style={themedStyles.headerContainer}>
+          <Text style={themedStyles.headerTitle}>Trophy Cast</Text>
+          <Text style={themedStyles.headerSubtitle}>Loading your dashboard...</Text>
         </View>
         <DashboardSkeleton />
       </ScrollView>
@@ -209,13 +579,13 @@ export default function EnhancedHomeScreen() {
   // Error state
   if (error && !dashboard) {
     return (
-      <View style={styles.errorContainer}>
-        <Ionicons name="alert-circle-outline" size={64} color="#E91E63" />
-        <Text style={styles.errorTitle}>Something went wrong</Text>
-        <Text style={styles.errorText}>Error: {error.message}</Text>
-        <TouchableOpacity onPress={() => refetch()} style={styles.retryButton}>
+      <View style={themedStyles.errorContainer}>
+        <Ionicons name="alert-circle-outline" size={64} color={theme.error} />
+        <Text style={themedStyles.errorTitle}>Something went wrong</Text>
+        <Text style={themedStyles.errorText}>Error: {error.message}</Text>
+        <TouchableOpacity onPress={() => refetch()} style={themedStyles.retryButton}>
           <Ionicons name="refresh" size={20} color="#fff" />
-          <Text style={styles.retryText}>Try Again</Text>
+          <Text style={themedStyles.retryText}>Try Again</Text>
         </TouchableOpacity>
       </View>
     );
@@ -224,25 +594,25 @@ export default function EnhancedHomeScreen() {
   // No data state
   if (!dashboard) {
     return (
-      <ScrollView style={styles.container}>
-        <View style={styles.headerContainer}>
-          <Text style={styles.headerTitle}>Trophy Cast</Text>
-          <Text style={styles.headerSubtitle}>Welcome to your fishing dashboard</Text>
+      <ScrollView style={themedStyles.container}>
+        <View style={themedStyles.headerContainer}>
+          <Text style={themedStyles.headerTitle}>Trophy Cast</Text>
+          <Text style={themedStyles.headerSubtitle}>Welcome to your fishing dashboard</Text>
         </View>
         
-        <View style={styles.card}>
-          <View style={styles.emptyStateContainer}>
-            <Ionicons name="fish-outline" size={64} color="#666" />
-            <Text style={styles.emptyStateTitle}>No Data Available</Text>
-            <Text style={styles.emptyStateText}>
+        <View style={themedStyles.card}>
+          <View style={themedStyles.emptyStateContainer}>
+            <Ionicons name="fish-outline" size={64} color={theme.textSecondary} />
+            <Text style={themedStyles.emptyStateTitle}>No Data Available</Text>
+            <Text style={themedStyles.emptyStateText}>
               Your tournament data will appear here once you participate in events.
             </Text>
-            <Text style={styles.memberInfoText}>
+            <Text style={themedStyles.memberInfoText}>
               Member: {profile?.member_code || 'Not Set'}
             </Text>
-            <TouchableOpacity onPress={() => refetch()} style={styles.refreshButton}>
-              <Ionicons name="refresh" size={18} color="#4CAF50" />
-              <Text style={styles.refreshButtonText}>Refresh</Text>
+            <TouchableOpacity onPress={() => refetch()} style={themedStyles.refreshButton}>
+              <Ionicons name="refresh" size={18} color={theme.success} />
+              <Text style={themedStyles.refreshButtonText}>Refresh</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -252,7 +622,7 @@ export default function EnhancedHomeScreen() {
 
   return (
     <ScrollView
-      style={[styles.container, { backgroundColor: theme.background }]}
+      style={themedStyles.container}
       refreshControl={
         <RefreshControl 
           refreshing={isRefetching} 
@@ -261,12 +631,12 @@ export default function EnhancedHomeScreen() {
           tintColor={theme.primary}
         />
       }
-      contentContainerStyle={styles.scrollContent}
+      contentContainerStyle={themedStyles.scrollContent}
       showsVerticalScrollIndicator={false}
     >
       {/* Header Section */}
-      <View style={[styles.headerContainer, { backgroundColor: theme.surface }]}>
-          <View style={styles.welcomeSection}>
+      <View style={themedStyles.headerContainer}>
+          <View style={themedStyles.welcomeSection}>
             {/* show skeletons while refreshing for perceived performance */}
             {isRefetching ? (
               <>
@@ -275,36 +645,36 @@ export default function EnhancedHomeScreen() {
               </>
             ) : (
               <>
-                <Text style={[styles.headerTitle, { color: theme.text }]}>Welcome back!</Text>
-                <Text style={[styles.headerSubtitle, { color: theme.textSecondary }]}>
+                <Text style={themedStyles.headerTitle}>Welcome back!</Text>
+                <Text style={themedStyles.headerSubtitle}>
                   {profile?.name || user?.email?.split('@')[0] || 'Angler'}
                 </Text>
               </>
             )}
           </View>
-        <View style={styles.headerActions}>
+        <View style={themedStyles.headerActions}>
           <ThemeToggle compact />
-          <View style={[styles.memberBadge, { backgroundColor: theme.background, borderColor: theme.border }]}>
+          <View style={themedStyles.memberBadge}>
             <Ionicons name="card" size={16} color={theme.primary} />
-            <Text style={[styles.memberCode, { color: theme.text }]}>{profile?.member_code || 'N/A'}</Text>
+            <Text style={themedStyles.memberCode}>{profile?.member_code || 'N/A'}</Text>
           </View>
         </View>
       </View>
 
       {/* Quick Stats Overview */}
-      <View style={styles.statsOverview}>
+      <View style={themedStyles.statsOverview}>
         {isRefetching ? (
           // show three lightweight skeleton stat cards while refreshing
           <>
-            <View style={styles.statCard}>
+            <View style={themedStyles.statCard}>
               <Skeleton width={80} height={14} />
               <Skeleton width={90} height={26} style={{ marginTop: 12 }} />
             </View>
-            <View style={styles.statCard}>
+            <View style={themedStyles.statCard}>
               <Skeleton width={80} height={14} />
               <Skeleton width={90} height={26} style={{ marginTop: 12 }} />
             </View>
-            <View style={styles.statCard}>
+            <View style={themedStyles.statCard}>
               <Skeleton width={80} height={14} />
               <Skeleton width={90} height={26} style={{ marginTop: 12 }} />
             </View>
@@ -312,103 +682,103 @@ export default function EnhancedHomeScreen() {
         ) : (
           <>
             <TouchableOpacity
-              style={styles.statCard}
+              style={themedStyles.statCard}
               activeOpacity={0.85}
               onPress={() => handleStatPress('aoy')}
               accessible
               accessibilityRole="button"
               accessibilityLabel={aoy?.aoy_rank ? `AOY rank ${aoy.aoy_rank}` : 'AOY rank not available'}
             >
-              <View style={styles.statIconContainer}>
-                <Ionicons name="trophy" size={24} color="#FFD700" />
+              <View style={themedStyles.statIconContainer}>
+                <Ionicons name="trophy" size={24} color={theme.gold} />
               </View>
-              <Text style={styles.statLabel}>AOY Rank</Text>
-              <Text style={styles.statValue}>
+              <Text style={themedStyles.statLabel}>AOY Rank</Text>
+              <Text style={themedStyles.statValue}>
                 {aoy?.aoy_rank ? `#${aoy.aoy_rank}` : 'N/A'}
               </Text>
               {aoy?.aoy_rank && (
-                <Text style={styles.statSuffix}>
+                <Text style={themedStyles.statSuffix}>
                   {getRankSuffix(aoy.aoy_rank)}
                 </Text>
               )}
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={styles.statCard}
+              style={themedStyles.statCard}
               activeOpacity={0.85}
               onPress={() => handleStatPress('points')}
               accessible
               accessibilityRole="button"
               accessibilityLabel={`Total points ${aoy?.total_aoy_points || 0}`}
             >
-              <View style={styles.statIconContainer}>
-                <Ionicons name="star" size={24} color="#4CAF50" />
+              <View style={themedStyles.statIconContainer}>
+                <Ionicons name="star" size={24} color={theme.success} />
               </View>
-              <Text style={styles.statLabel}>Points</Text>
-              <Text style={styles.statValue}>
+              <Text style={themedStyles.statLabel}>Points</Text>
+              <Text style={themedStyles.statValue}>
                 {aoy?.total_aoy_points || '0'}
               </Text>
-              <Text style={styles.statSuffix}>pts</Text>
+              <Text style={themedStyles.statSuffix}>pts</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={styles.statCard}
+              style={themedStyles.statCard}
               activeOpacity={0.85}
               onPress={() => handleStatPress('earnings')}
               accessible
               accessibilityRole="button"
               accessibilityLabel={`Earnings ${earningsNumber.toFixed(0)} dollars`}
             >
-              <View style={styles.statIconContainer}>
-                <Ionicons name="cash" size={24} color="#2196F3" />
+              <View style={themedStyles.statIconContainer}>
+                <Ionicons name="cash" size={24} color={theme.accent} />
               </View>
-              <Text style={styles.statLabel}>Earnings</Text>
-              <Text style={styles.statValue}>
+              <Text style={themedStyles.statLabel}>Earnings</Text>
+              <Text style={themedStyles.statValue}>
                 ${earningsNumber.toFixed(0)}
               </Text>
-              <Text style={styles.statSuffix}>2025</Text>
+              <Text style={themedStyles.statSuffix}>2025</Text>
             </TouchableOpacity>
           </>
         )}
       </View>
 
       {/* Quick Actions */}
-      <View style={styles.sectionContainer}>
-        <Text style={styles.sectionTitle}>Quick Actions</Text>
-        <View style={styles.quickActionsGrid}>
+      <View style={themedStyles.sectionContainer}>
+        <Text style={themedStyles.sectionTitle}>Quick Actions</Text>
+        <View style={themedStyles.quickActionsGrid}>
           {quickActions.map((action) => (
             <TouchableOpacity
               key={action.id}
-              style={styles.actionCard}
+              style={themedStyles.actionCard}
               onPress={() => handleQuickAction(action)}
               activeOpacity={0.7}
               accessible={true}
               accessibilityRole="button"
               accessibilityLabel={`${action.title} - ${action.description}`}
             >
-              <View style={[styles.actionIcon, { backgroundColor: action.color }]}>
+              <View style={[themedStyles.actionIcon, { backgroundColor: action.color }]}>
                 <Ionicons name={action.icon as any} size={24} color="#fff" accessibilityLabel={`${action.title} icon`} />
               </View>
-              <Text style={styles.actionTitle}>{action.title}</Text>
-              <Text style={styles.actionDescription}>{action.description}</Text>
+              <Text style={themedStyles.actionTitle}>{action.title}</Text>
+              <Text style={themedStyles.actionDescription}>{action.description}</Text>
             </TouchableOpacity>
           ))}
         </View>
       </View>
 
       {/* Recent Tournament Performance */}
-      <View style={styles.sectionContainer}>
-        <Text style={styles.sectionTitle}>Recent Performance</Text>
+      <View style={themedStyles.sectionContainer}>
+        <Text style={themedStyles.sectionTitle}>Recent Performance</Text>
         <TouchableOpacity onPress={handlePerformancePress} activeOpacity={0.9} accessible accessibilityRole="button" accessibilityLabel="Open last tournament details">
-          <AnimatedCard style={styles.performanceCard}>
-          <View style={styles.cardHeader}>
-            <View style={styles.cardTitleRow}>
-              <Ionicons name="fish" size={20} color="#4CAF50" />
-              <Text style={styles.cardTitle}>Last Tournament</Text>
+          <AnimatedCard style={themedStyles.performanceCard}>
+          <View style={themedStyles.cardHeader}>
+            <View style={themedStyles.cardTitleRow}>
+              <Ionicons name="fish" size={20} color={theme.success} />
+              <Text style={themedStyles.cardTitle}>Last Tournament</Text>
             </View>
             {lastTournament && (
-              <View style={styles.placementBadge}>
-                <Text style={styles.placementText}>
+              <View style={themedStyles.placementBadge}>
+                <Text style={themedStyles.placementText}>
                   #{lastTournament.place || 'N/A'}
                 </Text>
               </View>
@@ -416,45 +786,45 @@ export default function EnhancedHomeScreen() {
           </View>
           
           {lastTournament ? (
-            <View style={styles.tournamentDetails}>
-              <Text style={styles.tournamentName}>{lastTournament.tournament_name}</Text>
-              <Text style={styles.tournamentLocation}>
+            <View style={themedStyles.tournamentDetails}>
+              <Text style={themedStyles.tournamentName}>{lastTournament.tournament_name}</Text>
+              <Text style={themedStyles.tournamentLocation}>
                 📍 {lastTournament.lake} • {formatDate(lastTournament.event_date)}
               </Text>
               
-              <View style={styles.performanceStats}>
-                <View style={styles.performanceStat}>
-                  <Ionicons name="scale-outline" size={16} color="#666" />
-                  <Text style={styles.performanceLabel}>Weight</Text>
-                  <Text style={styles.performanceValue}>
+              <View style={themedStyles.performanceStats}>
+                <View style={themedStyles.performanceStat}>
+                  <Ionicons name="scale-outline" size={16} color={theme.textSecondary} />
+                  <Text style={themedStyles.performanceLabel}>Weight</Text>
+                  <Text style={themedStyles.performanceValue}>
                     {lastTournament.weight_lbs || 'N/A'} lbs
                   </Text>
                 </View>
                 
-                <View style={styles.performanceStat}>
-                  <Ionicons name="star-outline" size={16} color="#666" />
-                  <Text style={styles.performanceLabel}>Points</Text>
-                  <Text style={styles.performanceValue}>
+                <View style={themedStyles.performanceStat}>
+                  <Ionicons name="star-outline" size={16} color={theme.textSecondary} />
+                  <Text style={themedStyles.performanceLabel}>Points</Text>
+                  <Text style={themedStyles.performanceValue}>
                     {lastTournament.aoy_points || '0'}
                   </Text>
                 </View>
                 
-                <View style={styles.performanceStat}>
-                  <Ionicons name="cash-outline" size={16} color="#666" />
-                  <Text style={styles.performanceLabel}>Payout</Text>
-                  <Text style={styles.performanceValue}>
+                <View style={themedStyles.performanceStat}>
+                  <Ionicons name="cash-outline" size={16} color={theme.textSecondary} />
+                  <Text style={themedStyles.performanceLabel}>Payout</Text>
+                  <Text style={themedStyles.performanceValue}>
                     ${Number(lastTournament?.payout) || 0}
                   </Text>
                 </View>
               </View>
             </View>
           ) : (
-            <View style={styles.emptyTournament}>
-              <Ionicons name="calendar-outline" size={32} color="#999" />
-              <Text style={styles.emptyTournamentText}>
+            <View style={themedStyles.emptyTournament}>
+              <Ionicons name="calendar-outline" size={32} color={theme.textSecondary} />
+              <Text style={themedStyles.emptyTournamentText}>
                 No tournament results yet
               </Text>
-              <Text style={styles.emptyTournamentSubtext}>
+              <Text style={themedStyles.emptyTournamentSubtext}>
                 Your performance will show here after your first tournament
               </Text>
             </View>
@@ -465,30 +835,30 @@ export default function EnhancedHomeScreen() {
 
       {/* Upcoming Tournament */}
       {nextTournament && (
-        <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>Coming Up</Text>
+        <View style={themedStyles.sectionContainer}>
+          <Text style={themedStyles.sectionTitle}>Coming Up</Text>
           <TouchableOpacity onPress={handleUpcomingPress} activeOpacity={0.9} accessible accessibilityRole="button" accessibilityLabel={`Open details for ${nextTournament.tournament_name}`}>
-            <AnimatedCard style={styles.upcomingCard}>
-            <View style={styles.cardHeader}>
-              <View style={styles.cardTitleRow}>
-                <Ionicons name="calendar" size={20} color="#FF9800" />
-                <Text style={styles.cardTitle}>Next Tournament</Text>
+            <AnimatedCard style={themedStyles.upcomingCard}>
+            <View style={themedStyles.cardHeader}>
+              <View style={themedStyles.cardTitleRow}>
+                <Ionicons name="calendar" size={20} color={theme.warning} />
+                <Text style={themedStyles.cardTitle}>Next Tournament</Text>
               </View>
-              <View style={styles.upcomingBadge}>
-                <Ionicons name="time" size={12} color="#FF9800" />
-                <Text style={styles.upcomingText}>Soon</Text>
+              <View style={themedStyles.upcomingBadge}>
+                <Ionicons name="time" size={12} color={theme.warning} />
+                <Text style={themedStyles.upcomingText}>Soon</Text>
               </View>
             </View>
             
-            <View style={styles.upcomingDetails}>
-              <Text style={styles.upcomingName}>{nextTournament.tournament_name}</Text>
-              <Text style={styles.upcomingLocation}>
+            <View style={themedStyles.upcomingDetails}>
+              <Text style={themedStyles.upcomingName}>{nextTournament.tournament_name}</Text>
+              <Text style={themedStyles.upcomingLocation}>
                 📍 {nextTournament.lake} • {formatDate(nextTournament.event_date)}
               </Text>
             </View>
             
             <TouchableOpacity
-              style={styles.registerButton}
+              style={themedStyles.registerButton}
               accessible={true}
               accessibilityRole="button"
               accessibilityLabel={`Register for ${nextTournament.tournament_name} on ${formatDate(nextTournament.event_date)}`}
@@ -498,7 +868,7 @@ export default function EnhancedHomeScreen() {
               }}
             >
               <Ionicons name="add-circle" size={18} color="#fff" />
-              <Text style={styles.registerButtonText}>Register Now</Text>
+              <Text style={themedStyles.registerButtonText}>Register Now</Text>
             </TouchableOpacity>
             </AnimatedCard>
           </TouchableOpacity>
@@ -506,38 +876,38 @@ export default function EnhancedHomeScreen() {
       )}
 
       {/* Season Progress */}
-      <View style={styles.sectionContainer}>
-        <Text style={styles.sectionTitle}>2025 Season Progress</Text>
-        <AnimatedCard style={styles.progressCard}>
-          <View style={styles.progressStats}>
-            <View style={styles.progressStat}>
-              <Text style={styles.progressValue}>{seasonStats.tournaments}</Text>
-              <Text style={styles.progressLabel}>Tournaments</Text>
-              <View style={styles.progressBar}>
+      <View style={themedStyles.sectionContainer}>
+        <Text style={themedStyles.sectionTitle}>2025 Season Progress</Text>
+        <AnimatedCard style={themedStyles.progressCard}>
+          <View style={themedStyles.progressStats}>
+            <View style={themedStyles.progressStat}>
+              <Text style={themedStyles.progressValue}>{seasonStats.tournaments}</Text>
+              <Text style={themedStyles.progressLabel}>Tournaments</Text>
+              <View style={themedStyles.progressBar}>
                 <View 
                   style={[
-                    styles.progressFill, 
+                    themedStyles.progressFill, 
                     { width: `${getProgressPercentage(seasonStats.tournaments, 12)}%` }
                   ]} 
                 />
               </View>
             </View>
             
-            <View style={styles.progressStat}>
-              <Text style={styles.progressValue}>
+            <View style={themedStyles.progressStat}>
+              <Text style={themedStyles.progressValue}>
                 {seasonStats.bestFinish ? `#${seasonStats.bestFinish}` : 'N/A'}
               </Text>
-              <Text style={styles.progressLabel}>Best Finish</Text>
+              <Text style={themedStyles.progressLabel}>Best Finish</Text>
             </View>
             
-            <View style={styles.progressStat}>
-              <Text style={styles.progressValue}>{seasonStats.totalWeight}</Text>
-              <Text style={styles.progressLabel}>Total Weight</Text>
+            <View style={themedStyles.progressStat}>
+              <Text style={themedStyles.progressValue}>{seasonStats.totalWeight}</Text>
+              <Text style={themedStyles.progressLabel}>Total Weight</Text>
             </View>
             
-            <View style={styles.progressStat}>
-              <Text style={styles.progressValue}>{seasonStats.bigFish}</Text>
-              <Text style={styles.progressLabel}>Big Fish</Text>
+            <View style={themedStyles.progressStat}>
+              <Text style={themedStyles.progressValue}>{seasonStats.bigFish}</Text>
+              <Text style={themedStyles.progressLabel}>Big Fish</Text>
             </View>
           </View>
         </AnimatedCard>
@@ -545,377 +915,3 @@ export default function EnhancedHomeScreen() {
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f8f9fa',
-  },
-  scrollContent: {
-    paddingBottom: 32,
-  },
-  headerContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 60,
-    paddingBottom: 20,
-  },
-  welcomeSection: {
-    flex: 1,
-  },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#2c3e50',
-    marginBottom: 4,
-  },
-  headerSubtitle: {
-    fontSize: 16,
-    color: '#7f8c8d',
-  },
-  headerActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  memberBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-    borderWidth: 1,
-  },
-  memberCode: {
-    fontSize: 14,
-    fontWeight: '600',
-    marginLeft: 6,
-  },
-  statsOverview: {
-    flexDirection: 'row',
-    paddingHorizontal: 20,
-    marginBottom: 32,
-  },
-  statCard: {
-    flex: 1,
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 20,
-    alignItems: 'center',
-    marginHorizontal: 4,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-  },
-  statIconContainer: {
-    marginBottom: 12,
-  },
-  statLabel: {
-    fontSize: 12,
-    color: '#7f8c8d',
-    marginBottom: 4,
-  },
-  statValue: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#2c3e50',
-  },
-  statSuffix: {
-    fontSize: 12,
-    color: '#95a5a6',
-    marginTop: 2,
-  },
-  sectionContainer: {
-    marginBottom: 32,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#2c3e50',
-    marginBottom: 16,
-    paddingHorizontal: 20,
-  },
-  quickActionsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    paddingHorizontal: 20,
-  },
-  actionCard: {
-    width: (width - 60) / 2,
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 16,
-    marginHorizontal: 4,
-    alignItems: 'center',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  actionIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 12,
-  },
-  actionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#2c3e50',
-    marginBottom: 4,
-  },
-  actionDescription: {
-    fontSize: 12,
-    color: '#7f8c8d',
-    textAlign: 'center',
-  },
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 20,
-    marginHorizontal: 20,
-    marginBottom: 20,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-  },
-  performanceCard: {
-    marginHorizontal: 20,
-  },
-  upcomingCard: {
-    marginHorizontal: 20,
-    borderLeftWidth: 4,
-    borderLeftColor: '#FF9800',
-  },
-  progressCard: {
-    marginHorizontal: 20,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  cardTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#2c3e50',
-    marginLeft: 8,
-  },
-  placementBadge: {
-    backgroundColor: '#4CAF50',
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  placementText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  tournamentDetails: {
-    // No additional styles needed
-  },
-  tournamentName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#2c3e50',
-    marginBottom: 4,
-  },
-  tournamentLocation: {
-    fontSize: 14,
-    color: '#7f8c8d',
-    marginBottom: 16,
-  },
-  performanceStats: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  performanceStat: {
-    alignItems: 'center',
-    flex: 1,
-  },
-  performanceLabel: {
-    fontSize: 12,
-    color: '#7f8c8d',
-    marginTop: 4,
-    marginBottom: 2,
-  },
-  performanceValue: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#2c3e50',
-  },
-  emptyTournament: {
-    alignItems: 'center',
-    paddingVertical: 32,
-  },
-  emptyTournamentText: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#7f8c8d',
-    marginTop: 12,
-  },
-  emptyTournamentSubtext: {
-    fontSize: 14,
-    color: '#95a5a6',
-    textAlign: 'center',
-    marginTop: 4,
-  },
-  upcomingBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff3e0',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  upcomingText: {
-    fontSize: 12,
-    color: '#FF9800',
-    fontWeight: '600',
-    marginLeft: 4,
-  },
-  upcomingDetails: {
-    marginBottom: 16,
-  },
-  upcomingName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#2c3e50',
-    marginBottom: 4,
-  },
-  upcomingLocation: {
-    fontSize: 14,
-    color: '#7f8c8d',
-  },
-  registerButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#4CAF50',
-    paddingVertical: 12,
-    borderRadius: 12,
-  },
-  registerButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-    marginLeft: 8,
-  },
-  progressStats: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  progressStat: {
-    alignItems: 'center',
-    flex: 1,
-  },
-  progressValue: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#2c3e50',
-    marginBottom: 4,
-  },
-  progressLabel: {
-    fontSize: 12,
-    color: '#7f8c8d',
-    textAlign: 'center',
-    marginBottom: 8,
-  },
-  progressBar: {
-    width: '80%',
-    height: 4,
-    backgroundColor: '#ecf0f1',
-    borderRadius: 2,
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: '#4CAF50',
-    borderRadius: 2,
-  },
-  errorContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 32,
-    backgroundColor: '#f8f9fa',
-  },
-  errorTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#2c3e50',
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  errorText: {
-    color: '#e74c3c',
-    fontSize: 16,
-    textAlign: 'center',
-    marginBottom: 24,
-  },
-  retryButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#4CAF50',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 25,
-  },
-  retryText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
-    marginLeft: 8,
-  },
-  emptyStateContainer: {
-    alignItems: 'center',
-    paddingVertical: 32,
-  },
-  emptyStateTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#2c3e50',
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  emptyStateText: {
-    fontSize: 16,
-    color: '#7f8c8d',
-    textAlign: 'center',
-    marginBottom: 16,
-    lineHeight: 24,
-  },
-  memberInfoText: {
-    fontSize: 14,
-    color: '#95a5a6',
-    marginBottom: 20,
-  },
-  refreshButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#e8f5e8',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-  },
-  refreshButtonText: {
-    color: '#4CAF50',
-    fontWeight: '600',
-    marginLeft: 6,
-  },
-});
