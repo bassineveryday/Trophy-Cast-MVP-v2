@@ -12,7 +12,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { TournamentEvent } from '../lib/supabase';
-import { useTournaments, useTournamentParticipants, useParticipantCounts } from '../lib/hooks/useQueries';
+import { useGroupedTournaments, useTournamentParticipants, useParticipantCounts } from '../lib/hooks/useQueries';
 import { ListSkeleton } from '../components/Skeleton';
 import EmptyState from '../components/EmptyState';
 
@@ -24,7 +24,7 @@ interface FilterOptions {
 
 export default function EnhancedTournamentsScreen() {
   const navigation = useNavigation();
-  const { data: tournaments = [], isLoading, error, refetch, isRefetching } = useTournaments();
+  const { data: tournaments = [], isLoading, error, refetch, isRefetching } = useGroupedTournaments();
   const [filters, setFilters] = useState<FilterOptions>({
     search: '',
     year: new Date().getFullYear().toString(),

@@ -9,12 +9,12 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { TournamentEvent } from '../lib/supabase';
-import { useTournaments, useTournamentParticipants } from '../lib/hooks/useQueries';
+import { useGroupedTournaments, useTournamentParticipants } from '../lib/hooks/useQueries';
 import { ListSkeleton } from '../components/Skeleton';
 import EmptyState from '../components/EmptyState';
 
 export default function TournamentsScreen() {
-  const { data: tournaments = [], isLoading, error, refetch, isRefetching } = useTournaments();
+  const { data: tournaments = [], isLoading, error, refetch, isRefetching } = useGroupedTournaments();
 
   const handleRefresh = () => {
     refetch();

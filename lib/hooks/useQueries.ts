@@ -1,3 +1,4 @@
+import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   fetchAOYStandings,
@@ -507,5 +508,106 @@ export function useParticipantCounts(lookups: Array<{ code?: string; eventId?: s
     },
     enabled: lookups.length > 0,
   });
+}
+
+// Group multi-day tournaments into single entries (e.g., Norton Day 1 + Day 2 → "Norton 8-2/8-3")
+export function useGroupedTournaments() {
+  const { data: tournaments = [], isLoading, error, refetch, isRefetching } = useTournaments();
+  
+  return {
+    data: React.useMemo(() => {
+      // Group tournaments by base name (strip date from tournament_name)
+      const grouped = new Map<string, TournamentEvent[]>();
+      
+      tournaments.forEach(tournament => {
+        // Extract base name by removing date patterns (e.g., "Norton 8-2-25" → "Norton", "Cedar 5-3-25" → "Cedar")
+        const baseName = (tournament.tournament_name || '')
+          .replace(/\b\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4}\b/g, '') // Remove full dates
+          .replace(/\b\d{1,2}[-\/]\d{1,2}\b/g, '') // Remove month-day patterns
+          .trim();
+        
+        if (!grouped.has(baseName)) {
+          grouped.set(baseName, []);
+        }
+        grouped.get(baseName)!.push(tournament);
+      });
+      
+      // Convert groups to combined entries
+      const result: TournamentEvent[] = [];
+      
+      grouped.forEach((events, baseName) => {
+        // Sort by date
+        const sortedEvents = events.sort((a, b) => {
+          const dateA = a.event_date ? new Date(a.event_date).getTime() : 0;
+          const dateB = b.event_date ? new Date(b.event_date).getTime() : 0;
+          return dateA - dateB;
+        });
+        
+        // Check if events are within 3 days of each other (multi-day tournament)
+        const isMultiDay = sortedEvents.length > 1 && sortedEvents.every((event, idx) => {
+          if (idx === 0) return true;
+          const prevDate = new Date(sortedEvents[idx - 1].event_date || '');
+          const currDate = new Date(event.event_date || '');
+          const diffDays = Math.abs((currDate.getTime() - prevDate.getTime()) / (1000 * 60 * 60 * 24));
+          return diffDays <= 3;
+        });
+        
+        if (isMultiDay) {
+          // Create combined entry for multi-day tournament
+          const firstEvent = sortedEvents[0];
+          const lastEvent = sortedEvents[sortedEvents.length - 1];
+          
+          // Format date range (e.g., "8-2/8-3" from "2025-08-02" and "2025-08-03")
+          const firstDate = firstEvent.event_date ? new Date(firstEvent.event_date) : null;
+          const lastDate = lastEvent.event_date ? new Date(lastEvent.event_date) : null;
+          
+          let dateRange = '';
+          if (firstDate && lastDate) {
+            const firstMonth = firstDate.getMonth() + 1;
+            const firstDay = firstDate.getDate();
+            const lastMonth = lastDate.getMonth() + 1;
+            const lastDay = lastDate.getDate();
+            
+            if (firstMonth === lastMonth) {
+              dateRange = `${firstMonth}-${firstDay}/${lastDay}`;
+            } else {
+              dateRange = `${firstMonth}-${firstDay}/${lastMonth}-${lastDay}`;
+            }
+          }
+          
+          // Combine tournament names (e.g., "Norton 8-2/8-3")
+          const combinedName = dateRange ? `${baseName} ${dateRange}` : baseName;
+          
+          // Combine tournament codes (use first event's code as primary)
+          const combinedCodes = sortedEvents.map(e => e.tournament_code).filter(Boolean).join(',');
+          
+          result.push({
+            ...firstEvent,
+            tournament_name: combinedName,
+            tournament_code: firstEvent.tournament_code, // Keep first code as primary
+            // Store all codes for navigation
+            _multiDayCodes: combinedCodes,
+            _isMultiDay: true,
+            // Use first event's date as the representative date
+            event_date: firstEvent.event_date,
+          } as any);
+        } else {
+          // Single-day tournament(s) - add each separately
+          result.push(...sortedEvents);
+        }
+      });
+      
+      // Sort final result by date
+      return result.sort((a, b) => {
+        const dateA = a.event_date ? new Date(a.event_date).getTime() : 0;
+        const dateB = b.event_date ? new Date(b.event_date).getTime() : 0;
+        return dateB - dateA; // Most recent first
+      });
+    }, [tournaments]),
+    isLoading,
+    error,
+    refetch,
+    isRefetching,
+  };
 }
 
