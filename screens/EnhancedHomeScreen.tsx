@@ -813,7 +813,12 @@ export default function EnhancedHomeScreen() {
                   <Ionicons name="cash-outline" size={16} color={theme.textSecondary} />
                   <Text style={themedStyles.performanceLabel}>Payout</Text>
                   <Text style={themedStyles.performanceValue}>
-                    ${Number(lastTournament?.payout) || 0}
+                    ${(() => {
+                      const lt: any = lastTournament as any;
+                      const raw = lt?.payout != null ? lt.payout : lt?.cash_payout;
+                      const n = raw == null ? 0 : Number(String(raw).replace(/[^0-9.-]+/g, ''));
+                      return Number.isFinite(n) ? n : 0;
+                    })()}
                   </Text>
                 </View>
               </View>

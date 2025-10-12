@@ -170,7 +170,12 @@ export default function HomeScreen() {
             <Text style={styles.tourneyText}>Placement: {lastTournament.place ?? 'N/A'}</Text>
             <Text style={styles.tourneyText}>Weight: {lastTournament.weight_lbs ?? 'N/A'} lbs</Text>
             <Text style={styles.tourneyText}>Points: {lastTournament.aoy_points ?? 'N/A'}</Text>
-            <Text style={styles.tourneyText}>Payout: ${Number(lastTournament?.payout) || 0}</Text>
+            <Text style={styles.tourneyText}>Payout: ${(() => {
+              const lt: any = lastTournament as any;
+              const raw = lt?.payout != null ? lt.payout : lt?.cash_payout;
+              const n = raw == null ? 0 : Number(String(raw).replace(/[^0-9.-]+/g, ''));
+              return Number.isFinite(n) ? n : 0;
+            })()}</Text>
           </>
         ) : <Text style={styles.tourneyText}>No tournaments found.</Text>}
       </AnimatedCard>

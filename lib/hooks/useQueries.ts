@@ -382,7 +382,7 @@ export function useMultiDayTournamentResults(tournamentCode?: string) {
         existing.member_name = existing.member_name || r.member_name;
         existing.total_weight += Number(r.weight_lbs || 0);
         existing.total_aoy += Number(r.aoy_points || 0);
-        existing.total_payout += Number(r.payout || 0);
+  existing.total_payout += normalizePayout(r.cash_payout ?? r.payout);
         existing.big_fish = Math.max(existing.big_fish, Number(r.big_fish || 0));
         if (r.place != null) existing.places.push(Number(r.place));
         combinedMap.set(id, existing);
@@ -461,7 +461,7 @@ export function getMultiDayHelpers() {
       existing.member_name = existing.member_name || r.member_name;
       existing.total_weight += Number(r.weight_lbs || 0);
       existing.total_aoy += Number(r.aoy_points || 0);
-      existing.total_payout += Number(r.payout || 0);
+  existing.total_payout += normalizePayout(r.cash_payout ?? r.payout);
       existing.big_fish = Math.max(existing.big_fish, Number(r.big_fish || 0));
       if (r.place != null) existing.places.push(Number(r.place));
       combinedMap.set(finalKey, existing);

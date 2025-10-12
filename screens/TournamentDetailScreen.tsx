@@ -722,7 +722,12 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
                 <Text style={{ width: 60, textAlign: 'center' }}>{r.fish_count || 0}</Text>
                 <View style={{ width: 80, alignItems: 'center' }}>
                   <Text>{r.weight_lbs ? Number(r.weight_lbs).toFixed(2) : '0.00'}</Text>
-                  {r.payout ? <Text style={{ color: '#4a7c59', fontSize: 12 }}>${r.payout}</Text> : null}
+                  {
+                    (() => {
+                      const num = r.payout != null ? Number(r.payout) : (r.cash_payout != null ? Number(String(r.cash_payout).replace(/[^0-9.-]+/g, '')) : null);
+                      return num != null && Number.isFinite(num) ? <Text style={{ color: '#4a7c59', fontSize: 12 }}>${num}</Text> : null;
+                    })()
+                  }
                 </View>
               </TouchableOpacity>
             );
