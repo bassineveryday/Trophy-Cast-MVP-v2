@@ -601,9 +601,23 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
               return combinedRows.map((r: any, idx: number) => {
                 const fallbackKey = normalizeNameLocal(r.member_name) || `combined-${idx}`;
                 const rowKey = r.member_id || fallbackKey;
+                const place = idx + 1;
+                
+                // Trophy icon for top 3 in Final (combined) view
+                let placeDisplay = null;
+                if (place === 1) {
+                  placeDisplay = <Ionicons name="trophy" size={24} color="#FFD700" />; // Gold
+                } else if (place === 2) {
+                  placeDisplay = <Ionicons name="trophy" size={24} color="#C0C0C0" />; // Silver
+                } else if (place === 3) {
+                  placeDisplay = <Ionicons name="trophy" size={24} color="#CD7F32" />; // Bronze
+                } else {
+                  placeDisplay = <Text style={{ fontWeight: '700' }}>{place}</Text>;
+                }
+                
                 return (
                   <TouchableOpacity key={rowKey} onPress={() => (navigation as any).navigate('Profile', { memberId: r.member_id || undefined })} style={{ flexDirection: 'row', padding: 12, marginVertical: 6, backgroundColor: '#fff', borderRadius: 8, alignItems: 'center' }}>
-                    <Text style={{ width: 40, fontWeight: '700' }}>{idx + 1}</Text>
+                    <View style={{ width: 40, alignItems: 'center' }}>{placeDisplay}</View>
                     <View style={{ flex: 1 }}>
                       <Text style={{ fontWeight: '600' }}>{r.member_name}</Text>
                     </View>
@@ -632,12 +646,28 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
         return bWeight - aWeight;
       });
 
+      // Determine if this is Day 2 by checking selectedResultTab
+      const isDay2 = selectedResultTab && selectedResultTab !== 'combined' && dayEvents.length >= 2 && selectedResultTab === (dayEvents[1]?.tournament_code || dayEvents[1]?.event_id);
+      const isDay1 = selectedResultTab && selectedResultTab !== 'combined' && dayEvents.length >= 1 && selectedResultTab === (dayEvents[0]?.tournament_code || dayEvents[0]?.event_id);
+      
+      // Build Day 1 placement map for movement comparison
+      const day1Placements = new Map<string, number>();
+      if (isDay2 && dayEvents.length >= 1) {
+        const day1Code = dayEvents[0]?.tournament_code || dayEvents[0]?.event_id;
+        const day1Rows = multiDay?.dayResults?.[day1Code] || [];
+        day1Rows.forEach((r: any, idx: number) => {
+          const id = r.member_id || r.member?.dbm_number || r.member?.member_code || r.member_name;
+          if (id) day1Placements.set(String(id), idx + 1);
+        });
+      }
+
       return (
         <ScrollView accessibilityLabel="results-list" style={{ marginTop: 8 }}>
           {/* Header */}
           <View style={{ flexDirection: 'row', padding: 8, backgroundColor: '#eee', borderRadius: 6, marginBottom: 8 }}>
             <Text style={{ fontWeight: '700', width: 40 }}>#</Text>
             <Text style={{ fontWeight: '700', flex: 1 }}>Name</Text>
+            {isDay2 && <Text style={{ fontWeight: '700', width: 60, textAlign: 'center' }}>Move</Text>}
             <Text style={{ fontWeight: '700', width: 60, textAlign: 'center' }}>Fish</Text>
             <Text style={{ fontWeight: '700', width: 80, textAlign: 'center' }}>Weight</Text>
           </View>
@@ -645,6 +675,35 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
           {sortedRows.map((r: any, idx: number) => {
             const isBigBass = !!r.big_fish || !!r.big_bass;
             const memberId = r.member?.dbm_number || r.member?.member_code || r.member_id || r.member_code;
+            const currentPlace = idx + 1;
+            
+            // Movement indicator for Day 2
+            let movement = null;
+            if (isDay2) {
+              const id = r.member_id || r.member?.dbm_number || r.member?.member_code || r.member_name;
+              const day1Place = id ? day1Placements.get(String(id)) : null;
+              if (day1Place) {
+                const delta = day1Place - currentPlace;
+                if (delta > 0) {
+                  movement = (
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+                      <Ionicons name="arrow-up" size={14} color="#4CAF50" />
+                      <Text style={{ color: '#4CAF50', fontSize: 12, fontWeight: '700', marginLeft: 2 }}>+{delta}</Text>
+                    </View>
+                  );
+                } else if (delta < 0) {
+                  movement = (
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+                      <Ionicons name="arrow-down" size={14} color="#E53935" />
+                      <Text style={{ color: '#E53935', fontSize: 12, fontWeight: '700', marginLeft: 2 }}>{Math.abs(delta)}</Text>
+                    </View>
+                  );
+                } else {
+                  movement = <Text style={{ color: '#888', fontSize: 12 }}>—</Text>;
+                }
+              }
+            }
+            
             return (
               <TouchableOpacity
                 key={r.id}
@@ -653,12 +712,13 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
                 onPress={() => (navigation as any).navigate('Profile', { memberId })}
                 style={{ padding: 12, marginVertical: 6, backgroundColor: '#fff', borderRadius: 8, flexDirection: 'row', alignItems: 'center' }}
               >
-                <Text style={{ fontWeight: '700', width: 40 }}>{idx + 1}</Text>
+                <Text style={{ fontWeight: '700', width: 40 }}>{currentPlace}</Text>
                 <View style={{ flex: 1 }}>
                   <Text style={{ fontWeight: '600' }}>{r.member_name || r.member_id}</Text>
                   {r.boat_name ? <Text style={{ color: '#666', fontSize: 12 }}>{r.boat_name}</Text> : null}
                   {isBigBass && <Text accessibilityLabel="big-bass" style={{ color: '#b8860b', fontSize: 12 }}>Big Bass</Text>}
                 </View>
+                {isDay2 && <View style={{ width: 60, alignItems: 'center' }}>{movement}</View>}
                 <Text style={{ width: 60, textAlign: 'center' }}>{r.fish_count || 0}</Text>
                 <View style={{ width: 80, alignItems: 'center' }}>
                   <Text>{r.weight_lbs ? Number(r.weight_lbs).toFixed(2) : '0.00'}</Text>
