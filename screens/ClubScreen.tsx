@@ -18,20 +18,40 @@ const styles = makeStyles((theme) => ({
     flex: 1,
     backgroundColor: theme.background,
   },
-  header: {
-    padding: spacing.xl,
-    backgroundColor: theme.primary,
+  heroHeader: {
+    backgroundColor: theme.surface,
+    paddingVertical: spacing.xl,
+    paddingHorizontal: spacing.xl,
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: theme.border,
     alignItems: 'center',
+  },
+  headerTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing.sm,
   },
   clubName: {
     fontSize: fontSize.xxl,
     fontWeight: fontWeight.bold,
+    color: theme.text,
+    marginRight: spacing.md,
+  },
+  statusBadge: {
+    backgroundColor: theme.success,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs - 2,
+    borderRadius: borderRadius.md,
+  },
+  statusBadgeText: {
     color: '#ffffff',
+    fontSize: fontSize.xs,
+    fontWeight: fontWeight.semibold,
   },
   clubTagline: {
     fontSize: fontSize.md,
-    color: '#ffffff',
-    opacity: opacity.strong,
+    color: theme.textSecondary,
   },
   quickLinks: {
     flexDirection: 'row',
@@ -67,18 +87,22 @@ const styles = makeStyles((theme) => ({
     marginBottom: 5,
   },
   officerCard: {
-    marginBottom: spacing.sm + 2,
-    padding: spacing.sm + 2,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.border,
+    backgroundColor: theme.surface,
+    borderRadius: borderRadius.lg,
+    borderWidth: 1,
+    borderColor: theme.border,
+    padding: spacing.lg,
+    marginBottom: spacing.md,
+    ...shadows.sm,
   },
   officerRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: spacing.md,
   },
   officerAvatar: {
-    width: 64,
-    height: 64,
+    width: 56,
+    height: 56,
     borderRadius: borderRadius.circle,
     marginRight: spacing.md,
     backgroundColor: theme.border,
@@ -87,18 +111,40 @@ const styles = makeStyles((theme) => ({
     flex: 1,
   },
   officerRole: {
-    fontSize: fontSize.sm,
+    fontSize: fontSize.xs,
     color: theme.textSecondary,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 2,
   },
   officerName: {
     fontSize: fontSize.md,
     fontWeight: fontWeight.bold,
     color: theme.text,
   },
-  officerContact: {
+  actionChipsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+    marginTop: spacing.xs,
+  },
+  actionChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: theme.background,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.xxl,
+    borderWidth: 1,
+    borderColor: theme.border,
+  },
+  actionChipIcon: {
+    marginRight: spacing.xs,
+  },
+  actionChipText: {
     fontSize: fontSize.xs,
     color: theme.accent,
-    marginTop: spacing.xs,
+    fontWeight: fontWeight.medium,
   },
   websiteLink: {
     color: theme.accent,
@@ -123,10 +169,15 @@ const ClubScreen = () => {
 
   return (
     <ScrollView style={themedStyles.container}>
-      {/* Club Header */}
-      <View style={themedStyles.header}>
-        <Text style={themedStyles.clubName}>Denver Bassmasters</Text>
-        <Text style={themedStyles.clubTagline}>Established 1975</Text>
+      {/* Club Hero Header */}
+      <View style={themedStyles.heroHeader}>
+        <View style={themedStyles.headerTitleRow}>
+          <Text style={themedStyles.clubName}>Denver Bassmasters</Text>
+          <View style={themedStyles.statusBadge}>
+            <Text style={themedStyles.statusBadgeText}>ACTIVE</Text>
+          </View>
+        </View>
+        <Text style={themedStyles.clubTagline}>Established 1975 • Colorado's Premier Bass Fishing Club</Text>
       </View>
 
       {/* Quick Links */}
@@ -165,13 +216,12 @@ const ClubScreen = () => {
       </View>
 
       {/* Officers Section */}
-            <View style={themedStyles.card}>
+      <View style={themedStyles.card}>
         <Text style={themedStyles.cardTitle}>Club Officers</Text>
         {officers.map((officer, index) => (
           <View key={index} style={themedStyles.officerCard}>
             <View style={themedStyles.officerRow}>
               {officer.image ? (
-                // local require() image
                 <Image source={officer.image} style={themedStyles.officerAvatar} />
               ) : officer.imageUrl ? (
                 <Image source={{ uri: officer.imageUrl }} style={themedStyles.officerAvatar} />
@@ -179,14 +229,40 @@ const ClubScreen = () => {
               <View style={themedStyles.officerMeta}>
                 <Text style={themedStyles.officerRole}>{officer.role}</Text>
                 <Text style={themedStyles.officerName}>{officer.name || 'TBA'}</Text>
-                {officer.phone && <Text style={themedStyles.officerContact}>{officer.phone}</Text>}
+              </View>
+            </View>
+            
+            {/* Action Chips for Contact */}
+            {(officer.email || officer.phone) && (
+              <View style={themedStyles.actionChipsContainer}>
                 {officer.email && (
-                  <TouchableOpacity onPress={() => Linking.openURL(`mailto:${officer.email}`)} accessible accessibilityRole="button" accessibilityLabel={`Email ${officer.name}`}>
-                    <Text style={themedStyles.officerContact}>{officer.email}</Text>
+                  <TouchableOpacity
+                    style={themedStyles.actionChip}
+                    onPress={() => Linking.openURL(`mailto:${officer.email}`)}
+                    accessible
+                    accessibilityRole="button"
+                    accessibilityLabel={`Email ${officer.name}`}
+                    activeOpacity={0.7}
+                  >
+                    <Ionicons name="mail" size={14} color={theme.accent} style={themedStyles.actionChipIcon} />
+                    <Text style={themedStyles.actionChipText}>{officer.email}</Text>
+                  </TouchableOpacity>
+                )}
+                {officer.phone && (
+                  <TouchableOpacity
+                    style={themedStyles.actionChip}
+                    onPress={() => Linking.openURL(`tel:${officer.phone}`)}
+                    accessible
+                    accessibilityRole="button"
+                    accessibilityLabel={`Call ${officer.name}`}
+                    activeOpacity={0.7}
+                  >
+                    <Ionicons name="call" size={14} color={theme.accent} style={themedStyles.actionChipIcon} />
+                    <Text style={themedStyles.actionChipText}>{officer.phone}</Text>
                   </TouchableOpacity>
                 )}
               </View>
-            </View>
+            )}
           </View>
         ))}
       </View>
