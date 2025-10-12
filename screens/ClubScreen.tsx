@@ -4,6 +4,14 @@ import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import officersData from '../assets/imports/dbm-officers.json';
 import localOfficers from '../assets/imports/dbm-officers.local';
+// Local images (prefer these when available)
+import jeremiahImg from '../assets/images/jeremiah_hofstetter.jpg';
+import bobbyImg from '../assets/images/bobby_martin.jpg';
+import taiImg from '../assets/images/tai_hunt.jpg';
+import gordonImg from '../assets/images/gordon_phair.jpg';
+import howardImg from '../assets/images/howard_binkley.jpg';
+import justinImg from '../assets/images/justin_apfel.jpg';
+import cliffImg from '../assets/images/cliff_purslow.jpg';
 import TopBar from '../components/TopBar';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import RulesDisplay from '../components/RulesDisplay';
@@ -12,6 +20,36 @@ import { makeStyles, spacing, borderRadius, fontSize, fontWeight, shadows, opaci
 
 // Prefer local bundled officers (with images) when available; fall back to scraped JSON
 const officers = (localOfficers as any[])?.length ? (localOfficers as any[]) : (officersData as any[]) || [];
+
+// Map of canonicalized name -> local image asset
+// Intentionally shift images down one person per request. Jeremiah will use the placeholder.
+const localImageMap: Record<string, any> = {
+  'jeremiah hofstetter': null,
+  'bobby martin': jeremiahImg,
+  'tai hunt': bobbyImg,
+  'gordon phair': taiImg,
+  'howard binkley': gordonImg,
+  'justin apfel': howardImg,
+  'cliff purslow': justinImg,
+  'bill cancellieri': cliffImg,
+};
+
+const canonicalize = (name?: string) => (name || '').trim().toLowerCase();
+
+const getImageForOfficer = (officer: any) => {
+  if (!officer) return null;
+  const key = canonicalize(officer.name);
+  // Jeremiah should always show the placeholder (no image)
+  if (key === 'jeremiah hofstetter') return null;
+
+  // Prefer local mapped images (shifted)
+  if (localImageMap.hasOwnProperty(key) && localImageMap[key]) return localImageMap[key];
+
+  // Fallback to officer-provided image fields
+  if (officer.image) return officer.image;
+  if (officer.imageUrl) return { uri: officer.imageUrl };
+  return null;
+};
 
 const styles = makeStyles((theme) => ({
   container: {
@@ -98,13 +136,14 @@ const styles = makeStyles((theme) => ({
   officerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: spacing.md,
+    paddingVertical: 12,
   },
   officerAvatar: {
-    width: 56,
-    height: 56,
-    borderRadius: borderRadius.circle,
-    marginRight: spacing.md,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    marginRight: 12,
+    marginBottom: 4,
     backgroundColor: theme.border,
   },
   officerMeta: {
@@ -221,11 +260,16 @@ const ClubScreen = () => {
         {officers.map((officer, index) => (
           <View key={index} style={themedStyles.officerCard}>
             <View style={themedStyles.officerRow}>
-              {officer.image ? (
-                <Image source={officer.image} style={themedStyles.officerAvatar} />
-              ) : officer.imageUrl ? (
-                <Image source={{ uri: officer.imageUrl }} style={themedStyles.officerAvatar} />
-              ) : null}
+              {(() => {
+                const img = getImageForOfficer(officer);
+                if (img) return <Image source={img} style={themedStyles.officerAvatar} />;
+                // Render a simple initials placeholder when no image is available
+                return (
+                  <View style={[themedStyles.officerAvatar, { alignItems: 'center', justifyContent: 'center', backgroundColor: theme.primaryLight }] as any}>
+                    <Text style={{ color: '#fff', fontWeight: '700' }}>{(officer.name || 'TBA').split(' ').map((p: string) => p[0]).slice(0,2).join('')}</Text>
+                  </View>
+                );
+              })()}
               <View style={themedStyles.officerMeta}>
                 <Text style={themedStyles.officerRole}>{officer.role}</Text>
                 <Text style={themedStyles.officerName}>{officer.name || 'TBA'}</Text>
