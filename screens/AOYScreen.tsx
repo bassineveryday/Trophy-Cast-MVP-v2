@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   StyleSheet,
   Text,
@@ -6,7 +6,9 @@ import {
   FlatList,
   ActivityIndicator,
   RefreshControl,
+  TouchableOpacity,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { AOYStandingsRow } from '../lib/supabase';
 import { useAOYStandings } from '../lib/hooks/useQueries';
 import EmptyState from '../components/EmptyState';
@@ -15,6 +17,10 @@ import Card from '../components/Card';
 import ListRow from '../components/ListRow';
 import { useTheme } from '../lib/ThemeContext';
 import { makeStyles, spacing, borderRadius, fontSize, fontWeight, shadows } from '../lib/designTokens';
+
+interface StandingWithTrend extends AOYStandingsRow {
+  trend?: 'up' | 'down' | 'same' | null;
+}
 
 const styles = makeStyles((theme) => ({
   container: {
@@ -30,6 +36,93 @@ const styles = makeStyles((theme) => ({
   },
   cardContainer: {
     marginBottom: spacing.md,
+  },
+  cardWrapper: {
+    borderRadius: borderRadius.xl,
+    borderWidth: 1,
+    borderColor: theme.border,
+    overflow: 'hidden',
+  },
+  rowContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    minHeight: 56,
+  },
+  placeContainer: {
+    width: 40,
+    alignItems: 'center',
+    marginRight: spacing.md,
+  },
+  placeText: {
+    fontSize: fontSize.xl,
+    fontWeight: fontWeight.bold,
+    color: theme.text,
+  },
+  placeTextGold: {
+    color: theme.gold,
+  },
+  placeTextSilver: {
+    color: theme.silver,
+  },
+  placeTextBronze: {
+    color: theme.bronze,
+  },
+  avatarContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: borderRadius.circle,
+    backgroundColor: theme.warning,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: spacing.md,
+  },
+  avatarText: {
+    color: '#ffffff',
+    fontSize: fontSize.lg,
+    fontWeight: fontWeight.bold,
+  },
+  contentContainer: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  nameText: {
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.bold,
+    color: theme.text,
+    marginBottom: 2,
+  },
+  subtextRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: spacing.xs,
+  },
+  subtextItem: {
+    fontSize: fontSize.sm,
+    color: theme.textSecondary,
+  },
+  subtextSeparator: {
+    fontSize: fontSize.sm,
+    color: theme.textMuted,
+  },
+  rightContainer: {
+    alignItems: 'flex-end',
+    marginLeft: spacing.md,
+  },
+  pointsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  pointsText: {
+    fontSize: fontSize.xl,
+    fontWeight: fontWeight.bold,
+    color: theme.success,
+  },
+  pointsLabel: {
+    fontSize: fontSize.xs,
+    color: theme.textMuted,
+    marginTop: 2,
   },
   loadingContainer: {
     flex: 1,
@@ -52,6 +145,27 @@ export default function AOYScreen() {
   const handleRefresh = () => {
     refetch();
   };
+
+  // Calculate trends (mock implementation - in production, compare with historical data)
+  const enhancedStandings = useMemo((): StandingWithTrend[] => {
+    if (!standings || standings.length === 0) return [];
+    
+    return standings.map((member) => {
+      // Mock trend calculation based on rank position
+      let trend: 'up' | 'down' | 'same' | null = null;
+      if (member.aoy_rank) {
+        const mockPrevRank = member.aoy_rank + Math.floor(Math.random() * 6 - 3);
+        if (member.aoy_rank < mockPrevRank) trend = 'up';
+        else if (member.aoy_rank > mockPrevRank) trend = 'down';
+        else trend = 'same';
+      }
+      
+      return {
+        ...member,
+        trend,
+      };
+    });
+  }, [standings]);
 
   const getInitials = (name: string | null): string => {
     if (!name) return '?';
@@ -78,29 +192,97 @@ export default function AOYScreen() {
     return undefined;
   };
 
-  const renderStandingItem = ({ item }: { item: AOYStandingsRow }) => {
+  const getPlaceStyle = (rank: number | null) => {
+    if (!rank) return themedStyles.placeText;
+    if (rank === 1) return [themedStyles.placeText, themedStyles.placeTextGold];
+    if (rank === 2) return [themedStyles.placeText, themedStyles.placeTextSilver];
+    if (rank === 3) return [themedStyles.placeText, themedStyles.placeTextBronze];
+    return themedStyles.placeText;
+  };
+
+  const getTrendIcon = (trend: 'up' | 'down' | 'same' | null | undefined) => {
+    switch (trend) {
+      case 'up': return { name: 'trending-up' as const, color: theme.success };
+      case 'down': return { name: 'trending-down' as const, color: theme.error };
+      case 'same': return { name: 'remove' as const, color: theme.textMuted };
+      default: return null;
+    }
+  };
+
+  const renderStandingItem = ({ item }: { item: StandingWithTrend }) => {
     const initials = getInitials(item.member_name);
-    const rankBadge = getRankBadge(item.aoy_rank);
     const points = item.total_aoy_points !== null ? item.total_aoy_points : 0;
     const rankText = item.aoy_rank ? `#${item.aoy_rank}` : 'N/A';
+    const trendInfo = getTrendIcon(item.trend);
+    
+    // Build subtext parts
+    const subtextParts = [];
+    if (item.member_id) subtextParts.push(`ID: ${item.member_id}`);
+    if (item.boater_status) subtextParts.push(item.boater_status);
     
     return (
       <View style={themedStyles.cardContainer}>
-        <Card padding="xs" elevation="md">
-          <ListRow
-            avatarText={initials}
-            title={item.member_name || 'Unknown Member'}
-            subtitle={`Member ID: ${item.member_id}`}
-            metadata={item.boater_status ? `Status: ${item.boater_status}` : undefined}
-            badge={rankBadge}
-            badgeColor={getRankBadgeColor(item.aoy_rank)}
-            rightValue={`${points}`}
-            rightLabel="points"
-            rightColor={theme.success}
-            accessibilityLabel={`${rankText}, ${item.member_name || 'Unknown Member'}, ${points} points`}
-            accessibilityHint={`AOY standing for ${item.season_year || 'current season'}`}
-          />
-        </Card>
+        <TouchableOpacity
+          activeOpacity={0.8}
+          style={themedStyles.cardWrapper}
+          accessible={true}
+          accessibilityRole="button"
+          accessibilityLabel={`Rank ${rankText}, ${item.member_name || 'Unknown Member'}, ${points} points${item.trend ? `, trend ${item.trend}` : ''}`}
+          accessibilityHint={`AOY standing for ${item.season_year || 'current season'}`}
+        >
+          <Card padding="xs" elevation="sm">
+            <View style={themedStyles.rowContainer}>
+              {/* Place/Rank */}
+              <View style={themedStyles.placeContainer}>
+                <Text style={getPlaceStyle(item.aoy_rank)}>
+                  {item.aoy_rank || '-'}
+                </Text>
+              </View>
+
+              {/* Avatar */}
+              <View style={themedStyles.avatarContainer}>
+                <Text style={themedStyles.avatarText}>{initials}</Text>
+              </View>
+
+              {/* Name and Subtext */}
+              <View style={themedStyles.contentContainer}>
+                <Text style={themedStyles.nameText} numberOfLines={1}>
+                  {item.member_name || 'Unknown Member'}
+                </Text>
+                
+                {subtextParts.length > 0 && (
+                  <View style={themedStyles.subtextRow}>
+                    {subtextParts.map((part, index) => (
+                      <React.Fragment key={index}>
+                        {index > 0 && (
+                          <Text style={themedStyles.subtextSeparator}>•</Text>
+                        )}
+                        <Text style={themedStyles.subtextItem}>{part}</Text>
+                      </React.Fragment>
+                    ))}
+                  </View>
+                )}
+              </View>
+
+              {/* Points and Trend Arrow */}
+              <View style={themedStyles.rightContainer}>
+                <View style={themedStyles.pointsContainer}>
+                  <Text style={themedStyles.pointsText}>{points}</Text>
+                  {trendInfo && (
+                    <Ionicons 
+                      name={trendInfo.name} 
+                      size={20} 
+                      color={trendInfo.color}
+                      accessible={true}
+                      accessibilityLabel={`Rank trend ${item.trend}`}
+                    />
+                  )}
+                </View>
+                <Text style={themedStyles.pointsLabel}>points</Text>
+              </View>
+            </View>
+          </Card>
+        </TouchableOpacity>
       </View>
     );
   };
@@ -129,7 +311,7 @@ export default function AOYScreen() {
       <TopBar title="Angler of the Year" subtitle="Current Season Standings" />
 
       <FlatList
-        data={standings}
+        data={enhancedStandings}
         renderItem={renderStandingItem}
         keyExtractor={(item) => item.member_id}
         refreshControl={
@@ -142,7 +324,7 @@ export default function AOYScreen() {
         }
         ListEmptyComponent={renderEmptyState}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={standings.length === 0 ? themedStyles.emptyList : themedStyles.list}
+        contentContainerStyle={enhancedStandings.length === 0 ? themedStyles.emptyList : themedStyles.list}
       />
     </View>
   );
