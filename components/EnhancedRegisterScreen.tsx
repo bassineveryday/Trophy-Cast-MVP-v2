@@ -270,7 +270,7 @@ export default function EnhancedRegisterScreen() {
   if (authMode === 'login') {
     return (
       <ScrollView contentContainerStyle={styles.container}>
-        <TopBar title="Trophy Cast" subtitle="Welcome back to Denver Bassmasters" />
+        <TopBar title="🏆 Trophy Cast" subtitle="Welcome back to Denver Bassmasters" />
         
         <View style={styles.formContainer}>
           <Input

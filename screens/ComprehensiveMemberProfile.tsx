@@ -122,7 +122,7 @@ const ComprehensiveMemberProfile: React.FC = () => {
         const memberKey = found.member_code || found.dbm_number || found.id;
         const { data: statsRows } = await supabase
           .from('tournament_results')
-          .select('place, weight_lbs, event_date, payout, big_fish')
+          .select('place, weight_lbs, event_date, cash_payout, payout, big_fish')
           .eq('member_id', memberKey)
           .order('event_date', { ascending: false });
 
@@ -130,13 +130,21 @@ const ComprehensiveMemberProfile: React.FC = () => {
         const career: CareerStats = {
           years_in_dbm: 1,
           total_tournaments: statsRows?.length || 0,
-          time_in_money: (statsRows || []).filter((r: any) => r.payout && r.payout > 0).length,
+          time_in_money: (statsRows || []).filter((r: any) => {
+            const raw = r.cash_payout ?? r.payout;
+            const num = Number(String(raw).replace(/[^0-9.-]+/g, ''));
+            return Number.isFinite(num) && num > 0;
+          }).length,
           first_place_finishes: (statsRows || []).filter((r: any) => r.place === 1).length,
           second_place_finishes: (statsRows || []).filter((r: any) => r.place === 2).length,
           third_place_finishes: (statsRows || []).filter((r: any) => r.place === 3).length,
           top_ten_finishes: (statsRows || []).filter((r: any) => r.place && r.place <= 10).length,
           total_weight: (statsRows || []).reduce((s: number, r: any) => s + (Number(r.weight_lbs) || 0), 0),
-          career_winnings: (statsRows || []).reduce((s: number, r: any) => s + (Number(r.payout) || 0), 0),
+          career_winnings: (statsRows || []).reduce((s: number, r: any) => {
+            const raw = r.cash_payout ?? r.payout;
+            const n = Number(String(raw).replace(/[^0-9.-]+/g, ''));
+            return s + (Number.isFinite(n) ? n : 0);
+          }, 0),
         };
 
         setCareerStats(career);
