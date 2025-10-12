@@ -66,7 +66,7 @@ async function diagnosticCheck() {
     // 5. Check last tournament (exact dashboard query)
     const { data: lastTournament, error: lastError } = await supabase
       .from('tournament_results')
-      .select('event_date, lake, tournament_name, place, weight_lbs, aoy_points, payout')
+      .select('event_date, lake, tournament_name, place, weight_lbs, aoy_points, cash_payout, payout')
       .eq('member_id', memberCode)
       .order('event_date', { ascending: false })
       .limit(1)

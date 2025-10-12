@@ -15,6 +15,21 @@ function toNumber(value: any, defaultValue: number = 0): number {
   return Number.isFinite(n) ? n : defaultValue;
 }
 
+// Normalize cash_payout values which may be stored as strings like "$350.00" or numeric
+function normalizePayout(raw: any): number {
+  if (raw == null) return 0;
+  // prefer numeric payout if provided
+  if (typeof raw === 'number') return Number.isFinite(raw) ? raw : 0;
+  // strip non-numeric except dot and minus
+  try {
+    const s = String(raw).replace(/[^0-9.-]+/g, '').trim();
+    const n = Number(s);
+    return Number.isFinite(n) ? n : 0;
+  } catch (e) {
+    return 0;
+  }
+}
+
 // Normalize member names for robust matching (trim, lowercase, unicode normalize)
 function normalizeName(n: any) {
   if (n == null) return '';
@@ -81,7 +96,7 @@ export function useDashboard(memberCode: string | undefined) {
 
       const { data: lastRaw, error: lastError } = await supabase
         .from('tournament_results')
-        .select('event_date, lake, tournament_name, place, weight_lbs, aoy_points, payout')
+        .select('event_date, lake, tournament_name, place, weight_lbs, aoy_points, cash_payout')
         .eq('member_id', memberCode)
         .order('event_date', { ascending: false })
         .limit(1)
@@ -102,7 +117,7 @@ export function useDashboard(memberCode: string | undefined) {
             place: lastRaw.place != null ? toNumber(lastRaw.place) : null,
             weight_lbs: toNumber(lastRaw.weight_lbs, 0),
             aoy_points: toNumber(lastRaw.aoy_points, 0),
-            payout: toNumber(lastRaw.payout, 0),
+            payout: normalizePayout(lastRaw.cash_payout ?? lastRaw.payout),
           }
         : null;
 
@@ -120,11 +135,11 @@ export function useDashboard(memberCode: string | undefined) {
       // Earnings for 2025
       const { data: earningsRows, error: earningsError } = await supabase
         .from('tournament_results')
-        .select('payout')
+        .select('cash_payout, payout')
         .eq('member_id', memberCode)
         .gte('event_date', '2025-01-01');
       if (earningsError) throw earningsError;
-  const earnings = (earningsRows || []).reduce((sum: number, r: any) => sum + toNumber(r.payout, 0), 0);
+      const earnings = (earningsRows || []).reduce((sum: number, r: any) => sum + normalizePayout(r.cash_payout ?? r.payout), 0);
 
       // Next tournament
       const { data: nextRaw, error: nextError } = await supabase
@@ -140,7 +155,7 @@ export function useDashboard(memberCode: string | undefined) {
       // Season stats
       const { data: statsRows, error: statsError } = await supabase
         .from('tournament_results')
-        .select('place, weight_lbs, big_fish')
+        .select('place, weight_lbs, big_fish, cash_payout, payout')
         .eq('member_id', memberCode)
         .gte('event_date', '2025-01-01');
       if (statsError) throw statsError;
