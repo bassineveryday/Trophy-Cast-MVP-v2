@@ -49,12 +49,44 @@ const createStorageAdapter = () => {
 
 // Minimal mock client implementing the subset used by the app.
 const makeMockClient = () => {
-  const chain = {
-    select: async () => ({ data: [], error: null }),
+  const createChain = () => ({
+    select: function(fields?: string) { return this; },
     single: async () => ({ data: null, error: null }),
-    eq: function () { return this; },
-    order: function () { return this; },
-  };
+    maybeSingle: async () => ({ data: null, error: null }),
+    eq: function(column: string, value: any) { return this; },
+    neq: function(column: string, value: any) { return this; },
+    gt: function(column: string, value: any) { return this; },
+    gte: function(column: string, value: any) { return this; },
+    lt: function(column: string, value: any) { return this; },
+    lte: function(column: string, value: any) { return this; },
+    like: function(column: string, pattern: string) { return this; },
+    ilike: function(column: string, pattern: string) { return this; },
+    is: function(column: string, value: any) { return this; },
+    in: function(column: string, values: any[]) { return this; },
+    contains: function(column: string, value: any) { return this; },
+    containedBy: function(column: string, value: any) { return this; },
+    rangeGt: function(column: string, value: any) { return this; },
+    rangeGte: function(column: string, value: any) { return this; },
+    rangeLt: function(column: string, value: any) { return this; },
+    rangeLte: function(column: string, value: any) { return this; },
+    rangeAdjacent: function(column: string, value: any) { return this; },
+    overlaps: function(column: string, value: any) { return this; },
+    textSearch: function(column: string, query: string, options?: any) { return this; },
+    match: function(query: object) { return this; },
+    not: function(column: string, operator: string, value: any) { return this; },
+    or: function(filters: string) { return this; },
+    filter: function(column: string, operator: string, value: any) { return this; },
+    order: function(column: string, options?: any) { return this; },
+    limit: function(count: number) { return this; },
+    range: function(from: number, to: number) { return this; },
+    abortSignal: function(signal: AbortSignal) { return this; },
+    then: function(onFulfilled?: any, onRejected?: any) {
+      // Make it thenable so it can be awaited
+      return Promise.resolve({ data: [], error: null }).then(onFulfilled, onRejected);
+    }
+  });
+
+  const chain = createChain();
 
   // Minimal in-memory auth state to mirror the supabase client shape
   let currentSession: any = null;
@@ -119,7 +151,7 @@ const makeMockClient = () => {
   };
 
   return {
-    from: () => chain,
+    from: (table: string) => createChain(),
     auth,
   } as any;
 };

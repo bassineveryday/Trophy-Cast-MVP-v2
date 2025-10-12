@@ -9,7 +9,7 @@ export const fadeIn = (animatedValue: Animated.Value, duration = 300) => {
   Animated.timing(animatedValue, {
     toValue: 1,
     duration,
-    useNativeDriver: true,
+    useNativeDriver: false,
   }).start();
 };
 
@@ -22,7 +22,7 @@ export const fadeOut = (animatedValue: Animated.Value, duration = 300) => {
   Animated.timing(animatedValue, {
     toValue: 0,
     duration,
-    useNativeDriver: true,
+    useNativeDriver: false,
   }).start();
 };
 
@@ -36,7 +36,7 @@ export const slideUp = (animatedValue: Animated.Value, duration = 400) => {
     toValue: 0,
     friction: 8,
     tension: 40,
-    useNativeDriver: true,
+    useNativeDriver: false,
   }).start();
 };
 
@@ -51,7 +51,7 @@ export const scale = (animatedValue: Animated.Value, toValue = 1, duration = 200
     toValue,
     friction: 5,
     tension: 40,
-    useNativeDriver: true,
+    useNativeDriver: false,
   }).start();
 };
 
@@ -71,7 +71,7 @@ export const staggerFadeIn = (
       toValue: 1,
       duration,
       delay: index * delay,
-      useNativeDriver: true,
+      useNativeDriver: false,
     })
   );
 

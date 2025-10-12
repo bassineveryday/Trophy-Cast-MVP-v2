@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 // User type will be inferred from supabase.auth
 import { supabase } from '../lib/supabase';
 import { setUser as setSentryUser } from './sentry';
@@ -29,47 +30,72 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check for dev mode bypass in localStorage
-    if (typeof window !== 'undefined' && localStorage.getItem('devModeBypass') === 'true') {
-      const mockUser = {
-        id: 'dev-mode-user-tai-hunt',
-        email: 'tai.hunt@demo.com',
-        created_at: new Date().toISOString(),
-      };
-      
-      const mockProfile: Profile = {
-        id: 'dev-mode-user-tai-hunt',
-        member_code: 'DBM019',
-        name: 'Tai Hunt',
-        hometown: 'Denver, CO',
-        created_at: new Date().toISOString(),
-      };
-      
-      setUser(mockUser);
-      setProfile(mockProfile);
-      setLoading(false);
-      return;
-    }
-
-    // Check active sessions and subscribe to auth changes
-    supabase.auth.getSession().then(({ data: { session } }: any) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchProfile(session.user.id);
+    // Check for dev mode bypass in AsyncStorage or auto-enable if no Supabase env vars
+    const checkDevMode = async () => {
+      try {
+        const devModeBypass = await AsyncStorage.getItem('devModeBypass');
+        // Auto-enable dev mode in development when no real Supabase backend is configured
+        const shouldEnableDevMode = devModeBypass === 'true' || 
+          (!process.env.EXPO_PUBLIC_SUPABASE_URL || !process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY);
+        
+        if (shouldEnableDevMode) {
+          const mockUser = {
+            id: 'dev-mode-user-tai-hunt',
+            email: 'tai.hunt@demo.com',
+            created_at: new Date().toISOString(),
+          };
+          
+          const mockProfile: Profile = {
+            id: 'dev-mode-user-tai-hunt',
+            member_code: 'DBM019',
+            name: 'Tai Hunt',
+            hometown: 'Denver, CO',
+            created_at: new Date().toISOString(),
+          };
+          
+          // Set dev mode flag for future use
+          await AsyncStorage.setItem('devModeBypass', 'true');
+          
+          setUser(mockUser);
+          setProfile(mockProfile);
+          setLoading(false);
+          
+          console.log('🎣 Dev mode enabled - logged in as Tai Hunt (DBM019)');
+          return true;
+        }
+        return false;
+      } catch (error) {
+        console.error('Error checking dev mode:', error);
+        return false;
       }
-      setLoading(false);
-    });
+    };
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchProfile(session.user.id);
-      } else {
-        setProfile(null);
-      }
-    });
+    const initAuth = async () => {
+      const isDevMode = await checkDevMode();
+      if (isDevMode) return;
 
-    return () => subscription.unsubscribe();
+      // Check active sessions and subscribe to auth changes
+      supabase.auth.getSession().then(({ data: { session } }: any) => {
+        setUser(session?.user ?? null);
+        if (session?.user) {
+          fetchProfile(session.user.id);
+        }
+        setLoading(false);
+      });
+
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
+        setUser(session?.user ?? null);
+        if (session?.user) {
+          fetchProfile(session.user.id);
+        } else {
+          setProfile(null);
+        }
+      });
+
+      return () => subscription.unsubscribe();
+    };
+
+    initAuth();
   }, []);
 
   const fetchProfile = async (userId: string) => {
