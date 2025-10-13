@@ -125,9 +125,9 @@ export default function HeroBanner({ name, subtitle, tagline }: HeroBannerProps)
       <View style={styles.content}>
         {/* Top Row: Avatar + Welcome Text + Badges */}
         <View style={styles.topRow}>
-          {/* Avatar Circle */}
+          {/* DBM Logo Placeholder */}
           <View style={styles.avatar}>
-            <Text style={styles.avatarText}>{initials}</Text>
+            <Text style={styles.logoPlaceholder}>DBM</Text>
           </View>
 
           {/* Welcome Section */}
@@ -205,6 +205,15 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#ffffff',
     textShadowColor: 'rgba(0, 0, 0, 0.2)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+  logoPlaceholder: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#ffffff',
+    letterSpacing: 0.5,
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
   },

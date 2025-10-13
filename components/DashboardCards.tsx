@@ -48,7 +48,7 @@ function DashboardCard({ icon, title, value, subtitle, gradientColors, onPress }
       )}
       
       <View style={styles.cardContent}>
-        <Ionicons name={icon} size={32} color="#ffffff" style={styles.icon} />
+        <Ionicons name={icon} size={28} color="#ffffff" style={styles.icon} />
         <Text style={styles.value}>{value}</Text>
         <Text style={styles.title}>{title}</Text>
         {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
   },
   card: {
     flex: 1,
-    minHeight: 140,
+    minHeight: 126,
     borderRadius: 16,
     overflow: 'hidden',
     shadowColor: '#000',
@@ -175,17 +175,17 @@ const styles = StyleSheet.create({
   },
   cardContent: {
     flex: 1,
-    padding: 16,
+    padding: 14,
     justifyContent: 'space-between',
   },
   icon: {
-    marginBottom: 8,
+    marginBottom: 6,
   },
   value: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: '700',
     color: '#ffffff',
-    marginBottom: 4,
+    marginBottom: 3,
   },
   title: {
     fontSize: 13,

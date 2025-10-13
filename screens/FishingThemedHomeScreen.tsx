@@ -143,7 +143,7 @@ export default function FishingThemedHomeScreen() {
         </View>
         
         {/* Hero Banner under header */}
-        <HeroBanner subtitle="Denver Bassmasters Secretary" />
+        <HeroBanner subtitle="DBM Secretary" />
       </View>
 
       {/* Main Content */}
@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'column',
     paddingHorizontal: spacing.lg,
-    paddingTop: spacing.lg,
+    paddingTop: spacing.md,
     paddingBottom: 0,
     backgroundColor: fishingTheme.colors.navyTeal,
     borderBottomWidth: 2,
@@ -241,7 +241,7 @@ const styles = StyleSheet.create({
   },
   headerContent: {
     alignItems: 'center',
-    marginBottom: spacing.md,
+    marginBottom: spacing.sm,
   },
   logoText: {
     fontSize: 24,
