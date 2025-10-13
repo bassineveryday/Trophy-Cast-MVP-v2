@@ -20,6 +20,7 @@ import {
 import { useAuth } from '../lib/AuthContext';
 import { useDashboard, useAOYStandings } from '../lib/hooks/useQueries';
 import HeroBanner from '../components/HeroBanner';
+import DashboardCards from '../components/DashboardCards';
 import { GradientCard, GradientVariant } from '../components/GradientCard';
 import { TrophyRack, Trophy } from '../components/TrophyRack';
 import { DailyChallenge } from '../components/DailyChallenge';
@@ -153,6 +154,16 @@ export default function FishingThemedHomeScreen() {
         }
       >
 
+        {/* Dashboard Cards - 2x2 Grid */}
+        <DashboardCards
+          catchesThisMonth={dashboardQuery.data?.seasonStats?.tournaments || 23}
+          catchesChange="+5 from last month"
+          activePlan="Active Plans"
+          nextTournament={dashboardQuery.data?.nextTournament?.lake || "Lake Guntersville"}
+          nextTournamentDate="Sept 28"
+          notificationCount={0}
+        />
+
         <Animated.View
           style={[
             isMobile ? styles.singleColumn : styles.twoColumn,
@@ -162,12 +173,12 @@ export default function FishingThemedHomeScreen() {
             },
           ]}
         >
-          {/* Left Column - Leaderboard */}
+          {/* Left Column - Coming Soon */}
           <View style={styles.leftColumn}>
             <Text style={styles.sectionTitle}>TOP ANGLERS</Text>
             
             {topAnglers.length > 0 ? (
-              topAnglers.map((angler, index) => (
+              topAnglers.slice(0, 3).map((angler, index) => (
                 <GradientCard
                   key={angler.member_id}
                   variant={RANK_VARIANTS[index]}
