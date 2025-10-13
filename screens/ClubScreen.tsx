@@ -12,32 +12,11 @@ import gordonImg from '../assets/images/gordon_phair.jpg';
 import howardImg from '../assets/images/howard_binkley.jpg';
 import justinImg from '../assets/images/justin_apfel.jpg';
 import cliffImg from '../assets/images/cliff_purslow.jpg';
-// DBM Logo (base64 inline to avoid bundler issues)
-const DBM_LOGO = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSIjRDRBRjM3Ij48cGF0aCBkPSJNNTAgMTBMMjAgOTBoNjBMMTAwIDUweiIvPjwvZz48L3N2Zz4=';
-// Prefer a checked-in PNG/SVG at assets/images/dbm-logo.png if available. If you drop the real logo
-// into that path, Metro will bundle it with `require`. Otherwise we fall back to the inline data URI above.
-let DBM_IMAGE: any = { uri: DBM_LOGO };
-try {
-  // Conditional require is safe here — if the file exists Metro will include it.
-  // If it doesn't exist during development the require will throw and we keep the inline fallback.
-  // eslint-disable-next-line global-require, @typescript-eslint/no-var-requires
-  DBM_IMAGE = require('../assets/images/dbm-logo.png');
-} catch (e) {
-  // fallback already assigned
-}
 import TopBar from '../components/TopBar';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import RulesDisplay from '../components/RulesDisplay';
 import { useTheme } from '../lib/ThemeContext';
 import { makeStyles, spacing, borderRadius, fontSize, fontWeight, shadows, opacity } from '../lib/designTokens';
-
-// Club-specific color tokens (applied only within ClubScreen)
-const clubColors = {
-  primary: '#F5C842', // Fishing Gold
-  secondary: '#1A3D4D', // Deep Ocean
-  accent: '#2BAE66', // Bass Green  
-  background: '#1A3D4D', // Deep Ocean
-};
 
 // Prefer local bundled officers (with images) when available; fall back to scraped JSON
 const officers = (localOfficers as any[])?.length ? (localOfficers as any[]) : (officersData as any[]) || [];
@@ -86,11 +65,6 @@ const styles = makeStyles((theme) => ({
     borderColor: theme.border,
     alignItems: 'center',
   },
-  clubLogo: {
-    width: 80,
-    height: 80,
-    marginBottom: spacing.md,
-  },
   headerTitleRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -116,24 +90,6 @@ const styles = makeStyles((theme) => ({
   clubTagline: {
     fontSize: fontSize.md,
     color: theme.textSecondary,
-  },
-  clubHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: spacing.lg,
-    paddingHorizontal: spacing.md,
-    borderRadius: borderRadius.lg,
-    marginBottom: spacing.md,
-    backgroundColor: theme.surface,
-    ...shadows.md,
-  },
-  clubInfo: {
-    flex: 1,
-  },
-  clubSubtitle: {
-    fontSize: fontSize.sm,
-    color: theme.textSecondary,
-    marginTop: spacing.xs,
   },
   quickLinks: {
     flexDirection: 'row',
@@ -252,17 +208,15 @@ const ClubScreen = () => {
 
   return (
     <ScrollView style={themedStyles.container}>
-      {/* Club BRANDED Header */}
-      <View style={[themedStyles.clubHeader, { backgroundColor: clubColors.background }]}>
-  <Image source={DBM_IMAGE} style={themedStyles.clubLogo} resizeMode="contain" />
-        <View style={themedStyles.clubInfo}>
-          <Text style={[themedStyles.clubName, { color: clubColors.secondary }]}>Denver Bassmasters</Text>
-          <Text style={[themedStyles.clubSubtitle, { color: clubColors.secondary }]}>Founded 1977 • 48 Years Strong</Text>
-          <Text style={themedStyles.clubTagline}>Promoting bass fishing, fellowship, youth programs, and conservation</Text>
+      {/* Club Hero Header */}
+      <View style={themedStyles.heroHeader}>
+        <View style={themedStyles.headerTitleRow}>
+          <Text style={themedStyles.clubName}>Denver Bassmasters</Text>
+          <View style={themedStyles.statusBadge}>
+            <Text style={themedStyles.statusBadgeText}>ACTIVE</Text>
+          </View>
         </View>
-        <View style={themedStyles.statusBadge}>
-          <Text style={themedStyles.statusBadgeText}>ACTIVE</Text>
-        </View>
+        <Text style={themedStyles.clubTagline}>Established 1975 • Colorado's Premier Bass Fishing Club</Text>
       </View>
 
       {/* Quick Links */}
@@ -293,15 +247,10 @@ const ClubScreen = () => {
       </View>
 
       {/* Club Description */}
-      <View style={themedStyles.card}>
+            <View style={themedStyles.card}>
         <Text style={themedStyles.cardTitle}>About Denver Bassmasters</Text>
         <Text style={themedStyles.cardContent}>
-          Founded in 1977, Denver Bassmasters (DBM) is Colorado's premier bass fishing club and proud chapter of B.A.S.S. (Bass Anglers Sportsman Society).
-        </Text>
-        
-        <Text style={[themedStyles.cardTitle, { marginTop: spacing.lg }]}>Mission</Text>
-        <Text style={themedStyles.cardContent}>
-          To stimulate public awareness of bass fishing as a major sport, improve our skills through fellowship and exchange of techniques, promote youth fishing, and exemplify sportsmanship and ethics in all activities representing the Chapter and B.A.S.S.
+          Founded in 1977, Denver Bassmasters is a premier fishing club in Colorado dedicated to promoting bass fishing, conservation, and sportsmanship.
         </Text>
       </View>
 
