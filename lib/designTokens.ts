@@ -108,3 +108,45 @@ export function makeStyles<T extends StyleSheet.NamedStyles<T>>(
     return StyleSheet.create(styleFactory(theme));
   };
 }
+
+/**
+ * Fishing Theme - Premium tournament fishing UI colors and gradients
+ * Brand: Bassin' Everyday × Trophy Cast
+ */
+export const fishingTheme = {
+  colors: {
+    // Base backgrounds
+    deepOcean: '#1A3D4D',
+    navyTeal: '#2A5A6B',
+    darkTeal: '#1E4A56',
+    
+    // Brand
+    gold: '#F5C842',
+    goldenOrange: '#E8A735',
+    
+    // Widget backgrounds
+    challengeTeal: '#3A7A7E',
+    trophyNavy: '#2A5060',
+    
+    // Accents
+    mutedGold: '#D4AF7A',
+    lightTeal: '#5BC4C0',
+    
+    // Text
+    white: '#FFFFFF',
+    cream: '#F5EFE6',
+    mutedWhite: 'rgba(255,255,255,0.7)',
+    
+    // Progress
+    progressOrange: '#F5A142',
+    progressDark: '#2A4A5A',
+  },
+  
+  gradients: {
+    goldCard: 'linear-gradient(135deg, #F5C842 0%, #E8A735 100%)',
+    greenCard: 'linear-gradient(135deg, #7CAA5C 0%, #5A8A4A 100%)',
+    tealCard: 'linear-gradient(135deg, #3EAAA8 0%, #2A8B89 100%)',
+    blueCard: 'linear-gradient(135deg, #4A7FAF 0%, #35678F 100%)',
+    oceanBg: 'linear-gradient(180deg, #1A3D4D 0%, #0D2A36 100%)',
+  },
+} as const;

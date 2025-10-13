@@ -13,6 +13,7 @@ import { queryClient } from './lib/queryClient';
 // Import screens
 import HomeScreen from './screens/HomeScreen';
 import EnhancedHomeScreen from './screens/EnhancedHomeScreen';
+import FishingThemedHomeScreen from './screens/FishingThemedHomeScreen';
 import EnhancedTournamentsScreen from './components/EnhancedTournamentsScreen';
 import EnhancedProfileScreen from './components/EnhancedProfileScreen';
 import EnhancedAOYScreen from './components/EnhancedAOYScreen';
@@ -107,7 +108,7 @@ function TabNavigator() {
       <Tab.Screen 
         name="Home" 
         options={{ title: 'Trophy Cast' }}
-        component={EnhancedHomeScreen}
+        component={FishingThemedHomeScreen}
       />
       <Tab.Screen 
         name="Tournaments" 

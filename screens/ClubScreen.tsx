@@ -14,6 +14,17 @@ import justinImg from '../assets/images/justin_apfel.jpg';
 import cliffImg from '../assets/images/cliff_purslow.jpg';
 // DBM Logo (base64 inline to avoid bundler issues)
 const DBM_LOGO = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSIjRDRBRjM3Ij48cGF0aCBkPSJNNTAgMTBMMjAgOTBoNjBMMTAwIDUweiIvPjwvZz48L3N2Zz4=';
+// Prefer a checked-in PNG/SVG at assets/images/dbm-logo.png if available. If you drop the real logo
+// into that path, Metro will bundle it with `require`. Otherwise we fall back to the inline data URI above.
+let DBM_IMAGE: any = { uri: DBM_LOGO };
+try {
+  // Conditional require is safe here — if the file exists Metro will include it.
+  // If it doesn't exist during development the require will throw and we keep the inline fallback.
+  // eslint-disable-next-line global-require, @typescript-eslint/no-var-requires
+  DBM_IMAGE = require('../assets/images/dbm-logo.png');
+} catch (e) {
+  // fallback already assigned
+}
 import TopBar from '../components/TopBar';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import RulesDisplay from '../components/RulesDisplay';
@@ -243,7 +254,7 @@ const ClubScreen = () => {
     <ScrollView style={themedStyles.container}>
       {/* Club BRANDED Header */}
       <View style={[themedStyles.clubHeader, { backgroundColor: clubColors.background }]}>
-        <Image source={{ uri: DBM_LOGO }} style={themedStyles.clubLogo} resizeMode="contain" />
+  <Image source={DBM_IMAGE} style={themedStyles.clubLogo} resizeMode="contain" />
         <View style={themedStyles.clubInfo}>
           <Text style={[themedStyles.clubName, { color: clubColors.secondary }]}>Denver Bassmasters</Text>
           <Text style={[themedStyles.clubSubtitle, { color: clubColors.secondary }]}>Founded 1977 • 48 Years Strong</Text>
