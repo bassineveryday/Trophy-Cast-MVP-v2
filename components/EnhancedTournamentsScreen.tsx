@@ -128,70 +128,64 @@ export default function EnhancedTournamentsScreen() {
     const isExpanded = selectedTournament === item.tournament_code;
 
     return (
-      <TouchableOpacity 
-        style={[styles.tournamentCard, isExpanded && styles.expandedCard]}
-        onPress={() => setSelectedTournament(isExpanded ? null : item.tournament_code || null)}
-        activeOpacity={0.7}
-      >
-        {/* Card Header */}
-        <View style={styles.cardHeader}>
-          <View style={styles.titleContainer}>
-            <Text style={styles.tournamentName} numberOfLines={isExpanded ? undefined : 1}>
-              {item.tournament_name || 'Unnamed Tournament'}
-            </Text>
-            <View style={[styles.statusBadge, { backgroundColor: statusInfo.color }]}>
-              <Ionicons name={statusInfo.icon as any} size={12} color="white" />
-              <Text style={styles.statusText}>
-                {getStatusText(statusInfo.status)}
-              </Text>
-            </View>
-          </View>
-          
-          <View style={styles.participantBadge}>
-              <Text style={styles.participantCount}>
-                {participantCounts[item.tournament_code || ''] ?? (isExpanded ? (selectedParticipants?.length ?? 0) : (item.participants || 0))}
-              </Text>
-              <Text style={styles.participantLabel}>anglers</Text>
-            </View>
-        </View>
-        
-        {/* Basic Info */}
-        <View style={styles.infoContainer}>
-          <View style={styles.infoRow}>
-            <Ionicons name="calendar-outline" size={16} color="#666" />
-            <Text style={styles.infoText}>
-              {formatDate(item.event_date || '')}
-            </Text>
-          </View>
-          
-          <View style={styles.infoRow}>
-            <Ionicons name="location-outline" size={16} color="#666" />
-            <Text style={styles.infoText}>
-              {item.lake || 'Lake TBD'}
-            </Text>
-          </View>
-          
-          {item.tournament_code && (
-            <View style={styles.infoRow}>
-              <Ionicons name="barcode-outline" size={16} color="#666" />
-              <Text style={styles.codeText}>
-                {item.tournament_code}
-              </Text>
-            </View>
-          )}
-        </View>
+      <View>
+        {/* Branded summary card */}
+        <TouchableOpacity
+          onPress={() => setSelectedTournament(isExpanded ? null : item.tournament_code || null)}
+          activeOpacity={0.8}
+        >
+          {/* Use the themed card styles for a compact summary */}
+          <View style={[styles.tournamentCard, isExpanded && styles.expandedCard]}>
+            <View style={styles.cardHeader}>
+              <View style={styles.titleContainer}>
+                <Text style={styles.tournamentName} numberOfLines={isExpanded ? undefined : 1}>
+                  {item.tournament_name || 'Unnamed Tournament'}
+                </Text>
 
-        {/* Expanded Details */}
+                <View style={[styles.statusBadge, { backgroundColor: statusInfo.color }]}>
+                  <Ionicons name={statusInfo.icon as any} size={12} color="white" />
+                  <Text style={styles.statusText}>{getStatusText(statusInfo.status)}</Text>
+                </View>
+              </View>
+
+              <View style={styles.participantBadge}>
+                <Text style={styles.participantCount}>{participantCounts[item.tournament_code || ''] ?? (isExpanded ? (selectedParticipants?.length ?? 0) : (item.participants || 0))}</Text>
+                <Text style={styles.participantLabel}>anglers</Text>
+              </View>
+            </View>
+
+            <View style={styles.infoContainer}>
+              <View style={styles.infoRow}>
+                <Ionicons name="calendar-outline" size={16} color={fishingTheme.colors.mutedWhite} />
+                <Text style={styles.infoText}>{formatDate(item.event_date || '')}</Text>
+              </View>
+
+              <View style={styles.infoRow}>
+                <Ionicons name="location-outline" size={16} color={fishingTheme.colors.mutedWhite} />
+                <Text style={styles.infoText}>{item.lake || 'Lake TBD'}</Text>
+              </View>
+
+              {item.tournament_code && (
+                <View style={styles.infoRow}>
+                  <Ionicons name="barcode-outline" size={16} color={fishingTheme.colors.lightTeal} />
+                  <Text style={styles.codeText}>{item.tournament_code}</Text>
+                </View>
+              )}
+            </View>
+          </View>
+        </TouchableOpacity>
+
+        {/* Expanded details area (keeps previous layout but visually tied to card) */}
         {isExpanded && (
           <View style={styles.expandedContent}>
             <View style={styles.separator} />
-            
+
             <View style={styles.detailSection}>
               <Text style={styles.sectionTitle}>Tournament Details</Text>
-                <View style={styles.detailGrid}>
+              <View style={styles.detailGrid}>
                 <View style={styles.detailItem}>
                   <Text style={styles.detailLabel}>Participants</Text>
-                  <Text style={styles.detailValue}>{isExpanded && selectedTournament === item.tournament_code ? (participantsLoading ? 'Loading...' : `${selectedParticipants?.length ?? 0} anglers`) : `${item.participants || 0} anglers`}</Text>
+                  <Text style={styles.detailValue}>{participantsLoading ? 'Loading...' : `${selectedParticipants?.length ?? 0} anglers`}</Text>
                 </View>
                 <View style={styles.detailItem}>
                   <Text style={styles.detailLabel}>Status</Text>
@@ -202,27 +196,16 @@ export default function EnhancedTournamentsScreen() {
               </View>
             </View>
 
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.actionButton}
-              onPress={() => (navigation as any).navigate('TournamentDetail', { 
-                tournamentId: item.event_id 
-              })}
+              onPress={() => (navigation as any).navigate('TournamentDetail', { tournamentId: item.event_id })}
             >
               <Ionicons name="information-circle-outline" size={18} color={fishingTheme.colors.progressOrange} />
               <Text style={styles.actionButtonText}>View Full Details</Text>
             </TouchableOpacity>
           </View>
         )}
-        
-        {/* Expand/Collapse Indicator */}
-        <View style={styles.expandIndicator}>
-          <Ionicons 
-            name={isExpanded ? "chevron-up" : "chevron-down"} 
-            size={20} 
-            color="#999" 
-          />
-        </View>
-      </TouchableOpacity>
+      </View>
     );
   };
 
