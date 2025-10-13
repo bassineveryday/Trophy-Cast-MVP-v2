@@ -27,12 +27,12 @@ const trophyConfig: Record<
 
 export const TrophyBadge: React.FC<TrophyBadgeProps> = ({
   type,
-  size = 48,
+  size = 56,
   label,
   testID,
 }) => {
   const config = trophyConfig[type];
-  const iconSize = Math.round(size * 0.5);
+  const iconSize = Math.round(size * 0.55);
 
   return (
     <View style={styles.container} testID={testID || `trophy-badge-${type}`}>
@@ -45,6 +45,11 @@ export const TrophyBadge: React.FC<TrophyBadgeProps> = ({
             height: size,
             borderRadius: size / 2,
             backgroundColor: `${config.color}26`, // 15% opacity in hex
+            shadowColor: config.color,
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.3,
+            shadowRadius: 4,
+            elevation: 3,
           },
         ]}
       >
@@ -61,17 +66,17 @@ const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
     justifyContent: 'center',
-    margin: 8,
+    margin: 10,
   },
   badge: {
     justifyContent: 'center',
     alignItems: 'center',
   },
   label: {
-    marginTop: 6,
-    fontSize: 11,
-    color: fishingTheme.colors.mutedWhite,
+    marginTop: 8,
+    fontSize: 12,
+    color: fishingTheme.colors.cream,
     textAlign: 'center',
-    fontWeight: '500',
+    fontWeight: '600',
   },
 });

@@ -36,8 +36,11 @@ export const DailyChallenge: React.FC<DailyChallengeProps> = ({
 
   return (
     <View style={styles.container} testID={testID || 'daily-challenge'}>
-      {/* Title */}
-      <Text style={styles.title}>DAILY CHALLENGE</Text>
+      {/* Title with decorative hook */}
+      <View style={styles.titleRow}>
+        <Text style={styles.hookEmoji}>🎣</Text>
+        <Text style={styles.title}>DAILY CHALLENGE</Text>
+      </View>
 
       {/* Progress Bar */}
       <View style={styles.progressBarContainer}>
@@ -76,30 +79,43 @@ const styles = StyleSheet.create({
     backgroundColor: fishingTheme.colors.challengeTeal,
     borderRadius: 16,
     padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  hookEmoji: {
+    fontSize: 18,
+    marginRight: 8,
   },
   title: {
     fontSize: 14,
     fontWeight: '700',
     color: fishingTheme.colors.white,
-    marginBottom: 12,
     letterSpacing: 0.5,
   },
   progressBarContainer: {
-    height: 12,
+    height: 14,
     backgroundColor: fishingTheme.colors.progressDark,
-    borderRadius: 6,
+    borderRadius: 7,
     overflow: 'hidden',
-    marginBottom: 8,
+    marginBottom: 12,
   },
   progressBarFill: {
     height: '100%',
     backgroundColor: fishingTheme.colors.progressOrange,
-    borderRadius: 6,
+    borderRadius: 7,
   },
   progressText: {
-    fontSize: 12,
-    color: fishingTheme.colors.mutedWhite,
-    marginBottom: 16,
+    fontSize: 13,
+    color: fishingTheme.colors.white,
+    marginBottom: 20,
     fontWeight: '600',
   },
   fishRow: {

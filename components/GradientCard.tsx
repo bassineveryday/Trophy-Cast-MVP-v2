@@ -37,6 +37,10 @@ export const GradientCard: React.FC<GradientCardProps> = ({
   const colors = gradientColors[variant];
   const showTrophy = rank === 1;
 
+  // Fishing-themed avatar emojis for placeholder
+  const avatarEmojis = ['🎣', '🐟', '🏆', '⚓', '🐠', '🎯'];
+  const placeholderEmoji = avatarEmojis[rank % avatarEmojis.length];
+
   const CardContent = (
     <View style={styles.contentContainer}>
       {/* Avatar */}
@@ -45,7 +49,7 @@ export const GradientCard: React.FC<GradientCardProps> = ({
           <Image source={{ uri: avatar }} style={styles.avatar} />
         ) : (
           <View style={[styles.avatar, styles.avatarPlaceholder]}>
-            <Text style={styles.avatarText}>{name.charAt(0).toUpperCase()}</Text>
+            <Text style={styles.avatarEmoji}>{placeholderEmoji}</Text>
           </View>
         )}
       </View>
@@ -73,9 +77,10 @@ export const GradientCard: React.FC<GradientCardProps> = ({
     <Pressable
       onPress={onPress}
       testID={testID || `gradient-card-${variant}`}
-      style={({ pressed }) => [
+      style={({ pressed, hovered }: any) => [
         styles.pressable,
         pressed && styles.pressed,
+        Platform.OS === 'web' && hovered && styles.hovered,
       ]}
       accessible={true}
       accessibilityRole="button"
@@ -109,21 +114,26 @@ export const GradientCard: React.FC<GradientCardProps> = ({
 const styles = StyleSheet.create({
   pressable: {
     marginBottom: 12,
-  },
+    transition: 'all 0.2s ease',
+  } as any,
   pressed: {
-    opacity: 0.8,
-    transform: [{ scale: 0.98 }],
+    opacity: 0.85,
+    transform: [{ scale: 0.97 }],
   },
+  hovered: {
+    transform: [{ scale: 1.02 }],
+    shadowOpacity: 0.35,
+  } as any,
   card: {
     borderRadius: 16,
     padding: 16,
     minHeight: 80,
-    // Shadow for depth
+    // Enhanced shadow for 3D depth effect
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 6,
   },
   contentContainer: {
     flexDirection: 'row',
@@ -148,6 +158,9 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '700',
     color: fishingTheme.colors.white,
+  },
+  avatarEmoji: {
+    fontSize: 26,
   },
   infoContainer: {
     flex: 1,

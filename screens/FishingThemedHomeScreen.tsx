@@ -15,15 +15,18 @@ import {
   ScrollView,
   RefreshControl,
   useWindowDimensions,
+  Animated,
 } from 'react-native';
 import { useAuth } from '../lib/AuthContext';
 import { useDashboard, useAOYStandings } from '../lib/hooks/useQueries';
 import { GradientCard, GradientVariant } from '../components/GradientCard';
 import { TrophyRack, Trophy } from '../components/TrophyRack';
 import { DailyChallenge } from '../components/DailyChallenge';
+import { FishingDecorations } from '../components/FishingDecorations';
 import Skeleton from '../components/Skeleton';
 import { EmptyState } from '../components/EmptyState';
 import ThemeToggle from '../components/ThemeToggle';
+import { useReducedMotion } from '../hooks/useReducedMotion';
 import { fishingTheme, spacing, fontSize, fontWeight } from '../lib/designTokens';
 
 // Gradient variants for ranks 1-4
@@ -39,6 +42,7 @@ const MOCK_TROPHIES: Trophy[] = [
 export default function FishingThemedHomeScreen() {
   const { profile } = useAuth();
   const { width } = useWindowDimensions();
+  const prefersReducedMotion = useReducedMotion();
   
   // Data queries
   const dashboardQuery = useDashboard(profile?.member_code);
@@ -46,6 +50,31 @@ export default function FishingThemedHomeScreen() {
 
   // Responsive breakpoint
   const isMobile = width < 768;
+
+  // Entrance animations
+  const fadeAnim = React.useRef(new Animated.Value(0)).current;
+  const slideAnim = React.useRef(new Animated.Value(30)).current;
+
+  React.useEffect(() => {
+    if (prefersReducedMotion) {
+      fadeAnim.setValue(1);
+      slideAnim.setValue(0);
+      return;
+    }
+
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 600,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 600,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [fadeAnim, slideAnim, prefersReducedMotion]);
 
   // Get top 4 anglers from AOY standings
   const topAnglers = React.useMemo(() => {
@@ -102,6 +131,9 @@ export default function FishingThemedHomeScreen() {
 
   return (
     <View style={styles.container}>
+      {/* Decorative Background Elements */}
+      <FishingDecorations />
+
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerContent}>
@@ -118,7 +150,15 @@ export default function FishingThemedHomeScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        <View style={isMobile ? styles.singleColumn : styles.twoColumn}>
+        <Animated.View
+          style={[
+            isMobile ? styles.singleColumn : styles.twoColumn,
+            {
+              opacity: fadeAnim,
+              transform: [{ translateY: slideAnim }],
+            },
+          ]}
+        >
           {/* Left Column - Leaderboard */}
           <View style={styles.leftColumn}>
             <Text style={styles.sectionTitle}>TOP ANGLERS</Text>
@@ -160,7 +200,7 @@ export default function FishingThemedHomeScreen() {
               testID="home.trophyRack"
             />
           </View>
-        </View>
+        </Animated.View>
       </ScrollView>
     </View>
   );
@@ -176,26 +216,35 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: spacing.xl,
-    paddingTop: spacing.giant,
-    paddingBottom: spacing.xl,
+    paddingTop: spacing.giant + 8,
+    paddingBottom: spacing.xl + 4,
     backgroundColor: fishingTheme.colors.navyTeal,
-    borderBottomWidth: 2,
+    borderBottomWidth: 3,
     borderBottomColor: fishingTheme.colors.gold,
+    shadowColor: fishingTheme.colors.gold,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
   },
   headerContent: {
     flex: 1,
   },
   logoText: {
-    fontSize: 32,
+    fontSize: 36,
     fontWeight: '700',
     color: fishingTheme.colors.gold,
-    letterSpacing: 1,
+    letterSpacing: 1.5,
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
   },
   tagline: {
     fontSize: 14,
     color: fishingTheme.colors.cream,
-    marginTop: 4,
+    marginTop: 6,
     fontWeight: '500',
+    letterSpacing: 0.5,
   },
   scrollContent: {
     paddingHorizontal: spacing.xl,

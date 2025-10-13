@@ -54,21 +54,26 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: fishingTheme.colors.trophyNavy,
     borderRadius: 16,
-    padding: 16,
+    padding: 18,
     marginTop: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 3,
   },
   title: {
     fontSize: 14,
     fontWeight: '700',
-    color: fishingTheme.colors.white,
-    marginBottom: 12,
+    color: fishingTheme.colors.gold,
+    marginBottom: 16,
     letterSpacing: 0.5,
   },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'flex-start',
-    marginHorizontal: -8, // Offset badge margins
+    marginHorizontal: -10, // Offset badge margins
   },
   emptyState: {
     width: '100%',
