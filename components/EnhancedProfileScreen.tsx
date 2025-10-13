@@ -16,6 +16,7 @@ import { TournamentEvent, AOYStandingsRow } from '../lib/supabase';
 import DatabaseStatusScreen from '../components/DatabaseStatusScreen';
 import { ListSkeleton } from '../components/Skeleton';
 import TopBar from '../components/TopBar';
+import ThemeToggle from '../components/ThemeToggle';
 
 interface Achievement {
   id: string;
@@ -403,6 +404,19 @@ export default function EnhancedProfileScreen() {
                 {profile?.member_code || 'Not linked'}
               </Text>
             </View>
+          </View>
+        </View>
+
+        {/* App Preferences */}
+        <View style={styles.settingsGroup}>
+          <Text style={styles.settingsGroupTitle}>Appearance</Text>
+          
+          <View style={styles.settingsItem}>
+            <Ionicons name="color-palette-outline" size={20} color="#7f8c8d" />
+            <View style={styles.settingsItemContent}>
+              <Text style={styles.settingsItemLabel}>Theme</Text>
+            </View>
+            <ThemeToggle />
           </View>
         </View>
 
