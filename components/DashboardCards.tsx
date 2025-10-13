@@ -17,27 +17,27 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { fishingTheme } from '../lib/designTokens';
 
 interface DashboardCardProps {
   icon: keyof typeof Ionicons.glyphMap;
   title: string;
   value: string | number;
   subtitle?: string;
-  color: string;
+  gradientColors: [string, string];
   onPress?: () => void;
 }
 
 /**
  * Individual Dashboard Card
  */
-function DashboardCard({ icon, title, value, subtitle, color, onPress }: DashboardCardProps) {
+function DashboardCard({ icon, title, value, subtitle, gradientColors, onPress }: DashboardCardProps) {
   const isWeb = Platform.OS === 'web';
-  const gradientColors = [color, color] as const;
 
   const content = (
     <>
       {isWeb ? (
-        <View style={[styles.gradient, { backgroundColor: color }]} />
+        <View style={[styles.gradient, { backgroundColor: gradientColors[0] }]} />
       ) : (
         <LinearGradient
           colors={gradientColors}
@@ -105,7 +105,7 @@ export default function DashboardCards({
           title="Catches This Month"
           value={catchesThisMonth}
           subtitle={catchesChange}
-          color="#22d3ee"
+          gradientColors={['#3EAAA8', '#2A8B89']}
           onPress={onCatchesPress}
         />
 
@@ -115,7 +115,7 @@ export default function DashboardCards({
           title={activePlan}
           value="3"
           subtitle={nextTournament ? `Next: ${nextTournament}` : 'Next: Lake Guntersville'}
-          color="#22d3ee"
+          gradientColors={['#4A7FAF', '#35678F']}
           onPress={onPlanPress}
         />
       </View>
@@ -128,7 +128,7 @@ export default function DashboardCards({
           title="Tournaments"
           value="3"
           subtitle={nextTournamentDate || '3 Upcoming'}
-          color="#22d3ee"
+          gradientColors={['#F5C842', '#E8A735']}
           onPress={onTournamentsPress}
         />
 
@@ -138,7 +138,7 @@ export default function DashboardCards({
           title="Performance"
           value="94%"
           subtitle="Strong trend"
-          color="#22d3ee"
+          gradientColors={['#7CAA5C', '#5A8A4A']}
           onPress={onNotificationsPress}
         />
       </View>
