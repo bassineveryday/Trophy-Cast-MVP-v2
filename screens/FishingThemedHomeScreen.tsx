@@ -141,7 +141,6 @@ export default function FishingThemedHomeScreen() {
           <Text style={styles.logoText}>TROPHY CAST</Text>
           <Text style={styles.tagline}>Bassin' Everyday Tournament Series</Text>
         </View>
-        <ThemeToggle />
       </View>
 
       {/* Main Content */}
@@ -206,6 +205,11 @@ export default function FishingThemedHomeScreen() {
           </View>
         </Animated.View>
       </ScrollView>
+
+      {/* Theme Toggle - Floating at Bottom */}
+      <View style={styles.themeToggleContainer}>
+        <ThemeToggle />
+      </View>
     </View>
   );
 }
@@ -274,5 +278,16 @@ const styles = StyleSheet.create({
     color: fishingTheme.colors.cream,
     marginBottom: spacing.lg,
     letterSpacing: 0.5,
+  },
+  themeToggleContainer: {
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+    zIndex: 1000,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
   },
 });
