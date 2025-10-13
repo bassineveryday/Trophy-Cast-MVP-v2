@@ -23,6 +23,7 @@ import { useTheme } from '../lib/ThemeContext';
 import { useDashboard, useTournaments, useAOYStandings } from '../lib/hooks/useQueries';
 import Skeleton, { DashboardSkeleton, CardSkeleton } from '../components/Skeleton';
 import Card, { CardPressable } from '../components/Card';
+import HeroDashboard from '../components/HeroDashboard';
 import { EmptyState } from '../components/EmptyState';
 import AnimatedCard from '../components/AnimatedCard';
 import ThemeToggle from '../components/ThemeToggle';
@@ -660,6 +661,60 @@ export default function EnhancedHomeScreen() {
           <View style={themedStyles.memberBadge}>
             <Ionicons name="card" size={16} color={theme.primary} />
             <Text style={themedStyles.memberCode}>{profile?.member_code || 'N/A'}</Text>
+          </View>
+        </View>
+      </View>
+
+      {/* Hero personal dashboard (bragging card) */}
+      <HeroDashboard
+        stats={{
+          aoyRank: aoy?.aoy_rank ?? undefined,
+          totalPoints: aoy?.total_aoy_points ?? undefined,
+          tournaments: seasonStats?.tournaments ?? 0,
+          wins: (seasonStats as any)?.wins ?? 0,
+          pbLbs: seasonStats?.bigFish ?? 0,
+        }}
+        loading={isLoading}
+  onViewProfile={() => (navigation as any).navigate('Profile')}
+        testID="home.hero"
+      />
+
+      {/* Trophy Rack */}
+      <View style={[themedStyles.sectionContainer, { paddingHorizontal: spacing.xl }]}>
+        <Text style={themedStyles.sectionTitle}>Trophy Rack</Text>
+        {isRefetching ? (
+          <View style={{ flexDirection: 'row', gap: 12 }}>
+            <Skeleton width={80} height={80} />
+            <Skeleton width={80} height={80} />
+            <Skeleton width={80} height={80} />
+          </View>
+        ) : (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ paddingBottom: 8 }}>
+            {((dashboard as any)?.recentTrophies || []).map((t: any, i: number) => (
+              <Card key={i} padding="sm" radius="lg" variant="secondary" style={{ marginRight: 12 }} testID={`home.trophy.${i}`}>
+                <Text style={{ fontWeight: '700' }}>{t.title || 'Tournament Win'}</Text>
+                <Text style={{ color: '#6B7280', fontSize: 12 }}>{t.date || t.event_date}</Text>
+              </Card>
+            ))}
+          </ScrollView>
+        )}
+      </View>
+
+      {/* Expanded Stats Grid */}
+      <View style={[themedStyles.sectionContainer, { paddingHorizontal: spacing.xl }]}>
+        <Text style={themedStyles.sectionTitle}>Season Stats</Text>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+          <View style={themedStyles.statCard}>
+            <Text style={themedStyles.statLabel}>Tournaments</Text>
+            <Text style={themedStyles.statValue}>{seasonStats?.tournaments ?? 0}</Text>
+          </View>
+          <View style={themedStyles.statCard}>
+            <Text style={themedStyles.statLabel}>Wins</Text>
+            <Text style={themedStyles.statValue}>{(seasonStats as any)?.wins ?? 0}</Text>
+          </View>
+          <View style={themedStyles.statCard}>
+            <Text style={themedStyles.statLabel}>Total Weight</Text>
+            <Text style={themedStyles.statValue}>{seasonStats?.totalWeight ?? 0} lb</Text>
           </View>
         </View>
       </View>

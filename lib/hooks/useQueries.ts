@@ -82,7 +82,7 @@ export function useDashboard(memberCode: string | undefined) {
           aoyData: null,
           earnings: 0,
           nextTournament: null,
-          seasonStats: { tournaments: 0, bestFinish: null, totalWeight: 0, bigFish: 0 },
+          seasonStats: { tournaments: 0, bestFinish: null, totalWeight: 0, bigFish: 0, wins: 0 },
         };
       }
 
@@ -170,6 +170,8 @@ export function useDashboard(memberCode: string | undefined) {
         }, null as number | null),
         totalWeight: (statsRows || []).reduce((sum: number, r: any) => sum + toNumber(r.weight_lbs, 0), 0),
         bigFish: (statsRows || []).reduce((max: number, r: any) => Math.max(max, toNumber(r.big_fish, 0)), 0),
+        // Count wins (place === 1)
+        wins: (statsRows || []).reduce((cnt: number, r: any) => cnt + ((r.place != null && Number(r.place) === 1) ? 1 : 0), 0),
       };
 
       return {
