@@ -21,7 +21,7 @@ import { useAuth } from '../lib/AuthContext';
 import { useDashboard, useAOYStandings } from '../lib/hooks/useQueries';
 import HeroBanner from '../components/HeroBanner';
 import DashboardCards from '../components/DashboardCards';
-import { GradientCard, GradientVariant } from '../components/GradientCard';
+import TrophyRoom from '../components/TrophyRoom';
 import { TrophyRack, Trophy } from '../components/TrophyRack';
 import { DailyChallenge } from '../components/DailyChallenge';
 import { FishingDecorations } from '../components/FishingDecorations';
@@ -29,9 +29,6 @@ import Skeleton from '../components/Skeleton';
 import { EmptyState } from '../components/EmptyState';
 import { useReducedMotion } from '../hooks/useReducedMotion';
 import { fishingTheme, spacing, fontSize, fontWeight } from '../lib/designTokens';
-
-// Gradient variants for ranks 1-4
-const RANK_VARIANTS: GradientVariant[] = ['gold', 'green', 'teal', 'blue'];
 
 // Mock trophy data (will be replaced with real data later)
 const MOCK_TROPHIES: Trophy[] = [
@@ -76,15 +73,6 @@ export default function FishingThemedHomeScreen() {
       }),
     ]).start();
   }, [fadeAnim, slideAnim, prefersReducedMotion]);
-
-  // Get top 4 anglers from AOY standings
-  const topAnglers = React.useMemo(() => {
-    if (!aoyQuery.data) return [];
-    return aoyQuery.data
-      .filter((angler) => angler.aoy_rank && angler.aoy_rank <= 4)
-      .sort((a, b) => (a.aoy_rank || 0) - (b.aoy_rank || 0))
-      .slice(0, 4);
-  }, [aoyQuery.data]);
 
   // Calculate daily challenge progress (mock for now)
   const dailyProgress = 68; // TODO: Connect to real data
@@ -173,29 +161,18 @@ export default function FishingThemedHomeScreen() {
             },
           ]}
         >
-          {/* Left Column - Coming Soon */}
+          {/* Left Column - Trophy Room */}
           <View style={styles.leftColumn}>
-            <Text style={styles.sectionTitle}>TOP ANGLERS</Text>
-            
-            {topAnglers.length > 0 ? (
-              topAnglers.slice(0, 3).map((angler, index) => (
-                <GradientCard
-                  key={angler.member_id}
-                  variant={RANK_VARIANTS[index]}
-                  rank={angler.aoy_rank || index + 1}
-                  name={angler.member_name || 'Unknown Angler'}
-                  points={angler.total_aoy_points || 0}
-                  fishCount={Math.floor(Math.random() * 20) + 5} // TODO: Connect to real data
-                  testID={`home.leaderboard.${index}`}
-                />
-              ))
-            ) : (
-              <EmptyState
-                icon="trophy-outline"
-                title="No Rankings Yet"
-                message="Season standings will appear here once tournaments begin."
-              />
-            )}
+            <TrophyRoom
+              onAddCatch={() => {
+                // TODO: Navigate to add catch screen
+                console.log('Add catch clicked');
+              }}
+              onViewCatch={(catchId) => {
+                // TODO: Navigate to catch detail
+                console.log('View catch:', catchId);
+              }}
+            />
           </View>
 
           {/* Right Column - Widgets */}
