@@ -2,10 +2,12 @@
  * HeroBanner - Personalized Hero Banner Component
  * 
  * Features:
+ * - Avatar circle on the left
  * - Welcome message with user's name
  * - Achievement subtitle (role/title)
- * - Row of 4 stat badges with real data
+ * - Row of circular icon badges with counts
  * - Trophy Cast teal gradient background
+ * - Tagline below welcome
  * - Responsive design for web and mobile
  */
 import React from 'react';
@@ -21,10 +23,10 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../lib/AuthContext';
 import { useDashboard, useAOYStandings } from '../lib/hooks/useQueries';
 
-interface StatBadgeProps {
+interface CircleBadgeProps {
   icon: keyof typeof Ionicons.glyphMap;
   value: string | number;
-  label: string;
+  iconColor?: string;
 }
 
 interface HeroBannerProps {
@@ -36,19 +38,20 @@ interface HeroBannerProps {
    * Achievement subtitle (defaults to "Denver Bassmasters Member")
    */
   subtitle?: string;
+  /**
+   * Tagline below welcome message
+   */
+  tagline?: string;
 }
 
 /**
- * Individual stat badge component
+ * Small circular badge with icon and number
  */
-function StatBadge({ icon, value, label }: StatBadgeProps) {
+function CircleBadge({ icon, value, iconColor = '#FFA500' }: CircleBadgeProps) {
   return (
-    <View style={styles.statBadge}>
-      <View style={styles.statIconContainer}>
-        <Ionicons name={icon} size={20} color="#0891b2" />
-      </View>
-      <Text style={styles.statValue}>{value}</Text>
-      <Text style={styles.statLabel}>{label}</Text>
+    <View style={styles.circleBadge}>
+      <Ionicons name={icon} size={14} color={iconColor} />
+      <Text style={styles.circleValue}>{value}</Text>
     </View>
   );
 }
@@ -56,7 +59,7 @@ function StatBadge({ icon, value, label }: StatBadgeProps) {
 /**
  * Hero Banner Component
  */
-export default function HeroBanner({ name, subtitle }: HeroBannerProps) {
+export default function HeroBanner({ name, subtitle, tagline }: HeroBannerProps) {
   const { profile } = useAuth();
   const { width } = useWindowDimensions();
   const isWeb = Platform.OS === 'web';
@@ -72,8 +75,8 @@ export default function HeroBanner({ name, subtitle }: HeroBannerProps) {
       return {
         wins: 0,
         tournaments: 0,
-        bigBass: '0.00',
-        aoyRank: 'N/A',
+        bigBass: 0,
+        aoyRank: 0,
       };
     }
 
@@ -82,17 +85,26 @@ export default function HeroBanner({ name, subtitle }: HeroBannerProps) {
     return {
       wins: seasonStats?.wins || 0,
       tournaments: seasonStats?.tournaments || 0,
-      bigBass: seasonStats?.bigFish ? `${seasonStats.bigFish.toFixed(2)}` : '0.00',
-      aoyRank: aoyData?.aoy_rank ? `#${aoyData.aoy_rank}` : 'N/A',
+      bigBass: seasonStats?.bigFish || 0,
+      aoyRank: aoyData?.aoy_rank || 0,
     };
   }, [dashboardData]);
 
-  // Display name and subtitle
+  // Display name, subtitle, and tagline
   const displayName = name || profile?.name || 'Member';
-  const displaySubtitle = subtitle || 'Denver Bassmasters Member';
+  const displaySubtitle = subtitle || '2025 AOY Champion';
+  const displayTagline = tagline || 'Your digital tackle box for tournament success';
 
   // Gradient colors (Trophy Cast teal)
   const gradientColors = ['#0891b2', '#06b6d4', '#22d3ee'] as const;
+
+  // Get user initials for avatar
+  const initials = displayName
+    .split(' ')
+    .map(n => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
 
   return (
     <View style={[styles.container, isLargeScreen && styles.containerLarge]}>
@@ -111,35 +123,30 @@ export default function HeroBanner({ name, subtitle }: HeroBannerProps) {
 
       {/* Content */}
       <View style={styles.content}>
-        {/* Header Section */}
-        <View style={styles.header}>
-          <Text style={styles.welcomeText}>Welcome back, {displayName}!</Text>
-          <Text style={styles.subtitleText}>{displaySubtitle}</Text>
+        {/* Top Row: Avatar + Welcome Text + Badges */}
+        <View style={styles.topRow}>
+          {/* Avatar Circle */}
+          <View style={styles.avatar}>
+            <Text style={styles.avatarText}>{initials}</Text>
+          </View>
+
+          {/* Welcome Section */}
+          <View style={styles.welcomeSection}>
+            <Text style={styles.welcomeText}>Welcome back, {displayName}!</Text>
+            <Text style={styles.subtitleText}>{displaySubtitle}</Text>
+            
+            {/* Icon Badges Row */}
+            <View style={styles.badgesRow}>
+              <CircleBadge icon="people" value={stats.wins} iconColor="#FF6B6B" />
+              <CircleBadge icon="calendar" value={stats.tournaments} iconColor="#FFA500" />
+              <CircleBadge icon="trophy" value={stats.bigBass} iconColor="#FFD700" />
+              <CircleBadge icon="ribbon" value={stats.aoyRank} iconColor="#4ECDC4" />
+            </View>
+          </View>
         </View>
 
-        {/* Stats Row */}
-        <View style={[styles.statsRow, isLargeScreen && styles.statsRowLarge]}>
-          <StatBadge
-            icon="trophy"
-            value={stats.wins}
-            label="Wins"
-          />
-          <StatBadge
-            icon="fish"
-            value={stats.tournaments}
-            label="Tournaments"
-          />
-          <StatBadge
-            icon="analytics"
-            value={`${stats.bigBass} lbs`}
-            label="Big Bass"
-          />
-          <StatBadge
-            icon="podium"
-            value={stats.aoyRank}
-            label="AOY Rank"
-          />
-        </View>
+        {/* Tagline */}
+        <Text style={styles.taglineText}>{displayTagline}</Text>
       </View>
     </View>
   );
@@ -178,71 +185,81 @@ const styles = StyleSheet.create({
     }),
   },
   content: {
-    padding: 24,
-    paddingVertical: 28,
+    padding: 20,
+    paddingVertical: 24,
   },
-  header: {
-    marginBottom: 24,
+  topRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 16,
   },
-  welcomeText: {
-    fontSize: 28,
+  avatar: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  avatarText: {
+    fontSize: 24,
     fontWeight: '700',
     color: '#ffffff',
-    marginBottom: 6,
+    textShadowColor: 'rgba(0, 0, 0, 0.2)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+  welcomeSection: {
+    flex: 1,
+  },
+  welcomeText: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#ffffff',
+    marginBottom: 4,
     textShadowColor: 'rgba(0, 0, 0, 0.2)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 3,
   },
   subtitleText: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '500',
-    color: 'rgba(255, 255, 255, 0.95)',
+    color: 'rgba(255, 255, 255, 0.9)',
+    marginBottom: 10,
     textShadowColor: 'rgba(0, 0, 0, 0.15)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
   },
-  statsRow: {
+  badgesRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 12,
+    gap: 8,
+    flexWrap: 'wrap',
   },
-  statsRowLarge: {
-    gap: 20,
-  },
-  statBadge: {
-    flex: 1,
+  circleBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    borderRadius: 12,
-    padding: 14,
-    alignItems: 'center',
-    minWidth: 70,
-    // Subtle shadow
+    borderRadius: 16,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    gap: 4,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowRadius: 2,
+    elevation: 2,
   },
-  statIconContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: 'rgba(8, 145, 178, 0.1)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  statValue: {
-    fontSize: 20,
+  circleValue: {
+    fontSize: 13,
     fontWeight: '700',
     color: '#0f172a',
-    marginBottom: 2,
   },
-  statLabel: {
-    fontSize: 11,
+  taglineText: {
+    fontSize: 16,
     fontWeight: '600',
-    color: '#64748b',
-    textTransform: 'uppercase',
+    color: '#ffffff',
+    textAlign: 'center',
     letterSpacing: 0.5,
   },
 });
