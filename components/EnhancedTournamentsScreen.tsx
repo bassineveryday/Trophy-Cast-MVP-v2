@@ -347,14 +347,14 @@ export default function EnhancedTournamentsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#1A3D4D',
   },
   filterContainer: {
-    backgroundColor: 'white',
+    backgroundColor: '#2A5A6B',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e1e5e9',
+    borderBottomWidth: 3,
+    borderBottomColor: '#F5C842',
   },
   searchContainer: {
     flexDirection: 'row',

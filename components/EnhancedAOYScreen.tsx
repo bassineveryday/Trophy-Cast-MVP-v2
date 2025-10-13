@@ -246,10 +246,11 @@ export default function EnhancedAOYScreen() {
     <View style={styles.filterContainer}>
       {/* Search Input */}
       <View style={styles.searchContainer}>
-        <Ionicons name="search-outline" size={20} color="#666" style={styles.searchIcon} />
+        <Ionicons name="search-outline" size={20} color="#F5C842" style={styles.searchIcon} />
         <TextInput
           style={styles.searchInput}
           placeholder="Search members..."
+          placeholderTextColor="rgba(245, 239, 230, 0.6)"
           value={filters.search}
           onChangeText={(text) => setFilters(prev => ({ ...prev, search: text }))}
         />
@@ -385,23 +386,30 @@ export default function EnhancedAOYScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#1A3D4D', // fishingTheme.colors.deepOcean
   },
   filterContainer: {
-    backgroundColor: 'white',
+    backgroundColor: '#2A5A6B', // fishingTheme.colors.navyTeal
     paddingHorizontal: 16,
     paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e1e5e9',
+    borderBottomWidth: 3,
+    borderBottomColor: '#F5C842', // fishingTheme.colors.gold
+    shadowColor: '#F5C842',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f8f9fa',
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
     borderRadius: 10,
     paddingHorizontal: 12,
     marginBottom: 12,
     height: 44,
+    borderWidth: 1,
+    borderColor: 'rgba(245, 200, 66, 0.3)',
   },
   searchIcon: {
     marginRight: 8,
@@ -409,7 +417,7 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 16,
-    color: '#333',
+    color: '#F5EFE6', // fishingTheme.colors.cream
   },
   clearButton: {
     padding: 4,
@@ -418,25 +426,26 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   filterChip: {
-    backgroundColor: '#f8f9fa',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     borderRadius: 20,
     paddingHorizontal: 16,
     paddingVertical: 8,
     marginRight: 8,
     borderWidth: 1,
-    borderColor: '#dee2e6',
+    borderColor: 'rgba(245, 200, 66, 0.3)',
   },
   activeChip: {
-    backgroundColor: '#007bff',
-    borderColor: '#007bff',
+    backgroundColor: '#F5C842', // fishingTheme.colors.gold
+    borderColor: '#E8A735', // fishingTheme.colors.goldenOrange
   },
   chipText: {
     fontSize: 14,
-    color: '#666',
+    color: '#F5EFE6', // fishingTheme.colors.cream
     fontWeight: '500',
   },
   activeChipText: {
-    color: 'white',
+    color: '#0B1020', // Dark text on gold background
+    fontWeight: '700',
   },
   headerStats: {
     flexDirection: 'row',
@@ -445,25 +454,25 @@ const styles = StyleSheet.create({
   },
   statCard: {
     flex: 1,
-    backgroundColor: 'white',
-    borderRadius: 8,
+    backgroundColor: '#2A5060', // fishingTheme.colors.trophyNavy
+    borderRadius: 12,
     padding: 16,
     alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 3,
   },
   statNumber: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#2c3e50',
+    color: '#F5C842', // fishingTheme.colors.gold
     marginBottom: 4,
   },
   statTitle: {
     fontSize: 12,
-    color: '#7f8c8d',
+    color: '#F5EFE6', // fishingTheme.colors.cream
     textTransform: 'uppercase',
     fontWeight: '600',
   },
@@ -471,21 +480,23 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   memberCard: {
-    backgroundColor: 'white',
+    backgroundColor: '#2A5A6B', // fishingTheme.colors.navyTeal
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    elevation: 5,
     borderWidth: 1,
-    borderColor: '#f0f0f0',
+    borderColor: 'rgba(245, 200, 66, 0.2)',
   },
   expandedCard: {
-    borderColor: '#007bff',
+    borderColor: '#F5C842', // fishingTheme.colors.gold
     borderWidth: 2,
+    shadowColor: '#F5C842',
+    shadowOpacity: 0.3,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -512,7 +523,7 @@ const styles = StyleSheet.create({
   memberName: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#2c3e50',
+    color: '#F5EFE6', // fishingTheme.colors.cream
     marginBottom: 4,
   },
   memberMeta: {
@@ -522,18 +533,18 @@ const styles = StyleSheet.create({
   },
   memberId: {
     fontSize: 12,
-    color: '#7f8c8d',
+    color: 'rgba(255, 255, 255, 0.7)', // fishingTheme.colors.mutedWhite
     fontFamily: 'monospace',
   },
   statusBadge: {
-    backgroundColor: '#e3f2fd',
+    backgroundColor: 'rgba(245, 200, 66, 0.2)',
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,
   },
   statusText: {
     fontSize: 10,
-    color: '#1976d2',
+    color: '#F5C842', // fishingTheme.colors.gold
     fontWeight: '600',
     textTransform: 'uppercase',
   },
@@ -543,11 +554,11 @@ const styles = StyleSheet.create({
   pointsValue: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#2c3e50',
+    color: '#F5C842', // fishingTheme.colors.gold
   },
   pointsLabel: {
     fontSize: 12,
-    color: '#7f8c8d',
+    color: 'rgba(255, 255, 255, 0.7)', // fishingTheme.colors.mutedWhite
     textTransform: 'uppercase',
     fontWeight: '600',
   },
@@ -559,7 +570,7 @@ const styles = StyleSheet.create({
   },
   separator: {
     height: 1,
-    backgroundColor: '#e1e5e9',
+    backgroundColor: 'rgba(245, 200, 66, 0.2)',
     marginBottom: 16,
   },
   statsGrid: {
@@ -574,27 +585,29 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontSize: 12,
-    color: '#999',
+    color: 'rgba(255, 255, 255, 0.7)', // fishingTheme.colors.mutedWhite
     textTransform: 'uppercase',
     fontWeight: '600',
     marginBottom: 4,
   },
   statValue: {
     fontSize: 16,
-    color: '#333',
+    color: '#F5EFE6', // fishingTheme.colors.cream
     fontWeight: '600',
   },
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f8f9fa',
+    backgroundColor: 'rgba(245, 200, 66, 0.15)',
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 8,
     alignSelf: 'flex-start',
+    borderWidth: 1,
+    borderColor: '#F5C842',
   },
   actionButtonText: {
-    color: '#007bff',
+    color: '#F5C842', // fishingTheme.colors.gold
     fontSize: 14,
     fontWeight: '600',
     marginLeft: 8,

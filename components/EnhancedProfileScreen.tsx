@@ -521,18 +521,18 @@ export default function EnhancedProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#1A3D4D',
   },
   backButton: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
-    backgroundColor: 'white',
+    backgroundColor: '#2A5A6B',
   },
   backButtonText: {
     marginLeft: 8,
     fontSize: 16,
-    color: '#007bff',
+    color: '#F5C842',
   },
   tabBar: {
     flexDirection: 'row',

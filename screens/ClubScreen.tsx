@@ -33,10 +33,10 @@ import { makeStyles, spacing, borderRadius, fontSize, fontWeight, shadows, opaci
 
 // Club-specific color tokens (applied only within ClubScreen)
 const clubColors = {
-  primary: '#D4AF37', // DBM Gold
-  secondary: '#1a2332', // DBM Navy
-  accent: '#2d5016', // Conservation Green
-  background: '#f8f9fa',
+  primary: '#F5C842', // Fishing Gold
+  secondary: '#1A3D4D', // Deep Ocean
+  accent: '#2BAE66', // Bass Green  
+  background: '#1A3D4D', // Deep Ocean
 };
 
 // Prefer local bundled officers (with images) when available; fall back to scraped JSON
