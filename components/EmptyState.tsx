@@ -8,6 +8,7 @@ interface EmptyStateProps {
   message: string;
   actionLabel?: string;
   onAction?: () => void;
+  testID?: string;
 }
 
 /**
@@ -29,9 +30,10 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   message,
   actionLabel,
   onAction,
+  testID,
 }) => {
   return (
-    <View style={styles.container}>
+    <View style={styles.container} testID={testID}>
       <View style={styles.iconContainer}>
         <Ionicons name={icon} size={64} color="#bdc3c7" />
       </View>

@@ -1,3 +1,10 @@
+/**
+ * EnhancedHomeScreen - Dashboard with UX polish
+ * ✓ Loading → shows skeletons (no layout shift flashes)
+ * ✓ Empty → branded EmptyState with optional action
+ * ✓ Cards/rows feel tactile on hover/press
+ * ✓ No changes to data fetching logic or types
+ */
 import React from 'react';
 import { 
   StyleSheet, 
@@ -15,6 +22,8 @@ import { useAuth } from '../lib/AuthContext';
 import { useTheme } from '../lib/ThemeContext';
 import { useDashboard, useTournaments, useAOYStandings } from '../lib/hooks/useQueries';
 import Skeleton, { DashboardSkeleton, CardSkeleton } from '../components/Skeleton';
+import Card, { CardPressable } from '../components/Card';
+import { EmptyState } from '../components/EmptyState';
 import AnimatedCard from '../components/AnimatedCard';
 import ThemeToggle from '../components/ThemeToggle';
 import { showSuccess } from '../utils/toast';
@@ -600,21 +609,15 @@ export default function EnhancedHomeScreen() {
           <Text style={themedStyles.headerSubtitle}>Welcome to your fishing dashboard</Text>
         </View>
         
-        <View style={themedStyles.card}>
-          <View style={themedStyles.emptyStateContainer}>
-            <Ionicons name="fish-outline" size={64} color={theme.textSecondary} />
-            <Text style={themedStyles.emptyStateTitle}>No Data Available</Text>
-            <Text style={themedStyles.emptyStateText}>
-              Your tournament data will appear here once you participate in events.
-            </Text>
-            <Text style={themedStyles.memberInfoText}>
-              Member: {profile?.member_code || 'Not Set'}
-            </Text>
-            <TouchableOpacity onPress={() => refetch()} style={themedStyles.refreshButton}>
-              <Ionicons name="refresh" size={18} color={theme.success} />
-              <Text style={themedStyles.refreshButtonText}>Refresh</Text>
-            </TouchableOpacity>
-          </View>
+        <View style={{ padding: spacing.xl }}>
+          <EmptyState
+            icon="fish-outline"
+            title="No Data Available"
+            message={`Your tournament data will appear here once you participate in events.\n\nMember: ${profile?.member_code || 'Not Set'}`}
+            actionLabel="Refresh"
+            onAction={() => refetch()}
+            testID="empty.dashboard"
+          />
         </View>
       </ScrollView>
     );
@@ -747,21 +750,23 @@ export default function EnhancedHomeScreen() {
         <Text style={themedStyles.sectionTitle}>Quick Actions</Text>
         <View style={themedStyles.quickActionsGrid}>
           {quickActions.map((action) => (
-            <TouchableOpacity
+            <CardPressable
               key={action.id}
-              style={themedStyles.actionCard}
+              padding="md"
+              radius="xl"
+              variant="secondary"
               onPress={() => handleQuickAction(action)}
-              activeOpacity={0.7}
               accessible={true}
-              accessibilityRole="button"
               accessibilityLabel={`${action.title} - ${action.description}`}
+              testID={`quick-action.${action.id}`}
+              style={themedStyles.actionCard}
             >
               <View style={[themedStyles.actionIcon, { backgroundColor: action.color }]}>
                 <Ionicons name={action.icon as any} size={24} color="#fff" accessibilityLabel={`${action.title} icon`} />
               </View>
               <Text style={themedStyles.actionTitle}>{action.title}</Text>
               <Text style={themedStyles.actionDescription}>{action.description}</Text>
-            </TouchableOpacity>
+            </CardPressable>
           ))}
         </View>
       </View>

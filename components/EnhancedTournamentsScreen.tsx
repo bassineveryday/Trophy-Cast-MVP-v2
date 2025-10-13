@@ -1,3 +1,10 @@
+/**
+ * EnhancedTournamentsScreen - Tournament list with UX polish
+ * ✓ Loading → shows skeletons (no layout shift flashes)
+ * ✓ Empty → branded EmptyState with optional action
+ * ✓ Cards/rows feel tactile on hover/press
+ * ✓ No changes to data fetching logic or types
+ */
 import React, { useState } from 'react';
 import {
   StyleSheet,
@@ -13,8 +20,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { TournamentEvent } from '../lib/supabase';
 import { useGroupedTournaments, useTournamentParticipants, useParticipantCounts } from '../lib/hooks/useQueries';
-import { ListSkeleton } from '../components/Skeleton';
-import EmptyState from '../components/EmptyState';
+import { ListSkeleton, TableRowSkeleton } from '../components/Skeleton';
+import { EmptyState } from '../components/EmptyState';
+import { CardPressable } from '../components/Card';
+import ListRow from '../components/ListRow';
 
 interface FilterOptions {
   search: string;
@@ -287,6 +296,7 @@ export default function EnhancedTournamentsScreen() {
           message="Please check your connection and try again"
           actionLabel="Retry"
           onAction={handleRefresh}
+          testID="empty.tournaments.error"
         />
       </View>
     );
@@ -316,6 +326,7 @@ export default function EnhancedTournamentsScreen() {
               handleRefresh();
             }
           }}
+          testID="empty.tournaments"
         />
       ) : (
         <FlatList

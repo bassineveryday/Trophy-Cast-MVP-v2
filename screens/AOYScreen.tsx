@@ -1,3 +1,10 @@
+/**
+ * AOYScreen - Angler of the Year standings
+ * ✓ Loading → shows skeletons (no layout shift flashes)
+ * ✓ Empty → branded EmptyState with optional action
+ * ✓ Cards/rows feel tactile on hover/press
+ * ✓ No changes to data fetching logic or types
+ */
 import React, { useMemo } from 'react';
 import {
   StyleSheet,
@@ -11,9 +18,10 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { AOYStandingsRow } from '../lib/supabase';
 import { useAOYStandings } from '../lib/hooks/useQueries';
-import EmptyState from '../components/EmptyState';
+import { EmptyState } from '../components/EmptyState';
+import { TableRowSkeleton } from '../components/Skeleton';
 import TopBar from '../components/TopBar';
-import Card from '../components/Card';
+import Card, { CardPressable } from '../components/Card';
 import ListRow from '../components/ListRow';
 import { useTheme } from '../lib/ThemeContext';
 import { makeStyles, spacing, borderRadius, fontSize, fontWeight, shadows } from '../lib/designTokens';
@@ -294,14 +302,21 @@ export default function AOYScreen() {
       message="Angler of the Year standings will appear here once data is available. Pull to refresh to check for updates."
       actionLabel="Refresh"
       onAction={handleRefresh}
+      testID="empty.aoy"
     />
   );
 
   if (isLoading && !standings.length) {
     return (
-      <View style={themedStyles.loadingContainer}>
-        <ActivityIndicator size="large" color={theme.text} />
-        <Text style={themedStyles.loadingText}>Loading AOY Standings...</Text>
+      <View style={themedStyles.container}>
+        <TopBar title="Angler of the Year" subtitle="Loading standings..." />
+        <View style={themedStyles.list}>
+          {Array.from({ length: 8 }).map((_, i) => (
+            <View key={i} style={{ marginBottom: spacing.md }}>
+              <TableRowSkeleton />
+            </View>
+          ))}
+        </View>
       </View>
     );
   }
