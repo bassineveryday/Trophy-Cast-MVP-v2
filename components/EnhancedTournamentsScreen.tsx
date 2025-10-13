@@ -20,6 +20,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { TournamentEvent } from '../lib/supabase';
 import { useGroupedTournaments, useTournamentParticipants, useParticipantCounts } from '../lib/hooks/useQueries';
+import { fishingTheme, spacing } from '../lib/designTokens';
 import { ListSkeleton, TableRowSkeleton } from '../components/Skeleton';
 import { EmptyState } from '../components/EmptyState';
 import { CardPressable } from '../components/Card';
@@ -207,7 +208,7 @@ export default function EnhancedTournamentsScreen() {
                 tournamentId: item.event_id 
               })}
             >
-              <Ionicons name="information-circle-outline" size={18} color="#007bff" />
+              <Ionicons name="information-circle-outline" size={18} color={fishingTheme.colors.progressOrange} />
               <Text style={styles.actionButtonText}>View Full Details</Text>
             </TouchableOpacity>
           </View>
@@ -404,17 +405,17 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   tournamentCard: {
-    backgroundColor: 'white',
+    backgroundColor: fishingTheme.colors.trophyNavy,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
-    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+    // subtle shadow for depth
     elevation: 3,
     borderWidth: 1,
-    borderColor: '#f0f0f0',
+    borderColor: fishingTheme.colors.darkTeal,
   },
   expandedCard: {
-    borderColor: '#007bff',
+    borderColor: fishingTheme.colors.gold,
     borderWidth: 2,
   },
   cardHeader: {
@@ -429,8 +430,8 @@ const styles = StyleSheet.create({
   },
   tournamentName: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#2c3e50',
+    fontWeight: '700',
+    color: fishingTheme.colors.cream,
     marginBottom: 8,
   },
   statusBadge: {
@@ -448,7 +449,7 @@ const styles = StyleSheet.create({
     marginLeft: 4,
   },
   participantBadge: {
-    backgroundColor: '#e3f2fd',
+    backgroundColor: 'rgba(245,200,66,0.12)',
     borderRadius: 8,
     paddingHorizontal: 8,
     paddingVertical: 6,
@@ -458,11 +459,11 @@ const styles = StyleSheet.create({
   participantCount: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#1976d2',
+    color: fishingTheme.colors.gold,
   },
   participantLabel: {
     fontSize: 10,
-    color: '#1976d2',
+    color: fishingTheme.colors.mutedWhite,
     textTransform: 'uppercase',
     fontWeight: '600',
   },
@@ -475,13 +476,13 @@ const styles = StyleSheet.create({
   },
   infoText: {
     fontSize: 14,
-    color: '#666',
+    color: fishingTheme.colors.mutedWhite,
     marginLeft: 8,
     flex: 1,
   },
   codeText: {
     fontSize: 14,
-    color: '#007bff',
+    color: fishingTheme.colors.lightTeal,
     fontWeight: '600',
     marginLeft: 8,
   },
@@ -490,7 +491,7 @@ const styles = StyleSheet.create({
   },
   separator: {
     height: 1,
-    backgroundColor: '#e1e5e9',
+    backgroundColor: 'rgba(255,255,255,0.06)',
     marginBottom: 16,
   },
   detailSection: {
@@ -499,7 +500,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#2c3e50',
+    color: fishingTheme.colors.cream,
     marginBottom: 8,
   },
   sectionContent: {
@@ -516,27 +517,27 @@ const styles = StyleSheet.create({
   },
   detailLabel: {
     fontSize: 12,
-    color: '#999',
+    color: fishingTheme.colors.mutedWhite,
     textTransform: 'uppercase',
     fontWeight: '600',
     marginBottom: 4,
   },
   detailValue: {
     fontSize: 14,
-    color: '#333',
+    color: fishingTheme.colors.cream,
     fontWeight: '500',
   },
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f8f9fa',
+    backgroundColor: 'rgba(255,255,255,0.06)',
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 8,
     alignSelf: 'flex-start',
   },
   actionButtonText: {
-    color: '#007bff',
+    color: fishingTheme.colors.progressOrange,
     fontSize: 14,
     fontWeight: '600',
     marginLeft: 8,
