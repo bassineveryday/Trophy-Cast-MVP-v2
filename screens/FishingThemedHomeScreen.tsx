@@ -19,6 +19,7 @@ import {
 } from 'react-native';
 import { useAuth } from '../lib/AuthContext';
 import { useDashboard, useAOYStandings } from '../lib/hooks/useQueries';
+import HeroBanner from '../components/HeroBanner';
 import { GradientCard, GradientVariant } from '../components/GradientCard';
 import { TrophyRack, Trophy } from '../components/TrophyRack';
 import { DailyChallenge } from '../components/DailyChallenge';
@@ -150,6 +151,9 @@ export default function FishingThemedHomeScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
+        {/* Hero Banner */}
+        <HeroBanner subtitle="Denver Bassmasters Secretary" />
+
         <Animated.View
           style={[
             isMobile ? styles.singleColumn : styles.twoColumn,
