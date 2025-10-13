@@ -50,7 +50,7 @@ interface HeroBannerProps {
 function CircleBadge({ icon, value, iconColor = '#FFA500' }: CircleBadgeProps) {
   return (
     <View style={styles.circleBadge}>
-      <Ionicons name={icon} size={14} color={iconColor} />
+      <Ionicons name={icon} size={12} color={iconColor} />
       <Text style={styles.circleValue}>{value}</Text>
     </View>
   );
@@ -185,25 +185,25 @@ const styles = StyleSheet.create({
     }),
   },
   content: {
-    padding: 20,
-    paddingVertical: 24,
+    padding: 16,
+    paddingVertical: 16,
   },
   topRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    marginBottom: 16,
+    marginBottom: 12,
   },
   avatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     backgroundColor: 'rgba(255, 255, 255, 0.25)',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 16,
+    marginRight: 12,
   },
   avatarText: {
-    fontSize: 24,
+    fontSize: 18,
     fontWeight: '700',
     color: '#ffffff',
     textShadowColor: 'rgba(0, 0, 0, 0.2)',
@@ -214,36 +214,36 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   welcomeText: {
-    fontSize: 24,
+    fontSize: 18,
     fontWeight: '700',
     color: '#ffffff',
-    marginBottom: 4,
+    marginBottom: 2,
     textShadowColor: 'rgba(0, 0, 0, 0.2)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 3,
   },
   subtitleText: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '500',
     color: 'rgba(255, 255, 255, 0.9)',
-    marginBottom: 10,
+    marginBottom: 8,
     textShadowColor: 'rgba(0, 0, 0, 0.15)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
   },
   badgesRow: {
     flexDirection: 'row',
-    gap: 8,
+    gap: 6,
     flexWrap: 'wrap',
   },
   circleBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    borderRadius: 16,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    gap: 4,
+    borderRadius: 14,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    gap: 3,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
@@ -251,15 +251,15 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   circleValue: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '700',
     color: '#0f172a',
   },
   taglineText: {
-    fontSize: 16,
+    fontSize: 13,
     fontWeight: '600',
     color: '#ffffff',
     textAlign: 'center',
-    letterSpacing: 0.5,
+    letterSpacing: 0.3,
   },
 });
