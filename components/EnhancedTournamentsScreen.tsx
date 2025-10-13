@@ -46,6 +46,10 @@ export default function EnhancedTournamentsScreen() {
   // The hook is enabled only when a tournament code is selected, so it won't fire for every list item.
   const { data: selectedParticipants = [], isLoading: participantsLoading } = useTournamentParticipants(selectedTournament || undefined);
 
+  // Participant counts lookup - call hook unconditionally to preserve hooks order
+  const lookupsInitial = (tournaments || []).map(t => ({ code: t.tournament_code, eventId: t.event_id }));
+  const { data: participantCounts = {}, isLoading: countsLoading } = useParticipantCounts(lookupsInitial as any);
+
   // Compute visible tournament codes and fetch participant counts for them
   // (moved below where filteredTournaments is computed to avoid duplicate declarations)
 
@@ -289,8 +293,7 @@ export default function EnhancedTournamentsScreen() {
   const filteredTournaments = filterTournaments(tournaments);
 
   // Fetch participant counts for visible tournaments (support code or event_id)
-  const lookups = filteredTournaments.map(t => ({ code: t.tournament_code, eventId: t.event_id }));
-  const { data: participantCounts = {}, isLoading: countsLoading } = useParticipantCounts(lookups as any);
+  // We already call useParticipantCounts earlier with full list (participantCounts variable)
 
   return (
     <View style={styles.container}>
