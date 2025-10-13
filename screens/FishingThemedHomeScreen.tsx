@@ -138,8 +138,11 @@ export default function FishingThemedHomeScreen() {
       <View style={styles.header}>
         <View style={styles.headerContent}>
           <Text style={styles.logoText}>TROPHY CAST</Text>
-          <Text style={styles.tagline}>Bassin' Everyday Tournament Series</Text>
+          <Text style={styles.tagline}>Where Every Cast Counts</Text>
         </View>
+        
+        {/* Hero Banner under header */}
+        <HeroBanner subtitle="Denver Bassmasters Secretary" />
       </View>
 
       {/* Main Content */}
@@ -149,8 +152,6 @@ export default function FishingThemedHomeScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        {/* Hero Banner */}
-        <HeroBanner subtitle="Denver Bassmasters Secretary" />
 
         <Animated.View
           style={[
@@ -214,12 +215,10 @@ const styles = StyleSheet.create({
     backgroundColor: fishingTheme.colors.deepOcean,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: 'column',
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.lg,
-    paddingBottom: spacing.md,
+    paddingBottom: 0,
     backgroundColor: fishingTheme.colors.navyTeal,
     borderBottomWidth: 2,
     borderBottomColor: fishingTheme.colors.gold,
@@ -230,7 +229,8 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   headerContent: {
-    flex: 1,
+    alignItems: 'center',
+    marginBottom: spacing.md,
   },
   logoText: {
     fontSize: 24,

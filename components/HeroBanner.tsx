@@ -144,9 +144,6 @@ export default function HeroBanner({ name, subtitle, tagline }: HeroBannerProps)
             </View>
           </View>
         </View>
-
-        {/* Tagline */}
-        <Text style={styles.taglineText}>{displayTagline}</Text>
       </View>
     </View>
   );
@@ -154,9 +151,10 @@ export default function HeroBanner({ name, subtitle, tagline }: HeroBannerProps)
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: 16,
+    borderRadius: 12,
     overflow: 'hidden',
-    marginBottom: 20,
+    marginBottom: 12,
+    marginTop: 8,
     // Shadow for depth
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
