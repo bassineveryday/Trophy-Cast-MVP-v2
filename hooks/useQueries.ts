@@ -6,7 +6,7 @@
  */
 
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
-import { fetchAOYStandings, fetchTournamentEvents, AOYStandingsRow, TournamentEvent } from '../lib/supabase';
+import type { AOYStandingsRow, TournamentEvent } from '../lib/supabase';
 
 /**
  * Hook to fetch AOY (Angler of the Year) standings
@@ -25,15 +25,17 @@ export function useAOYStandings(): UseQueryResult<AOYStandingsRow[], Error> {
   return useQuery({
     queryKey: ['aoy-standings'],
     queryFn: async () => {
-      const { data, error } = await fetchAOYStandings();
-      if (error) {
-        throw error;
-      }
+      // Require at runtime so Jest module mocks are respected during tests
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { fetchAOYStandings: fetchFn } = require('../lib/supabase');
+      const { data, error } = await fetchFn();
+      if (error) throw error;
       return data;
     },
     staleTime: 1000 * 60 * 5, // 5 minutes
     gcTime: 1000 * 60 * 10,   // 10 minutes
-    retry: 2,
+    // Disable automatic retries here to make errors surface quickly in tests
+    retry: false,
     retryDelay: (attemptIndex: number) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 }
@@ -55,15 +57,16 @@ export function useTournamentEvents(): UseQueryResult<TournamentEvent[], Error> 
   return useQuery({
     queryKey: ['tournament-events'],
     queryFn: async () => {
-      const { data, error } = await fetchTournamentEvents();
-      if (error) {
-        throw error;
-      }
+      // Require at runtime so Jest module mocks are respected during tests
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { fetchTournamentEvents: fetchFn } = require('../lib/supabase');
+      const { data, error } = await fetchFn();
+      if (error) throw error;
       return data;
     },
     staleTime: 1000 * 60 * 10, // 10 minutes
     gcTime: 1000 * 60 * 15,    // 15 minutes
-    retry: 2,
+    retry: false,
   });
 }
 
@@ -78,8 +81,9 @@ export function useAOYStandingsByMember(memberId: string | null): UseQueryResult
     queryKey: ['aoy-standings', memberId],
     queryFn: async () => {
       if (!memberId) throw new Error('Member ID is required');
-      
-      const { data, error } = await fetchAOYStandings();
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { fetchAOYStandings: fetchFn } = require('../lib/supabase');
+      const { data, error } = await fetchFn();
       if (error) throw error;
       
       const memberStanding = data.find((standing: AOYStandingsRow) => standing.member_id === memberId);

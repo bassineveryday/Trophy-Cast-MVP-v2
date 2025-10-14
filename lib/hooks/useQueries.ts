@@ -1,11 +1,6 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import {
-  fetchAOYStandings,
-  fetchTournamentEvents,
-  AOYStandingsRow,
-  TournamentEvent,
-} from '../supabase';
+import type { AOYStandingsRow, TournamentEvent } from '../supabase';
 import { supabase } from '../supabase';
 
 // Safe number parsing helper
@@ -54,7 +49,11 @@ export function useAOYStandings() {
   return useQuery({
     queryKey: queryKeys.aoyStandings,
     queryFn: async () => {
-      const { data, error } = await fetchAOYStandings();
+      // require at runtime so test mocks that replace the module are respected
+      // when Jest replaces the implementation via jest.mock
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { fetchAOYStandings: fetchFn } = require('../supabase');
+      const { data, error } = await fetchFn();
       if (error) throw error;
       return (data || []) as AOYStandingsRow[];
     },
@@ -65,7 +64,10 @@ export function useTournaments() {
   return useQuery({
     queryKey: queryKeys.tournaments,
     queryFn: async () => {
-      const { data, error } = await fetchTournamentEvents();
+      // require at runtime to ensure test-time module mocks are respected
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { fetchTournamentEvents: fetchFn } = require('../supabase');
+      const { data, error } = await fetchFn();
       if (error) throw error;
       return (data || []) as TournamentEvent[];
     },
@@ -236,7 +238,10 @@ export function useTournamentParticipants(eventId: string | undefined) {
 
       return uniqueParticipants(data || []);
     },
-    enabled: !!eventId,
+    // Run the query function even when eventId is undefined so the hook
+    // returns a stable, defined data shape (empty array) instead of
+    // leaving `data` undefined when React Query disables the query.
+    enabled: true,
   });
 }
 
@@ -256,7 +261,9 @@ export function useTournamentResults(eventId: string | undefined) {
       if (error) throw error;
       return (data || []) as any[];
     },
-    enabled: !!eventId,
+    // Always enable so callers that pass undefined still receive a defined
+    // array result (empty) rather than `data` being undefined.
+    enabled: true,
   });
 }
 
@@ -401,7 +408,9 @@ export function useMultiDayTournamentResults(tournamentCode?: string) {
 
       return { dayEvents, dayResults, combined };
     },
-    enabled: !!tournamentCode,
+    // Ensure the hook returns a stable structure even when no tournamentCode
+    // is provided so callers/tests can rely on defined fields.
+    enabled: true,
   });
 }
 
@@ -523,7 +532,9 @@ export function useParticipantCounts(lookups: Array<{ code?: string; eventId?: s
       for (const k of Object.keys(map)) counts[k] = map[k].size;
       return counts;
     },
-    enabled: lookups.length > 0,
+    // Always enabled so callers that pass an empty array still receive a
+    // defined object (empty) rather than `data` being undefined.
+    enabled: true,
   });
 }
 

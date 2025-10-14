@@ -19,6 +19,7 @@ import { showSuccess, showError } from '../utils/toast';
 import { useMultiDayTournamentResults } from '../lib/hooks/useQueries';
 import EmptyState from '../components/EmptyState';
 import TopBar from '../components/TopBar';
+import { fishingTheme, spacing, shadows, fontSize, fontWeight, borderRadius } from '../lib/designTokens';
 
 interface TournamentDetailScreenProps {
   route: {
@@ -291,7 +292,7 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
       <Ionicons
         name={icon as any}
         size={20}
-        color={activeTab === tab ? '#fff' : '#666'}
+        color={activeTab === tab ? fishingTheme.colors.white : fishingTheme.colors.cream}
       />
       <Text style={[styles.tabLabel, activeTab === tab && styles.activeTabLabel]}>
         {label}
@@ -308,7 +309,7 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
             <Ionicons
               name="calendar"
               size={16}
-              color="#fff"
+              color={fishingTheme.colors.white}
             />
             <Text style={styles.statusText}>
               {getStatusText(tournament?.event_date || null)}
@@ -330,19 +331,19 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
       {/* Quick Stats */}
       <View style={styles.statsGrid}>
         <View style={styles.statCard}>
-          <Ionicons name="people" size={24} color="#4CAF50" />
+          <Ionicons name="people" size={24} color={fishingTheme.colors.lightTeal} />
           <Text style={styles.statNumber}>{participantCount}</Text>
           <Text style={styles.statLabel}>Participants</Text>
         </View>
         
         <View style={styles.statCard}>
-          <Ionicons name="location" size={24} color="#2196F3" />
+          <Ionicons name="location" size={24} color={fishingTheme.colors.deepOcean} />
           <Text style={styles.statNumber} numberOfLines={1}>{tournament?.lake || 'TBD'}</Text>
           <Text style={styles.statLabel}>Location</Text>
         </View>
         
         <View style={styles.statCard}>
-          <Ionicons name="trophy" size={24} color="#FFD700" />
+          <Ionicons name="trophy" size={24} color={fishingTheme.colors.mutedGold} />
           <Text style={styles.statNumber}>TBD</Text>
           <Text style={styles.statLabel}>Prize Pool</Text>
         </View>
@@ -353,7 +354,7 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
         <Text style={styles.sectionTitle}>Tournament Details</Text>
         
         <View style={styles.detailItem}>
-          <Ionicons name="location" size={20} color="#4CAF50" />
+          <Ionicons name="location" size={20} color={fishingTheme.colors.lightTeal} />
           <View style={styles.detailContent}>
             <Text style={styles.detailLabel}>Location</Text>
             <TouchableOpacity onPress={openDirections}>
@@ -365,7 +366,7 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
         </View>
         
         <View style={styles.detailItem}>
-          <Ionicons name="fish" size={20} color="#2196F3" />
+          <Ionicons name="fish" size={20} color={fishingTheme.colors.deepOcean} />
           <View style={styles.detailContent}>
             <Text style={styles.detailLabel}>Tournament Code</Text>
             <Text style={styles.detailValue}>
@@ -375,7 +376,7 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
         </View>
         
         <View style={styles.detailItem}>
-          <Ionicons name="people" size={20} color="#FF9800" />
+          <Ionicons name="people" size={20} color={fishingTheme.colors.goldenOrange} />
           <View style={styles.detailContent}>
             <Text style={styles.detailLabel}>Current Participants</Text>
             <Text style={styles.detailValue}>
@@ -390,15 +391,15 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
         {!isRegistered && getStatusText(tournament?.event_date || null) !== 'Completed' && (
           <TouchableOpacity style={styles.registerButton} onPress={handleRegistration}>
             <View style={styles.buttonGradient}>
-              <Ionicons name="add-circle" size={20} color="#fff" />
+              <Ionicons name="add-circle" size={20} color={fishingTheme.colors.white} />
               <Text style={styles.buttonText}>Register Now</Text>
             </View>
           </TouchableOpacity>
         )}
         
         <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
-          <Ionicons name="share-social" size={20} color="#4CAF50" />
-          <Text style={[styles.buttonText, { color: '#4CAF50' }]}>Share</Text>
+          <Ionicons name="share-social" size={20} color={fishingTheme.colors.lightTeal} />
+          <Text style={[styles.buttonText, { color: fishingTheme.colors.lightTeal }]}>Share</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -816,16 +817,16 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: fishingTheme.colors.cream,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingTop: 50,
-    paddingBottom: 15,
-    backgroundColor: '#fff',
+    paddingHorizontal: spacing.xl,
+    paddingTop: spacing.giant,
+    paddingBottom: spacing.md,
+    backgroundColor: fishingTheme.colors.white,
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
   },
@@ -833,168 +834,156 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
+    fontSize: fontSize.lg,
+    fontWeight: fontWeight.semibold as any,
+    color: '#13323b',
   },
   shareHeaderButton: {
     padding: 8,
   },
   tabNavigation: {
-    backgroundColor: '#fff',
-    paddingVertical: 10,
+    backgroundColor: fishingTheme.colors.white,
+    paddingVertical: spacing.sm,
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
   },
   tabButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    marginHorizontal: 5,
-    borderRadius: 25,
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.sm,
+    marginHorizontal: spacing.sm,
+    borderRadius: borderRadius.xxl,
     backgroundColor: '#f5f5f5',
   },
   activeTabButton: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: fishingTheme.colors.lightTeal,
   },
   tabLabel: {
-    marginLeft: 8,
-    fontSize: 14,
-    fontWeight: '500',
+    marginLeft: spacing.sm,
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.medium as any,
     color: '#666',
   },
   activeTabLabel: {
-    color: '#fff',
+    color: fishingTheme.colors.white,
   },
   scrollView: {
     flex: 1,
   },
   tabContent: {
-    padding: 20,
+    padding: spacing.xl,
   },
   headerCard: {
-    marginBottom: 20,
-    borderRadius: 15,
-    backgroundColor: '#fff',
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    marginBottom: spacing.xl,
+    borderRadius: borderRadius.xl,
+    backgroundColor: fishingTheme.colors.white,
+    ...shadows.md,
   },
   headerContent: {
-    padding: 25,
+    padding: spacing.xxl,
     alignItems: 'center',
   },
   statusBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 15,
-    marginBottom: 15,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.xxl,
+    marginBottom: spacing.md,
   },
   statusText: {
-    marginLeft: 6,
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#fff',
+    marginLeft: spacing.sm,
+    fontSize: fontSize.xs,
+    fontWeight: fontWeight.semibold as any,
+    color: fishingTheme.colors.white,
   },
   tournamentTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
+    fontSize: fontSize.xxxl,
+    fontWeight: fontWeight.bold as any,
+    color: '#13323b',
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: spacing.sm,
   },
   tournamentDate: {
-    fontSize: 16,
+    fontSize: fontSize.md,
     color: '#666',
     textAlign: 'center',
   },
   statsGrid: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 20,
+    marginBottom: spacing.xl,
   },
   statCard: {
     flex: 1,
-    backgroundColor: '#fff',
-    padding: 20,
-    marginHorizontal: 5,
-    borderRadius: 15,
+    backgroundColor: fishingTheme.colors.white,
+    padding: spacing.lg,
+    marginHorizontal: spacing.sm,
+    borderRadius: borderRadius.lg,
     alignItems: 'center',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
+    ...shadows.sm,
   },
   statNumber: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-    marginTop: 8,
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.bold as any,
+    color: '#13323b',
+    marginTop: spacing.sm,
     textAlign: 'center',
   },
   statLabel: {
-    fontSize: 12,
+    fontSize: fontSize.xs,
     color: '#666',
-    marginTop: 4,
+    marginTop: spacing.xs,
     textAlign: 'center',
   },
   detailsCard: {
-    backgroundColor: '#fff',
-    padding: 20,
-    borderRadius: 15,
-    marginBottom: 20,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
+    backgroundColor: fishingTheme.colors.white,
+    padding: spacing.lg,
+    borderRadius: borderRadius.lg,
+    marginBottom: spacing.xl,
+    ...shadows.sm,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 15,
+    fontSize: fontSize.lg,
+    fontWeight: fontWeight.bold as any,
+    color: '#13323b',
+    marginBottom: spacing.md,
   },
   detailItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
   },
   detailContent: {
     flex: 1,
-    marginLeft: 15,
+    marginLeft: spacing.md,
   },
   detailLabel: {
-    fontSize: 14,
+    fontSize: fontSize.md,
     color: '#666',
-    marginBottom: 4,
+    marginBottom: spacing.xs,
   },
   detailValue: {
-    fontSize: 16,
-    color: '#333',
-    fontWeight: '500',
+    fontSize: fontSize.md,
+    color: '#13323b',
+    fontWeight: fontWeight.medium as any,
   },
   linkText: {
-    color: '#4CAF50',
+    color: fishingTheme.colors.lightTeal,
     textDecorationLine: 'underline',
   },
   actionButtons: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 10,
+    marginTop: spacing.sm,
   },
   registerButton: {
     flex: 1,
-    marginRight: 10,
-    borderRadius: 25,
+    marginRight: spacing.sm,
+    borderRadius: borderRadius.xxl,
     overflow: 'hidden',
   },
   shareButton: {
@@ -1002,51 +991,47 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 15,
-    borderRadius: 25,
+    paddingVertical: spacing.md,
+    borderRadius: borderRadius.xxl,
     borderWidth: 2,
-    borderColor: '#4CAF50',
-    backgroundColor: '#fff',
+    borderColor: fishingTheme.colors.lightTeal,
+    backgroundColor: fishingTheme.colors.white,
   },
   buttonGradient: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 15,
-    paddingHorizontal: 25,
-    backgroundColor: '#4CAF50',
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.xxl,
+    backgroundColor: fishingTheme.colors.lightTeal,
   },
   buttonText: {
-    marginLeft: 8,
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#fff',
+    marginLeft: spacing.sm,
+    fontSize: fontSize.lg,
+    fontWeight: fontWeight.semibold as any,
+    color: fishingTheme.colors.white,
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 15,
+    marginBottom: spacing.md,
   },
   participantCount: {
-    fontSize: 14,
+    fontSize: fontSize.md,
     color: '#666',
   },
   participantsList: {
-    gap: 10,
+    gap: spacing.md,
   },
   participantCard: {
-    backgroundColor: '#fff',
-    padding: 15,
-    borderRadius: 12,
+    backgroundColor: fishingTheme.colors.white,
+    padding: spacing.lg,
+    borderRadius: borderRadius.md,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
+    ...shadows.sm,
   },
   participantInfo: {
     flex: 1,
@@ -1058,56 +1043,56 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   participantName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.semibold as any,
+    color: '#13323b',
     flex: 1,
   },
   participantStatusBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 10,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.sm,
   },
   participantStatusText: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: '#fff',
+    fontSize: fontSize.xs,
+    fontWeight: fontWeight.semibold as any,
+    color: fishingTheme.colors.white,
   },
   registrationDate: {
-    fontSize: 12,
+    fontSize: fontSize.xs,
     color: '#999',
   },
   participantNumber: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#4CAF50',
+    fontSize: fontSize.xxl,
+    fontWeight: fontWeight.bold as any,
+    color: fishingTheme.colors.lightTeal,
   },
   resultsHeader: {
     flexDirection: 'row',
-    paddingHorizontal: 8,
-    paddingVertical: 6,
-    backgroundColor: '#fff',
-    borderRadius: 8,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    backgroundColor: fishingTheme.colors.white,
+    borderRadius: borderRadius.md,
     alignItems: 'center',
   },
   resultsHeaderText: {
-    fontSize: 13,
-    fontWeight: '700',
+    fontSize: fontSize.sm,
+    fontWeight: fontWeight.bold as any,
     color: '#666',
   },
   bigBassBadge: {
-    marginTop: 6,
-    backgroundColor: '#b8860b',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
+    marginTop: spacing.sm,
+    backgroundColor: fishingTheme.colors.goldenOrange,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.xl,
     flexDirection: 'row',
     alignItems: 'center',
   },
   bigBassText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: '700',
+    color: fishingTheme.colors.white,
+    fontSize: fontSize.xs,
+    fontWeight: fontWeight.bold as any,
   },
 });
 

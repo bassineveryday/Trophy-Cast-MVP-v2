@@ -20,7 +20,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { TournamentEvent } from '../lib/supabase';
 import { useGroupedTournaments, useTournamentParticipants, useParticipantCounts } from '../lib/hooks/useQueries';
-import { fishingTheme, spacing } from '../lib/designTokens';
+import { fishingTheme, spacing, borderRadius, shadows, fontSize, fontWeight } from '../lib/designTokens';
 import { ListSkeleton, TableRowSkeleton } from '../components/Skeleton';
 import { EmptyState } from '../components/EmptyState';
 import { CardPressable } from '../components/Card';
@@ -69,7 +69,7 @@ export default function EnhancedTournamentsScreen() {
   };
 
   const getTournamentStatus = (tournament: TournamentEvent) => {
-    if (!tournament.event_date) return { status: 'pending', color: '#ffc107', icon: 'time-outline' };
+    if (!tournament.event_date) return { status: 'pending', color: fishingTheme.colors.goldenOrange, icon: 'time-outline' };
     
     const eventDate = new Date(tournament.event_date);
     const today = new Date();
@@ -77,11 +77,11 @@ export default function EnhancedTournamentsScreen() {
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
     if (diffDays < 0) {
-      return { status: 'completed', color: '#28a745', icon: 'checkmark-circle-outline' };
+      return { status: 'completed', color: fishingTheme.colors.lightTeal, icon: 'checkmark-circle-outline' };
     } else if (diffDays <= 7) {
-      return { status: 'upcoming', color: '#dc3545', icon: 'warning-outline' };
+      return { status: 'upcoming', color: fishingTheme.colors.progressOrange, icon: 'warning-outline' };
     } else {
-      return { status: 'scheduled', color: '#007bff', icon: 'calendar-outline' };
+      return { status: 'scheduled', color: fishingTheme.colors.deepOcean, icon: 'calendar-outline' };
     }
   };
 
@@ -217,7 +217,7 @@ export default function EnhancedTournamentsScreen() {
     <View style={styles.filterContainer}>
       {/* Search Input */}
       <View style={styles.searchContainer}>
-        <Ionicons name="search-outline" size={20} color="#666" style={styles.searchIcon} />
+  <Ionicons name="search-outline" size={20} color={fishingTheme.colors.mutedWhite} style={styles.searchIcon} />
         <TextInput
           style={styles.searchInput}
           placeholder="Search tournaments..."
@@ -229,7 +229,7 @@ export default function EnhancedTournamentsScreen() {
             onPress={() => setFilters(prev => ({ ...prev, search: '' }))}
             style={styles.clearButton}
           >
-            <Ionicons name="close-circle" size={20} color="#999" />
+            <Ionicons name="close-circle" size={20} color={fishingTheme.colors.mutedWhite} />
           </TouchableOpacity>
         )}
       </View>
@@ -334,22 +334,22 @@ export default function EnhancedTournamentsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1A3D4D',
+    backgroundColor: fishingTheme.colors.deepOcean,
   },
   filterContainer: {
-    backgroundColor: '#2A5A6B',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    backgroundColor: fishingTheme.colors.navyTeal,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
     borderBottomWidth: 3,
-    borderBottomColor: '#F5C842',
+    borderBottomColor: fishingTheme.colors.gold,
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f8f9fa',
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    marginBottom: 12,
+    backgroundColor: fishingTheme.colors.cream,
+    borderRadius: borderRadius.md,
+    paddingHorizontal: spacing.md,
+    marginBottom: spacing.md,
     height: 44,
   },
   searchIcon: {
@@ -367,36 +367,36 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   filterChip: {
-    backgroundColor: '#f8f9fa',
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    marginRight: 8,
+    backgroundColor: fishingTheme.colors.cream,
+    borderRadius: borderRadius.xxl,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
+    marginRight: spacing.sm,
     borderWidth: 1,
-    borderColor: '#dee2e6',
+    borderColor: '#e6e1d6',
   },
   activeChip: {
-    backgroundColor: '#007bff',
-    borderColor: '#007bff',
+    backgroundColor: fishingTheme.colors.lightTeal,
+    borderColor: fishingTheme.colors.lightTeal,
   },
   chipText: {
-    fontSize: 14,
-    color: '#666',
-    fontWeight: '500',
+    fontSize: fontSize.md,
+    color: '#13323b',
+    fontWeight: fontWeight.medium as any,
   },
   activeChipText: {
-    color: 'white',
+    color: fishingTheme.colors.white,
   },
   listContainer: {
-    padding: 16,
+    padding: spacing.lg,
   },
   tournamentCard: {
     backgroundColor: fishingTheme.colors.trophyNavy,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg,
+    marginBottom: spacing.md,
     // subtle shadow for depth
-    elevation: 3,
+    ...shadows.md,
     borderWidth: 1,
     borderColor: fishingTheme.colors.darkTeal,
   },
@@ -415,118 +415,118 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   tournamentName: {
-    fontSize: 18,
-    fontWeight: '700',
+    fontSize: fontSize.xxl,
+    fontWeight: fontWeight.bold as any,
     color: fishingTheme.colors.cream,
-    marginBottom: 8,
+    marginBottom: spacing.sm,
   },
   statusBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.xxl,
     alignSelf: 'flex-start',
   },
   statusText: {
-    color: 'white',
-    fontSize: 12,
-    fontWeight: '600',
-    marginLeft: 4,
+    color: fishingTheme.colors.white,
+    fontSize: fontSize.xs,
+    fontWeight: fontWeight.semibold as any,
+    marginLeft: spacing.xs,
   },
   participantBadge: {
     backgroundColor: 'rgba(245,200,66,0.12)',
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    paddingVertical: 6,
+    borderRadius: borderRadius.md,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
     alignItems: 'center',
     minWidth: 60,
   },
   participantCount: {
-    fontSize: 18,
-    fontWeight: 'bold',
+    fontSize: fontSize.lg,
+    fontWeight: fontWeight.bold as any,
     color: fishingTheme.colors.gold,
   },
   participantLabel: {
-    fontSize: 10,
+    fontSize: fontSize.xs,
     color: fishingTheme.colors.mutedWhite,
     textTransform: 'uppercase',
-    fontWeight: '600',
+    fontWeight: fontWeight.semibold as any,
   },
   infoContainer: {
-    gap: 8,
+    gap: spacing.sm,
   },
   infoRow: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   infoText: {
-    fontSize: 14,
+    fontSize: fontSize.md,
     color: fishingTheme.colors.mutedWhite,
-    marginLeft: 8,
+    marginLeft: spacing.sm,
     flex: 1,
   },
   codeText: {
-    fontSize: 14,
+    fontSize: fontSize.md,
     color: fishingTheme.colors.lightTeal,
-    fontWeight: '600',
-    marginLeft: 8,
+    fontWeight: fontWeight.semibold as any,
+    marginLeft: spacing.sm,
   },
   expandedContent: {
-    marginTop: 16,
+    marginTop: spacing.md,
   },
   separator: {
     height: 1,
     backgroundColor: 'rgba(255,255,255,0.06)',
-    marginBottom: 16,
+    marginBottom: spacing.md,
   },
   detailSection: {
-    marginBottom: 16,
+    marginBottom: spacing.md,
   },
   sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: fontSize.lg,
+    fontWeight: fontWeight.semibold as any,
     color: fishingTheme.colors.cream,
-    marginBottom: 8,
+    marginBottom: spacing.sm,
   },
   sectionContent: {
-    fontSize: 14,
+    fontSize: fontSize.md,
     color: '#666',
     lineHeight: 20,
   },
   detailGrid: {
     flexDirection: 'row',
-    gap: 16,
+    gap: spacing.lg,
   },
   detailItem: {
     flex: 1,
   },
   detailLabel: {
-    fontSize: 12,
+    fontSize: fontSize.sm,
     color: fishingTheme.colors.mutedWhite,
     textTransform: 'uppercase',
-    fontWeight: '600',
-    marginBottom: 4,
+    fontWeight: fontWeight.semibold as any,
+    marginBottom: spacing.xs,
   },
   detailValue: {
-    fontSize: 14,
+    fontSize: fontSize.md,
     color: fishingTheme.colors.cream,
-    fontWeight: '500',
+    fontWeight: fontWeight.medium as any,
   },
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'rgba(255,255,255,0.06)',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    borderRadius: borderRadius.md,
     alignSelf: 'flex-start',
   },
   actionButtonText: {
     color: fishingTheme.colors.progressOrange,
-    fontSize: 14,
-    fontWeight: '600',
-    marginLeft: 8,
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.semibold as any,
+    marginLeft: spacing.sm,
   },
   expandIndicator: {
     position: 'absolute',

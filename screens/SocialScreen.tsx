@@ -19,6 +19,7 @@ import { useAuth } from '../lib/AuthContext';
 import { supabase } from '../lib/supabase';
 import { showSuccess, showError } from '../utils/toast';
 import EmptyState from '../components/EmptyState';
+import { fishingTheme, spacing, borderRadius, fontSize, fontWeight, shadows } from '../lib/designTokens';
 
 interface CommunityPost {
   id: string;
@@ -231,7 +232,7 @@ const SocialScreen: React.FC = () => {
       <Ionicons
         name={icon as any}
         size={20}
-        color={activeTab === tab ? '#fff' : '#666'}
+        color={activeTab === tab ? fishingTheme.colors.white : '#666'}
       />
       <Text style={[styles.tabLabel, activeTab === tab && styles.activeTabLabel]}>
         {label}
@@ -252,7 +253,7 @@ const SocialScreen: React.FC = () => {
           <Text style={styles.postTime}>{formatTimeAgo(post.created_at)}</Text>
         </View>
         <View style={[styles.postTypeBadge, { backgroundColor: getPostTypeColor(post.post_type) }]}>
-          <Ionicons name={getPostTypeIcon(post.post_type) as any} size={12} color="#fff" />
+          <Ionicons name={getPostTypeIcon(post.post_type) as any} size={12} color={fishingTheme.colors.white} />
         </View>
       </View>
       
@@ -273,13 +274,13 @@ const SocialScreen: React.FC = () => {
           <Ionicons
             name={post.is_liked ? "heart" : "heart-outline"}
             size={20}
-            color={post.is_liked ? "#E91E63" : "#666"}
+            color={post.is_liked ? "#E91E63" : fishingTheme.colors.mutedWhite}
           />
           <Text style={styles.actionText}>{post.likes_count}</Text>
         </TouchableOpacity>
         
         <TouchableOpacity style={styles.actionButton}>
-          <Ionicons name="chatbubble-outline" size={20} color="#666" />
+          <Ionicons name="chatbubble-outline" size={20} color={fishingTheme.colors.mutedWhite} />
           <Text style={styles.actionText}>{post.comments_count}</Text>
         </TouchableOpacity>
         
@@ -287,7 +288,7 @@ const SocialScreen: React.FC = () => {
           style={styles.actionButton}
           onPress={() => handleSharePost(post)}
         >
-          <Ionicons name="share-outline" size={20} color="#666" />
+          <Ionicons name="share-outline" size={20} color={fishingTheme.colors.mutedWhite} />
           <Text style={styles.actionText}>Share</Text>
         </TouchableOpacity>
       </View>
@@ -338,9 +339,9 @@ const SocialScreen: React.FC = () => {
   
   const getPostTypeColor = (type: string) => {
     switch (type) {
-      case 'photo': return '#4CAF50';
-      case 'achievement': return '#FFD700';
-      case 'tournament_update': return '#2196F3';
+      case 'photo': return fishingTheme.colors.lightTeal;
+      case 'achievement': return fishingTheme.colors.mutedGold;
+      case 'tournament_update': return fishingTheme.colors.deepOcean;
       default: return '#9E9E9E';
     }
   };
@@ -361,7 +362,7 @@ const SocialScreen: React.FC = () => {
         style={styles.createPostButton}
         onPress={() => setShowNewPostModal(true)}
       >
-        <Ionicons name="add-circle" size={24} color="#4CAF50" />
+        <Ionicons name="add-circle" size={24} color={fishingTheme.colors.lightTeal} />
         <Text style={styles.createPostText}>Share something with the community...</Text>
       </TouchableOpacity>
       
@@ -509,17 +510,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingTop: 50,
-    paddingBottom: 15,
-    backgroundColor: '#fff',
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.giant,
+    paddingBottom: spacing.md,
+    backgroundColor: fishingTheme.colors.white,
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
   },
   headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
+    fontSize: fontSize.xxxl,
+    fontWeight: fontWeight.bold as any,
+    color: '#13323b',
   },
   notificationsButton: {
     position: 'relative',
@@ -541,55 +542,51 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   tabNavigation: {
-    backgroundColor: '#fff',
-    paddingVertical: 10,
+    backgroundColor: fishingTheme.colors.white,
+    paddingVertical: spacing.sm,
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
   },
   tabButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    marginHorizontal: 5,
-    borderRadius: 25,
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.sm,
+    marginHorizontal: spacing.sm,
+    borderRadius: borderRadius.xxl,
     backgroundColor: '#f5f5f5',
   },
   activeTabButton: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: fishingTheme.colors.lightTeal,
   },
   tabLabel: {
-    marginLeft: 8,
-    fontSize: 14,
-    fontWeight: '500',
+    marginLeft: spacing.sm,
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.medium as any,
     color: '#666',
   },
   activeTabLabel: {
-    color: '#fff',
+    color: fishingTheme.colors.white,
   },
   scrollView: {
     flex: 1,
   },
   tabContent: {
-    padding: 20,
+    padding: spacing.xl,
   },
   createPostButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
-    padding: 15,
-    borderRadius: 12,
-    marginBottom: 20,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
+    backgroundColor: fishingTheme.colors.white,
+    padding: spacing.md,
+    borderRadius: borderRadius.md,
+    marginBottom: spacing.xxl,
+    ...shadows.sm,
   },
   createPostText: {
-    marginLeft: 12,
-    fontSize: 16,
-    color: '#666',
+    marginLeft: spacing.md,
+    fontSize: fontSize.md,
+    color: fishingTheme.colors.mutedWhite,
     flex: 1,
   },
   postsContainer: {
@@ -630,8 +627,8 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   postTypeBadge: {
-    padding: 6,
-    borderRadius: 12,
+    padding: spacing.xs + 2,
+    borderRadius: borderRadius.xl,
   },
   postContent: {
     fontSize: 16,
@@ -648,21 +645,21 @@ const styles = StyleSheet.create({
   postActions: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingTop: 12,
+    paddingTop: spacing.sm,
     borderTopWidth: 1,
     borderTopColor: '#f0f0f0',
   },
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    marginRight: 15,
+    paddingVertical: spacing.xs + 2,
+    paddingHorizontal: spacing.md,
+    marginRight: spacing.lg,
   },
   actionText: {
-    marginLeft: 6,
-    fontSize: 14,
-    color: '#666',
+    marginLeft: spacing.xs,
+    fontSize: fontSize.md,
+    color: fishingTheme.colors.mutedWhite,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -683,17 +680,13 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   memberCard: {
-    backgroundColor: '#fff',
-    padding: 15,
-    borderRadius: 12,
+    backgroundColor: fishingTheme.colors.white,
+    padding: spacing.lg,
+    borderRadius: borderRadius.md,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
+    ...shadows.sm,
   },
   memberInfo: {
     flexDirection: 'row',
@@ -738,19 +731,19 @@ const styles = StyleSheet.create({
     color: '#999',
   },
   connectButton: {
-    padding: 8,
+    padding: spacing.sm,
   },
   chatHeader: {
-    backgroundColor: '#fff',
-    padding: 15,
-    borderRadius: 12,
-    marginBottom: 15,
+    backgroundColor: fishingTheme.colors.white,
+    padding: spacing.md,
+    borderRadius: borderRadius.md,
+    marginBottom: spacing.md,
     alignItems: 'center',
   },
   chatTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
+    fontSize: fontSize.lg,
+    fontWeight: fontWeight.bold as any,
+    color: '#13323b',
   },
   chatSubtitle: {
     fontSize: 14,
@@ -805,15 +798,11 @@ const styles = StyleSheet.create({
   chatInputContainer: {
     flexDirection: 'row',
     alignItems: 'flex-end',
-    backgroundColor: '#fff',
-    borderRadius: 25,
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
+    backgroundColor: fishingTheme.colors.white,
+    borderRadius: borderRadius.xxl,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    ...shadows.sm,
   },
   chatInputField: {
     flex: 1,
@@ -822,13 +811,13 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   sendButton: {
-    backgroundColor: '#4CAF50',
-    borderRadius: 20,
+    backgroundColor: fishingTheme.colors.lightTeal,
+    borderRadius: borderRadius.circle,
     width: 40,
     height: 40,
     alignItems: 'center',
     justifyContent: 'center',
-    marginLeft: 10,
+    marginLeft: spacing.md,
   },
   modalContainer: {
     flex: 1,
