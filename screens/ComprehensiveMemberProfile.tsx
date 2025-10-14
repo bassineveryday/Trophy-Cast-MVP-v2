@@ -77,6 +77,7 @@ const ComprehensiveMemberProfile: React.FC = () => {
   const [recentForm, setRecentForm] = useState<RecentTournament[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isDerivedProfile, setIsDerivedProfile] = useState(false);
 
   useEffect(() => {
     loadProfileData();
@@ -117,6 +118,7 @@ const ComprehensiveMemberProfile: React.FC = () => {
         };
 
         setMemberProfile(fetched);
+  setIsDerivedProfile(false);
 
         // Optionally, fetch career/season stats from tournament_results for this member
         const memberKey = found.member_code || found.dbm_number || found.id;
@@ -168,24 +170,93 @@ const ComprehensiveMemberProfile: React.FC = () => {
           personal_best: recent.length ? Math.max(...recent.map(r => r.total_weight)) : 0,
         });
       } else {
-        // keep fallback mock data if no record found
+        // No explicit profile row found. Try to derive display info from AOY standings or tournament results.
+        let derivedName: string | undefined;
+        try {
+          // Prefer AOY standings if available in memory
+          const standing = (standings || []).find((s: any) => String(s.member_id) === String(memberCodeToUse));
+          derivedName = (standing?.member_name ?? undefined) as string | undefined;
+        } catch {}
+
+        if (!derivedName) {
+          try {
+            const { data: nameRow } = await supabase
+              .from('tournament_results')
+              .select('member_name')
+              .eq('member_id', memberCodeToUse)
+              .order('event_date', { ascending: false })
+              .limit(1)
+              .maybeSingle();
+            derivedName = (nameRow as any)?.member_name || undefined;
+          } catch {}
+        }
+
         const mockProfile: MemberProfile = {
           member_id: memberCodeToUse,
-          name: profile?.name || 'Tai Hunt',
+          name: derivedName || 'Member',
           role: 'DBM Member',
-          member_since: 'Oct 2025',
-          hometown: 'Denver, CO',
-          home_waters: 'Cherry Creek Reservoir',
+          member_since: 'Unknown',
+          hometown: 'Unknown',
+          home_waters: '',
           birthdate: undefined,
           hobbies: undefined,
           signature_technique: undefined,
           avatar_url: 'https://via.placeholder.com/150'
         };
 
-        setMemberProfile(mockProfile);
-        setCareerStats(null);
-        setSeasonPerformance(null);
-        setRecentForm([]);
+  setMemberProfile(mockProfile);
+  setIsDerivedProfile(true);
+
+        // Also attempt to compute basic stats from results even without a profile row
+        try {
+          const { data: statsRows } = await supabase
+            .from('tournament_results')
+            .select('place, weight_lbs, event_date, cash_payout, payout, big_fish, tournament_name, lake')
+            .eq('member_id', memberCodeToUse)
+            .order('event_date', { ascending: false });
+
+          const career: CareerStats = {
+            years_in_dbm: 1,
+            total_tournaments: statsRows?.length || 0,
+            time_in_money: (statsRows || []).filter((r: any) => {
+              const raw = r.cash_payout ?? r.payout;
+              const num = Number(String(raw).replace(/[^0-9.-]+/g, ''));
+              return Number.isFinite(num) && num > 0;
+            }).length,
+            first_place_finishes: (statsRows || []).filter((r: any) => Number(r.place) === 1).length,
+            second_place_finishes: (statsRows || []).filter((r: any) => Number(r.place) === 2).length,
+            third_place_finishes: (statsRows || []).filter((r: any) => Number(r.place) === 3).length,
+            top_ten_finishes: (statsRows || []).filter((r: any) => Number(r.place) > 0 && Number(r.place) <= 10).length,
+            total_weight: (statsRows || []).reduce((s: number, r: any) => s + (Number(r.weight_lbs) || 0), 0),
+            career_winnings: (statsRows || []).reduce((s: number, r: any) => {
+              const raw = r.cash_payout ?? r.payout;
+              const n = Number(String(raw).replace(/[^0-9.-]+/g, ''));
+              return s + (Number.isFinite(n) ? n : 0);
+            }, 0),
+          };
+          setCareerStats(career);
+
+          const recent: RecentTournament[] = (statsRows || []).slice(0, 5).map((r: any) => ({
+            tournament_name: r.tournament_name || 'Tournament',
+            lake: r.lake || '',
+            placement: Number(r.place) || 0,
+            total_weight: Number(r.weight_lbs) || 0,
+            event_date: r.event_date || '',
+          }));
+          setRecentForm(recent);
+
+          setSeasonPerformance({
+            aoy_points: 0,
+            season_rank: 0,
+            win_rate: career.total_tournaments ? career.first_place_finishes / career.total_tournaments : 0,
+            avg_tournament_weight: career.total_tournaments ? career.total_weight / career.total_tournaments : 0,
+            personal_best: recent.length ? Math.max(...recent.map(r => r.total_weight)) : 0,
+          });
+        } catch {
+          setCareerStats(null);
+          setSeasonPerformance(null);
+          setRecentForm([]);
+        }
       }
 
     } catch (error) {
@@ -232,6 +303,18 @@ const ComprehensiveMemberProfile: React.FC = () => {
   };
 
   const styles = createStyles(theme);
+
+  // Compute AOY info for the current member (works for derived profiles too)
+  const memberCodeForAoy = routeMemberId || profile?.member_code;
+  const aoyInfo = React.useMemo(() => {
+    if (!memberCodeForAoy || !standings) return { rank: null as number | null, points: null as number | null, year: null as number | null };
+    const entry = (standings as any[]).find(s => String(s.member_id) === String(memberCodeForAoy));
+    return {
+      rank: (entry?.aoy_rank ?? null) as number | null,
+      points: (entry?.total_aoy_points ?? null) as number | null,
+      year: (entry?.season_year ?? null) as number | null,
+    };
+  }, [memberCodeForAoy, standings]);
 
   const findEventId = (t: { tournament_name?: string; event_date?: string; lake?: string } | null) => {
     if (!t || !tournaments || tournaments.length === 0) return null;
@@ -299,8 +382,18 @@ const ComprehensiveMemberProfile: React.FC = () => {
             
             <View style={styles.heroInfo}>
               <Text style={styles.heroName}>{memberProfile.name}</Text>
+              {aoyInfo.rank && (
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4 }}>
+                  <Ionicons name="trophy" size={16} color="#FFD700" />
+                  <Text style={{ marginLeft: 6, color: theme.text, fontWeight: '700' }}>AOY #{aoyInfo.rank}</Text>
+                  {aoyInfo.points != null && (
+                    <Text style={{ marginLeft: 8, color: theme.textMuted }}>{aoyInfo.points} pts{aoyInfo.year ? ` • ${aoyInfo.year}` : ''}</Text>
+                  )}
+                </View>
+              )}
               <Text style={styles.heroRole}>
-                {memberProfile.role} • Member Since: {memberProfile.member_since}
+                {memberProfile.role}
+                {memberProfile.member_since && memberProfile.member_since !== 'Unknown' ? ` • Member Since: ${memberProfile.member_since}` : ''}
               </Text>
               <Text style={styles.heroLocation}>
                 📍 My Hometown: {memberProfile.hometown}
@@ -308,10 +401,29 @@ const ComprehensiveMemberProfile: React.FC = () => {
               <Text style={styles.heroWaters}>
                 🌊 Home Waters: {memberProfile.home_waters}
               </Text>
+              <Text style={[styles.heroWaters, { opacity: 0.8 }]}>
+                🆔 ID: {memberProfile.member_id}
+              </Text>
             </View>
           </View>
         </View>
       </View>
+
+      {isDerivedProfile && (
+        <View style={{
+          backgroundColor: '#FFF3CD',
+          padding: 10,
+          borderRadius: 8,
+          borderWidth: 1,
+          borderColor: '#FFEEBA',
+          marginHorizontal: 16,
+          marginBottom: 12
+        }}>
+          <Text style={{ color: '#856404' }}>
+            Profile details are derived from tournament results/AOY. Some fields may be missing until this member sets up their account profile.
+          </Text>
+        </View>
+      )}
 
       {/* 📋 About Me */}
       <AnimatedCard style={styles.sectionCard}>

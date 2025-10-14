@@ -516,7 +516,7 @@ export default function EnhancedHomeScreen() {
     if (target === 'aoy' || target === 'points') {
       (navigation as any).navigate('AOY');
     } else if (target === 'earnings') {
-      (navigation as any).navigate('Profile');
+  (navigation as any).navigate('MemberProfile', { memberId: profile?.member_code || profile?.id });
     }
   };
 
@@ -675,7 +675,7 @@ export default function EnhancedHomeScreen() {
           pbLbs: seasonStats?.bigFish ?? 0,
         }}
         loading={isLoading}
-  onViewProfile={() => (navigation as any).navigate('Profile')}
+  onViewProfile={() => (navigation as any).navigate('MemberProfile', { memberId: profile?.member_code || profile?.id })}
         testID="home.hero"
       />
 

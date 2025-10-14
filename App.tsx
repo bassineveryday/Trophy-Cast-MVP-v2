@@ -16,6 +16,7 @@ import EnhancedHomeScreen from './screens/EnhancedHomeScreen';
 import FishingThemedHomeScreen from './screens/FishingThemedHomeScreen';
 import EnhancedTournamentsScreen from './components/EnhancedTournamentsScreen';
 import EnhancedProfileScreen from './components/EnhancedProfileScreen';
+import ComprehensiveMemberProfile from './screens/ComprehensiveMemberProfile';
 import EnhancedAOYScreen from './components/EnhancedAOYScreen';
 import RegisterScreen from './screens/RegisterScreen';
 import ClubScreen from './screens/ClubScreen';
@@ -38,6 +39,7 @@ type TournamentStackParamList = {
 type RootStackParamList = {
   Main: undefined;
   Register: undefined;
+  MemberProfile: { memberId?: string };
 };
 
 const Tab = createBottomTabNavigator<TabParamList>();
@@ -148,6 +150,12 @@ function Navigation() {
       ) : (
         <Stack.Screen name="Main" component={TabNavigator} />
       )}
+      {/* Standalone member profile route for deep-linked member dashboards */}
+      <Stack.Screen
+        name="MemberProfile"
+        component={ComprehensiveMemberProfile}
+        options={{ headerShown: true, title: 'Member Profile' }}
+      />
     </Stack.Navigator>
   );
 }

@@ -428,7 +428,7 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
               key={p.member_id}
               style={styles.participantCard}
               accessibilityRole="button"
-              onPress={() => (navigation as any).navigate('Profile', { memberId: p.member_id })}
+              onPress={() => (navigation as any).navigate('MemberProfile', { memberId: p.member_id })}
             >
               <View style={styles.participantInfo}>
                 <Text style={styles.participantName}>{p.member_name}</Text>
@@ -617,7 +617,7 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
                 }
                 
                 return (
-                  <TouchableOpacity key={rowKey} onPress={() => (navigation as any).navigate('Profile', { memberId: r.member_id || undefined })} style={{ flexDirection: 'row', padding: 12, marginVertical: 6, backgroundColor: '#fff', borderRadius: 8, alignItems: 'center' }}>
+                  <TouchableOpacity key={rowKey} onPress={() => (navigation as any).navigate('MemberProfile', { memberId: r.member_id || undefined })} style={{ flexDirection: 'row', padding: 12, marginVertical: 6, backgroundColor: '#fff', borderRadius: 8, alignItems: 'center' }}>
                     <View style={{ width: 40, alignItems: 'center' }}>{placeDisplay}</View>
                     <View style={{ flex: 1 }}>
                       <Text style={{ fontWeight: '600' }}>{r.member_name}</Text>
@@ -710,7 +710,7 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
                 key={r.id}
                 accessibilityRole="button"
                 accessibilityLabel={`result-${idx + 1}-${r.member_name || r.member_id}`}
-                onPress={() => (navigation as any).navigate('Profile', { memberId })}
+                onPress={() => (navigation as any).navigate('MemberProfile', { memberId })}
                 style={{ padding: 12, marginVertical: 6, backgroundColor: '#fff', borderRadius: 8, flexDirection: 'row', alignItems: 'center' }}
               >
                 <Text style={{ fontWeight: '700', width: 40 }}>{currentPlace}</Text>

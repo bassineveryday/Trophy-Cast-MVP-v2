@@ -20,7 +20,7 @@ import EmptyState from '../components/EmptyState';
 interface FilterOptions {
   search: string;
   year: string;
-  boaterStatus: 'all' | 'boater' | 'non-boater';
+  boaterStatus: 'all' | 'boater' | 'co-angler';
 }
 
 interface StandingWithTrend extends AOYStandingsRow {
@@ -99,6 +99,15 @@ export default function EnhancedAOYScreen() {
     }
   };
 
+  // Classify boater status with robust heuristics
+  const classifyBoaterStatus = (raw?: string | null): 'boater' | 'co-angler' | 'unknown' => {
+    if (!raw) return 'unknown';
+    const s = String(raw).trim().toLowerCase();
+    if (s === 'b' || s.includes('boater')) return 'boater';
+    if (s === 'c' || s.includes('co') || s.includes('co-angler') || s.includes('co angler')) return 'co-angler';
+    return 'unknown';
+  };
+
   const filterStandings = (standings: StandingWithTrend[]): StandingWithTrend[] => {
     return standings.filter(member => {
       // Search filter
@@ -115,11 +124,11 @@ export default function EnhancedAOYScreen() {
         if (member.season_year.toString() !== filters.year) return false;
       }
 
-      // Boater status filter
+      // Boater/Co-Angler filter
       if (filters.boaterStatus !== 'all') {
-        const isBoater = member.boater_status?.toLowerCase().includes('boater');
-        if (filters.boaterStatus === 'boater' && !isBoater) return false;
-        if (filters.boaterStatus === 'non-boater' && isBoater) return false;
+        const role = classifyBoaterStatus(member.boater_status);
+        if (filters.boaterStatus === 'boater' && role !== 'boater') return false;
+        if (filters.boaterStatus === 'co-angler' && role !== 'co-angler') return false;
       }
 
       return true;
@@ -162,7 +171,10 @@ export default function EnhancedAOYScreen() {
               {item.boater_status && (
                 <View style={styles.statusBadge}>
                   <Text style={styles.statusText}>
-                    {item.boater_status}
+                    {(() => {
+                      const role = classifyBoaterStatus(item.boater_status);
+                      return role === 'boater' ? 'Boater' : role === 'co-angler' ? 'Co-Angler' : (item.boater_status || '');
+                    })()}
                   </Text>
                 </View>
               )}
@@ -223,7 +235,7 @@ export default function EnhancedAOYScreen() {
               </View>
             </View>
 
-            <TouchableOpacity style={styles.actionButton} onPress={() => (navigation as any).navigate('Profile', { memberId: item.member_id })}>
+            <TouchableOpacity style={styles.actionButton} onPress={() => (navigation as any).navigate('MemberProfile', { memberId: item.member_id })}>
               <Ionicons name="person-outline" size={18} color="#007bff" />
               <Text style={styles.actionButtonText}>View Member Profile</Text>
             </TouchableOpacity>
@@ -285,11 +297,11 @@ export default function EnhancedAOYScreen() {
         </TouchableOpacity>
         
         <TouchableOpacity 
-          style={[styles.filterChip, filters.boaterStatus === 'non-boater' && styles.activeChip]}
-          onPress={() => setFilters(prev => ({ ...prev, boaterStatus: 'non-boater' }))}
+          style={[styles.filterChip, filters.boaterStatus === 'co-angler' && styles.activeChip]}
+          onPress={() => setFilters(prev => ({ ...prev, boaterStatus: 'co-angler' }))}
         >
-          <Text style={[styles.chipText, filters.boaterStatus === 'non-boater' && styles.activeChipText]}>
-            Non-Boaters
+          <Text style={[styles.chipText, filters.boaterStatus === 'co-angler' && styles.activeChipText]}>
+            Co-Anglers
           </Text>
         </TouchableOpacity>
       </ScrollView>
