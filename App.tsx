@@ -5,7 +5,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
 import { QueryClientProvider } from '@tanstack/react-query';
-import { useFonts, Inter_400Regular, Inter_600SemiBold, Inter_700Bold } from '@expo-google-fonts/inter';
+import { useFonts, Raleway_400Regular } from '@expo-google-fonts/raleway';
+import { Montserrat_600SemiBold, Montserrat_700Bold } from '@expo-google-fonts/montserrat';
 import { StatusBar } from 'expo-status-bar';
 import { AuthProvider, useAuth } from './lib/AuthContext';
 import { ThemeProvider, useTheme, toNavigationTheme } from './lib/ThemeContext';
@@ -164,9 +165,9 @@ function Navigation() {
 
 export default function App() {
   const [fontsLoaded] = useFonts({
-    Inter_400Regular,
-    Inter_600SemiBold,
-    Inter_700Bold,
+    Raleway_400Regular,
+    Montserrat_600SemiBold,
+    Montserrat_700Bold,
   });
 
   // Wait for fonts to load before rendering
@@ -194,7 +195,7 @@ function ThemedNavigation() {
   
   return (
     <NavigationContainer theme={navTheme}>
-      <StatusBar style={theme.mode === 'dark' ? 'light' : 'dark'} />
+      <StatusBar style={theme.mode === 'dark' ? 'light' : 'dark'} backgroundColor={theme.background} />
       <Navigation />
     </NavigationContainer>
   );

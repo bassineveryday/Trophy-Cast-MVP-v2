@@ -72,7 +72,7 @@ export default function EnhancedTournamentsScreen() {
   };
 
   const getTournamentStatus = (tournament: TournamentEvent) => {
-    if (!tournament.event_date) return { status: 'pending', color: theme.accent, icon: 'time-outline' };
+    if (!tournament.event_date) return { status: 'pending', color: theme.primary, icon: 'time-outline' };
     
     const eventDate = new Date(tournament.event_date);
     const today = new Date();
@@ -80,7 +80,7 @@ export default function EnhancedTournamentsScreen() {
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
     if (diffDays < 0) {
-      return { status: 'completed', color: theme.accent, icon: 'checkmark-circle-outline' };
+      return { status: 'completed', color: theme.primary, icon: 'checkmark-circle-outline' };
     } else if (diffDays <= 7) {
       return { status: 'upcoming', color: theme.primary, icon: 'warning-outline' };
     } else {
@@ -174,7 +174,7 @@ export default function EnhancedTournamentsScreen() {
 
               {item.tournament_code && (
                 <View style={styles.infoRow}>
-                  <Ionicons name="barcode-outline" size={16} color={theme.accent} />
+                  <Ionicons name="barcode-outline" size={16} color={theme.primary} />
                   <Text style={styles.codeText}>{item.tournament_code}</Text>
                 </View>
               )}
@@ -207,7 +207,7 @@ export default function EnhancedTournamentsScreen() {
               style={styles.actionButton}
               onPress={() => (navigation as any).navigate('TournamentDetail', { tournamentId: item.event_id })}
             >
-              <Ionicons name="information-circle-outline" size={18} color={theme.primary} />
+              <Ionicons name="information-circle-outline" size={18} color={theme.onPrimary} />
               <Text style={styles.actionButtonText}>View Full Details</Text>
             </TouchableOpacity>
           </View>
@@ -528,14 +528,16 @@ const createStyles = (theme: any) => StyleSheet.create({
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: theme.mode === 'light' ? 'rgba(0,0,0,0.04)' : 'rgba(255,255,255,0.06)',
+    backgroundColor: theme.primary,
     paddingVertical: theme.layout.spacing.sm,
     paddingHorizontal: theme.layout.spacing.md,
     borderRadius: theme.layout.radius.md,
     alignSelf: 'flex-start',
+    borderWidth: 1,
+    borderColor: theme.primary,
   },
   actionButtonText: {
-    color: theme.primary,
+    color: '#0C1A23',
     fontSize: theme.typography.sizes.body,
     fontFamily: theme.typography.family.bold,
     marginLeft: theme.layout.spacing.sm,

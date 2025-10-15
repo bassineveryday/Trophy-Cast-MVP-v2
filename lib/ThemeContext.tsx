@@ -67,6 +67,7 @@ export interface ColorScheme {
   primary: string;
   primaryLight: string;
   primaryDark: string;
+  onPrimary: string;
   
   // Accent colors
   accent: string;
@@ -168,7 +169,9 @@ export const lightTheme: BrandTheme = {
   // Primary colors - from BRAND_CONFIG
   primary: BRAND_CONFIG.colors.primary,
   primaryLight: BRAND_CONFIG.colors.accent,
-  primaryDark: '#1F6B42',
+  // Darker variant of primary for emphasis states with gold theme
+  primaryDark: '#B8911F',
+  onPrimary: BRAND_CONFIG.colors.onPrimary,
   
   // Accent colors - from BRAND_CONFIG
   accent: BRAND_CONFIG.colors.accent,
@@ -219,7 +222,9 @@ export const darkTheme: BrandTheme = {
   // Primary colors - from BRAND_CONFIG
   primary: BRAND_CONFIG.colors.primary,
   primaryLight: BRAND_CONFIG.colors.accent,
-  primaryDark: '#1F6B42',
+  // Darker variant of primary for emphasis states with gold theme
+  primaryDark: '#B8911F',
+  onPrimary: BRAND_CONFIG.colors.onPrimary,
   
   // Accent colors - from BRAND_CONFIG
   accent: BRAND_CONFIG.colors.accent,

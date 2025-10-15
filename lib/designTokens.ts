@@ -9,23 +9,23 @@ import { ColorScheme } from './ThemeContext';
 export const spacing = {
   xs: 4,
   sm: 8,
-  md: 12,
-  lg: 16,
-  xl: 20,
-  xxl: 24,
-  xxxl: 32,
-  huge: 40,
-  massive: 48,
-  giant: 60,
+  md: 16,
+  lg: 24,
+  xl: 32,
+  xxl: 40,
+  xxxl: 48,
+  huge: 56,
+  massive: 64,
+  giant: 72,
 } as const;
 
 // Border radius values
 export const borderRadius = {
-  sm: 6,
+  sm: 4,
   md: 8,
-  lg: 12,
-  xl: 16,
-  xxl: 20,
+  lg: 16,
+  xl: 24,
+  xxl: 32,
   circle: 9999,
 } as const;
 

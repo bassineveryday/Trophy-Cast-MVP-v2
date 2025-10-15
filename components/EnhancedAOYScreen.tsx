@@ -443,17 +443,18 @@ const createStyles = (theme: any) => StyleSheet.create({
     flexDirection: 'row',
   },
   filterChip: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: theme.mode === 'light' ? '#f0f0f0' : theme.surface,
     borderRadius: 20,
     paddingHorizontal: 16,
     paddingVertical: 8,
     marginRight: 8,
     borderWidth: 1,
-    borderColor: 'rgba(245, 200, 66, 0.3)',
+    borderColor: theme.border,
   },
   activeChip: {
-    backgroundColor: '#F5C842', // fishingTheme.colors.gold
-    borderColor: '#E8A735', // fishingTheme.colors.goldenOrange
+    backgroundColor: 'transparent',
+    borderColor: theme.primary,
+    borderWidth: 2,
   },
   chipText: {
     fontSize: 14,
@@ -461,7 +462,7 @@ const createStyles = (theme: any) => StyleSheet.create({
     fontWeight: '500',
   },
   activeChipText: {
-    color: '#0B1020', // Dark text on gold background
+    color: theme.primary,
     fontWeight: '700',
   },
   headerStats: {
@@ -573,7 +574,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   pointsValue: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#F5C842', // fishingTheme.colors.gold
+    color: theme.primary,
   },
   pointsLabel: {
     fontSize: 12,
@@ -617,16 +618,16 @@ const createStyles = (theme: any) => StyleSheet.create({
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(245, 200, 66, 0.15)',
+    backgroundColor: 'transparent',
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 8,
     alignSelf: 'flex-start',
-    borderWidth: 1,
-    borderColor: '#F5C842',
+    borderWidth: 2,
+    borderColor: theme.primary,
   },
   actionButtonText: {
-    color: '#F5C842', // fishingTheme.colors.gold
+    color: theme.primary,
     fontSize: 14,
     fontWeight: '600',
     marginLeft: 8,

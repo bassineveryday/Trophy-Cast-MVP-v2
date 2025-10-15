@@ -861,7 +861,7 @@ const createStyles = (theme: any) => StyleSheet.create({
     backgroundColor: theme.mode === 'light' ? '#f5f5f5' : theme.background,
   },
   activeTabButton: {
-    backgroundColor: theme.accent,
+    backgroundColor: theme.primary,
   },
   tabLabel: {
     marginLeft: theme.layout.spacing.sm,
@@ -1017,7 +1017,7 @@ const createStyles = (theme: any) => StyleSheet.create({
     paddingVertical: theme.layout.spacing.md,
     borderRadius: theme.layout.radius.xl,
     borderWidth: 2,
-    borderColor: theme.accent,
+    borderColor: theme.primary,
     backgroundColor: theme.surface,
   },
   buttonGradient: {
@@ -1026,7 +1026,7 @@ const createStyles = (theme: any) => StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: theme.layout.spacing.md,
     paddingHorizontal: theme.layout.spacing.xl,
-    backgroundColor: theme.accent,
+    backgroundColor: theme.primary,
   },
   buttonText: {
     marginLeft: theme.layout.spacing.sm,

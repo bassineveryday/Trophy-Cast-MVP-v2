@@ -19,35 +19,38 @@
  * Used for main actions, highlights, and brand identity
  */
 export const BRAND_COLORS = {
-  // Main brand color (SeaGreen)
-  primary: '#2E8B57',
-  
-  // Accent/highlight color (MintGreen)
-  accent: '#65C18C',
-  
-  // Success states
-  success: '#4CAF50',
-  
-  // Warning states
-  warning: '#FF9800',
-  
-  // Error states
-  error: '#F44336',
-  
-  // Info states
-  info: '#2196F3',
+  // Primary brand color (Trophy Gold)
+  primary: '#D4AF37',
+
+  // Accent/highlight color (Bass Green)
+  accent: '#2E6E3D',
+
+  // Success states (Bass Green)
+  success: '#2E6E3D',
+
+  // Warning states (Bright Orange)
+  warning: '#FFA500',
+
+  // Error states (Strong Red)
+  error: '#D22B2B',
+
+  // Info states (Complementary blue)
+  info: '#3A7CA5',
+
+  // Text color to use on top of primary gold backgrounds
+  onPrimary: '#0C1A23',
 } as const;
 
 /**
  * Light theme colors
  */
 export const LIGHT_THEME_COLORS = {
-  background: '#F5F5F5',        // Page background
-  surface: '#FFFFFF',           // Cards, elevated surfaces
-  surfaceVariant: '#F8F8F8',    // Alternate surface color
-  border: '#E0E0E0',            // Borders and dividers
-  text: '#1A1A1A',              // Primary text
-  textSecondary: '#666666',     // Secondary/muted text
+  background: '#F5F1E6',        // Off-White/Sand background
+  surface: '#FFFFFF',           // Clean white for cards
+  surfaceVariant: '#EEF2F4',    // Alternate light surface
+  border: '#DDE2E5',            // Light grey border
+  text: '#0C1A23',              // Deep Navy text for high contrast
+  textSecondary: '#546674',     // Muted Deep Navy/grey
   shadow: '#000000',            // Shadow color
 } as const;
 
@@ -55,12 +58,12 @@ export const LIGHT_THEME_COLORS = {
  * Dark theme colors
  */
 export const DARK_THEME_COLORS = {
-  background: '#121212',        // Page background
-  surface: '#1E1E1E',           // Cards, elevated surfaces
-  surfaceVariant: '#2C2C2C',    // Alternate surface color
-  border: '#333333',            // Borders and dividers
-  text: '#FFFFFF',              // Primary text
-  textSecondary: '#B0B0B0',     // Secondary/muted text
+  background: '#0C1A23',        // Deep Navy background
+  surface: '#132532',           // Slightly lighter navy for surfaces
+  surfaceVariant: '#1A2C3A',    // Alternate navy for depth
+  border: '#3A4C5A',            // Subtle border color
+  text: '#F5F1E6',              // Off-White/Sand text
+  textSecondary: '#C9D3DA',     // Muted Off-White/Sand
   shadow: '#000000',            // Shadow color
 } as const;
 
@@ -69,20 +72,20 @@ export const DARK_THEME_COLORS = {
  * Used for hero sections, special cards, etc.
  */
 export const BRAND_GRADIENTS = {
-  // Main hero gradient (SeaGreen → MintGreen)
-  hero: ['#2E8B57', '#65C18C'],
-  
-  // Card gradient (slightly darker variation)
-  card: ['#3A9D6B', '#4CAF79'],
-  
-  // Accent gradient (lighter variation)
-  accent: ['#65C18C', '#7ED5A3'],
-  
-  // Success gradient
-  success: ['#4CAF50', '#66BB6A'],
-  
+  // Main hero gradient (Gold tones)
+  hero: ['#E3C04D', '#B8911F'],
+
+  // Card gradient (subtle navy depth)
+  card: ['#132532', '#1A2C3A'],
+
+  // Accent gradient (Bass Green range)
+  accent: ['#2E6E3D', '#3D8E4F'],
+
+  // Success gradient (Bass Green)
+  success: ['#2E6E3D', '#3D8E4F'],
+
   // Premium/gold gradient (for special features)
-  premium: ['#FFD700', '#FFA500'],
+  premium: ['#D4AF37', '#B8911F'],
 } as const;
 
 // ============================================
@@ -94,10 +97,10 @@ export const BRAND_GRADIENTS = {
  * Using Inter font family for clean, modern look
  */
 export const BRAND_FONTS = {
-  // Font families from @expo-google-fonts/inter
-  regular: 'Inter_400Regular',
-  medium: 'Inter_600SemiBold',
-  bold: 'Inter_700Bold',
+  // Brand fonts
+  regular: 'Raleway_400Regular',
+  medium: 'Montserrat_600SemiBold',
+  bold: 'Montserrat_700Bold',
 } as const;
 
 /**
@@ -132,12 +135,12 @@ export const FONT_WEIGHTS = {
  * Used for consistent padding, margins, and gaps
  */
 export const SPACING = {
-  xs: 6,           // Extra small spacing
+  xs: 4,           // Extra small spacing
   sm: 8,           // Small spacing
-  md: 12,          // Medium spacing
-  lg: 16,          // Large spacing
-  xl: 20,          // Extra large spacing
-  xxl: 24,         // 2x extra large spacing
+  md: 16,          // Standard padding for most components
+  lg: 24,          // Larger screen margins
+  xl: 32,          // Extra large spacing
+  xxl: 40,         // 2x extra large spacing
 } as const;
 
 /**
@@ -145,8 +148,8 @@ export const SPACING = {
  * Used for consistent rounded corners
  */
 export const BORDER_RADIUS = {
-  sm: 8,           // Small radius (buttons, chips)
-  md: 12,          // Medium radius (cards)
+  sm: 4,           // Small radius (buttons, chips)
+  md: 8,           // Medium radius (cards)
   lg: 16,          // Large radius (modals)
   xl: 24,          // Extra large radius (hero cards)
   full: 9999,      // Fully rounded (pills, avatars)

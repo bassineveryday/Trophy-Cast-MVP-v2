@@ -564,7 +564,7 @@ export default function EnhancedProfileScreen() {
           <Ionicons 
             name="settings-outline" 
             size={20} 
-            color={activeTab === 'settings' ? '#007bff' : '#7f8c8d'} 
+            color={activeTab === 'settings' ? theme.primary : '#7f8c8d'} 
           />
           <Text style={[styles.tabLabel, activeTab === 'settings' && styles.activeTabLabel]}>
             Settings
@@ -593,7 +593,7 @@ const createStyles = (theme: any) => StyleSheet.create({
     marginLeft: 8,
     fontSize: theme.typography.sizes.body,
     fontFamily: theme.typography.family.medium,
-    color: theme.accent,
+    color: theme.primary,
   },
   tabBar: {
     flexDirection: 'row',

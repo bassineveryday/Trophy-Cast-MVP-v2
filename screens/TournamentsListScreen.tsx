@@ -51,15 +51,16 @@ const styles = makeStyles((theme) => ({
     justifyContent: 'center',
   },
   filterButtonActive: {
-    backgroundColor: theme.accent,
-    borderColor: theme.accent,
+    backgroundColor: theme.primary,
+    borderColor: theme.primary,
   },
   filterButtonInactive: {
     backgroundColor: 'transparent',
     borderColor: theme.border,
   },
   filterButtonTextActive: {
-    color: '#ffffff',
+    // Deep Navy text on Gold for strong contrast
+    color: '#0C1A23',
     fontSize: theme.typography.sizes.body,
     fontFamily: theme.typography.family.bold,
   },
@@ -162,7 +163,7 @@ export default function TournamentsListScreen() {
               metadata={`📅 ${formattedDate}`}
               rightValue={`$${item.entry_fee}`}
               rightLabel="entry fee"
-              rightColor={theme.accent}
+              rightColor={theme.primary}
               showChevron
             />
           </Card>
@@ -216,7 +217,7 @@ export default function TournamentsListScreen() {
       <TopBar title="Tournaments" subtitle="Browse and register" />
       {loading ? (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <ActivityIndicator size="large" color={theme.accent} />
+          <ActivityIndicator size="large" color={theme.primary} />
         </View>
       ) : (
         <FlatList

@@ -35,7 +35,7 @@ export default function TopBar({ title, subtitle, showBack, rightAction, testID 
       ) : <View style={styles.backPlaceholder} />}
 
       <View style={styles.titles}>
-        {displayTitle ? <Text style={styles.title}>{displayTitle}</Text> : null}
+        {displayTitle ? <Text style={[styles.title, { color: theme.primary }]}>{displayTitle}</Text> : null}
         {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
       </View>
 
