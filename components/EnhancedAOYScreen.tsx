@@ -14,8 +14,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { AOYStandingsRow } from '../lib/supabase';
 import { useAOYStandings } from '../lib/hooks/useQueries';
+import { useTheme } from '../lib/ThemeContext';
 import { ListSkeleton } from '../components/Skeleton';
 import EmptyState from '../components/EmptyState';
+import { Chip } from '../components/BrandPrimitives';
 
 interface FilterOptions {
   search: string;
@@ -30,6 +32,8 @@ interface StandingWithTrend extends AOYStandingsRow {
 
 export default function EnhancedAOYScreen() {
   const navigation = useNavigation();
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const { data: standings = [], isLoading, error, refetch, isRefetching } = useAOYStandings();
   const [filters, setFilters] = useState<FilterOptions>({
     search: '',
@@ -395,18 +399,18 @@ export default function EnhancedAOYScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1A3D4D', // fishingTheme.colors.deepOcean
+    backgroundColor: theme.background,
   },
   filterContainer: {
-    backgroundColor: '#2A5A6B', // fishingTheme.colors.navyTeal
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 3,
-    borderBottomColor: '#F5C842', // fishingTheme.colors.gold
-    shadowColor: '#F5C842',
+    backgroundColor: theme.surface,
+    paddingHorizontal: theme.layout.spacing.md,
+    paddingVertical: theme.layout.spacing.sm,
+    borderBottomWidth: 2,
+    borderBottomColor: theme.primary,
+    shadowColor: theme.shadow,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
@@ -415,21 +419,22 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    marginBottom: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: theme.layout.radius.md,
+    paddingHorizontal: theme.layout.spacing.sm,
+    marginBottom: theme.layout.spacing.sm,
     height: 44,
     borderWidth: 1,
-    borderColor: 'rgba(245, 200, 66, 0.3)',
+    borderColor: theme.border,
   },
   searchIcon: {
-    marginRight: 8,
+    marginRight: theme.layout.spacing.xs,
   },
   searchInput: {
     flex: 1,
-    fontSize: 16,
-    color: '#F5EFE6', // fishingTheme.colors.cream
+    fontSize: theme.typography.sizes.body,
+    fontFamily: theme.typography.family.regular,
+    color: theme.text,
   },
   clearButton: {
     padding: 4,
@@ -466,48 +471,50 @@ const styles = StyleSheet.create({
   },
   statCard: {
     flex: 1,
-    backgroundColor: '#2A5060', // fishingTheme.colors.trophyNavy
-    borderRadius: 12,
-    padding: 16,
+    backgroundColor: theme.surface,
+    borderRadius: theme.layout.radius.md,
+    padding: theme.layout.spacing.md,
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: theme.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
     shadowRadius: 6,
-    elevation: 3,
+    elevation: theme.layout.elevation.sm,
+    borderWidth: 1,
+    borderColor: theme.border,
   },
   statNumber: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#F5C842', // fishingTheme.colors.gold
+    fontSize: theme.typography.sizes.h2,
+    fontFamily: theme.typography.family.bold,
+    color: theme.primary,
     marginBottom: 4,
   },
   statTitle: {
-    fontSize: 12,
-    color: '#F5EFE6', // fishingTheme.colors.cream
+    fontSize: theme.typography.sizes.label,
+    fontFamily: theme.typography.family.medium,
+    color: theme.textSecondary,
     textTransform: 'uppercase',
-    fontWeight: '600',
   },
   listContainer: {
     paddingHorizontal: 16,
   },
   memberCard: {
-    backgroundColor: '#2A5A6B', // fishingTheme.colors.navyTeal
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: '#000',
+    backgroundColor: theme.surface,
+    borderRadius: theme.layout.radius.lg,
+    padding: theme.layout.spacing.md,
+    marginBottom: theme.layout.spacing.sm,
+    shadowColor: theme.shadow,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 10,
-    elevation: 5,
+    elevation: theme.layout.elevation.md,
     borderWidth: 1,
-    borderColor: 'rgba(245, 200, 66, 0.2)',
+    borderColor: theme.border,
   },
   expandedCard: {
-    borderColor: '#F5C842', // fishingTheme.colors.gold
+    borderColor: theme.primary,
     borderWidth: 2,
-    shadowColor: '#F5C842',
+    shadowColor: theme.primary,
     shadowOpacity: 0.3,
   },
   cardHeader: {
@@ -533,9 +540,9 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   memberName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#F5EFE6', // fishingTheme.colors.cream
+    fontSize: theme.typography.sizes.h3,
+    fontFamily: theme.typography.family.bold,
+    color: theme.text,
     marginBottom: 4,
   },
   memberMeta: {

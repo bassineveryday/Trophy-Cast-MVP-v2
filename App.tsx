@@ -5,8 +5,10 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
 import { QueryClientProvider } from '@tanstack/react-query';
+import { useFonts, Inter_400Regular, Inter_600SemiBold, Inter_700Bold } from '@expo-google-fonts/inter';
+import { StatusBar } from 'expo-status-bar';
 import { AuthProvider, useAuth } from './lib/AuthContext';
-import { ThemeProvider, useTheme } from './lib/ThemeContext';
+import { ThemeProvider, useTheme, toNavigationTheme } from './lib/ThemeContext';
 import ErrorBoundary from './components/ErrorBoundary';
 import { queryClient } from './lib/queryClient';
 
@@ -161,6 +163,17 @@ function Navigation() {
 }
 
 export default function App() {
+  const [fontsLoaded] = useFonts({
+    Inter_400Regular,
+    Inter_600SemiBold,
+    Inter_700Bold,
+  });
+
+  // Wait for fonts to load before rendering
+  if (!fontsLoaded) {
+    return null;
+  }
+
   return (
     <ErrorBoundary>
       <ThemeProvider>
@@ -176,40 +189,12 @@ export default function App() {
 }
 
 function ThemedNavigation() {
-  const { theme, isDark } = useTheme();
+  const { theme } = useTheme();
+  const navTheme = toNavigationTheme(theme);
   
   return (
-    <NavigationContainer
-      theme={{
-        dark: isDark,
-        colors: {
-          primary: theme.primary,
-          background: theme.background,
-          card: theme.surface,
-          text: theme.text,
-          border: theme.border,
-          notification: theme.accent,
-        },
-        fonts: {
-          regular: {
-            fontFamily: 'System',
-            fontWeight: '400',
-          },
-          medium: {
-            fontFamily: 'System',
-            fontWeight: '500',
-          },
-          bold: {
-            fontFamily: 'System',
-            fontWeight: '700',
-          },
-          heavy: {
-            fontFamily: 'System',
-            fontWeight: '900',
-          },
-        },
-      }}
-    >
+    <NavigationContainer theme={navTheme}>
+      <StatusBar style={theme.mode === 'dark' ? 'light' : 'dark'} />
       <Navigation />
     </NavigationContainer>
   );

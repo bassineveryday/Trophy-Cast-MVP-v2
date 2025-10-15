@@ -1,8 +1,56 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useColorScheme } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { DarkTheme as NavDark, DefaultTheme as NavLight, Theme as NavigationTheme } from '@react-navigation/native';
+import { BRAND_CONFIG } from './brandConfig';
 
 export type ThemeMode = 'light' | 'dark' | 'system';
+
+// Typography tokens
+export interface Typography {
+  family: {
+    regular: string;
+    medium: string;
+    bold: string;
+  };
+  sizes: {
+    h1: number;
+    h2: number;
+    h3: number;
+    title: number;
+    body: number;
+    label: number;
+    caption: number;
+  };
+  weights: {
+    regular: '400';
+    medium: '600';
+    bold: '700';
+  };
+}
+
+// Layout tokens
+export interface LayoutTokens {
+  radius: {
+    sm: number;
+    md: number;
+    lg: number;
+    xl: number;
+  };
+  spacing: {
+    xs: number;
+    sm: number;
+    md: number;
+    lg: number;
+    xl: number;
+    xxl: number;
+  };
+  elevation: {
+    sm: number;
+    md: number;
+    lg: number;
+  };
+}
 
 export interface ColorScheme {
   // Background colors
@@ -39,33 +87,98 @@ export interface ColorScheme {
   // Status colors
   active: string;
   inactive: string;
+  
+  // Gradients
+  gradients: {
+    hero: [string, string];
+    card: [string, string];
+    accent: [string, string];
+  };
 }
 
-export const lightTheme: ColorScheme = {
-  // Background colors
-  background: '#f8f9fa',
-  surface: '#ffffff',
-  card: '#ffffff',
+// Full brand theme combining colors, typography, and layout
+export interface BrandTheme extends ColorScheme {
+  mode: 'light' | 'dark';
+  typography: Typography;
+  layout: LayoutTokens;
+}
+
+// Shared typography tokens (same for light and dark)
+// Now imported from brandConfig.ts for easy updates!
+const typography: Typography = {
+  family: {
+    regular: BRAND_CONFIG.fonts.regular,
+    medium: BRAND_CONFIG.fonts.medium,
+    bold: BRAND_CONFIG.fonts.bold,
+  },
+  sizes: {
+    h1: BRAND_CONFIG.fontSizes.h1,
+    h2: BRAND_CONFIG.fontSizes.h2,
+    h3: BRAND_CONFIG.fontSizes.h3,
+    title: BRAND_CONFIG.fontSizes.body,
+    body: BRAND_CONFIG.fontSizes.body,
+    label: BRAND_CONFIG.fontSizes.label,
+    caption: BRAND_CONFIG.fontSizes.caption,
+  },
+  weights: {
+    regular: '400',
+    medium: '600',
+    bold: '700',
+  },
+};
+
+// Shared layout tokens (same for light and dark)
+// Now imported from brandConfig.ts for easy updates!
+const layout: LayoutTokens = {
+  radius: {
+    sm: BRAND_CONFIG.borderRadius.sm,
+    md: BRAND_CONFIG.borderRadius.md,
+    lg: BRAND_CONFIG.borderRadius.lg,
+    xl: BRAND_CONFIG.borderRadius.xl,
+  },
+  spacing: {
+    xs: BRAND_CONFIG.spacing.xs,
+    sm: BRAND_CONFIG.spacing.sm,
+    md: BRAND_CONFIG.spacing.md,
+    lg: BRAND_CONFIG.spacing.lg,
+    xl: BRAND_CONFIG.spacing.xl,
+    xxl: BRAND_CONFIG.spacing.xxl,
+  },
+  elevation: {
+    sm: BRAND_CONFIG.elevation.sm,
+    md: BRAND_CONFIG.elevation.md,
+    lg: BRAND_CONFIG.elevation.lg,
+  },
+};
+
+// Light theme now uses brandConfig.ts values - update colors there to change the entire app!
+export const lightTheme: BrandTheme = {
+  mode: 'light',
   
-  // Text colors
-  text: '#2c3e50',
-  textSecondary: '#34495e',
-  textMuted: '#7f8c8d',
+  // Background colors - from BRAND_CONFIG
+  background: BRAND_CONFIG.lightTheme.background,
+  surface: BRAND_CONFIG.lightTheme.surface,
+  card: BRAND_CONFIG.lightTheme.surface,
   
-  // Primary colors
-  primary: '#4CAF50',
-  primaryLight: '#81C784',
-  primaryDark: '#388E3C',
+  // Text colors - from BRAND_CONFIG
+  text: BRAND_CONFIG.lightTheme.text,
+  textSecondary: BRAND_CONFIG.lightTheme.textSecondary,
+  textMuted: BRAND_CONFIG.lightTheme.textSecondary,
   
-  // Accent colors
-  accent: '#2196F3',
-  success: '#4CAF50',
-  warning: '#FF9800',
-  error: '#E91E63',
+  // Primary colors - from BRAND_CONFIG
+  primary: BRAND_CONFIG.colors.primary,
+  primaryLight: BRAND_CONFIG.colors.accent,
+  primaryDark: '#1F6B42',
   
-  // UI elements
-  border: '#e0e0e0',
-  shadow: '#000000',
+  // Accent colors - from BRAND_CONFIG
+  accent: BRAND_CONFIG.colors.accent,
+  success: BRAND_CONFIG.colors.success,
+  warning: BRAND_CONFIG.colors.warning,
+  error: BRAND_CONFIG.colors.error,
+  
+  // UI elements - from BRAND_CONFIG
+  border: BRAND_CONFIG.lightTheme.border,
+  shadow: BRAND_CONFIG.lightTheme.shadow,
   overlay: 'rgba(0,0,0,0.5)',
   
   // Tournament specific colors
@@ -73,36 +186,50 @@ export const lightTheme: ColorScheme = {
   silver: '#C0C0C0',
   bronze: '#CD7F32',
   
-  // Status colors
-  active: '#4CAF50',
+  // Status colors - from BRAND_CONFIG
+  active: BRAND_CONFIG.colors.success,
   inactive: '#9E9E9E',
+  
+  // Gradients - from BRAND_CONFIG
+  gradients: {
+    hero: BRAND_CONFIG.gradients.hero as [string, string],
+    card: [BRAND_CONFIG.lightTheme.surface, BRAND_CONFIG.lightTheme.background] as [string, string],
+    accent: BRAND_CONFIG.gradients.accent as [string, string],
+  },
+  
+  // Typography and layout
+  typography,
+  layout,
 };
 
-export const darkTheme: ColorScheme = {
-  // Background colors
-  background: '#121212',
-  surface: '#1e1e1e',
-  card: '#2d2d2d',
+// Dark theme now uses brandConfig.ts values - update colors there to change the entire app!
+export const darkTheme: BrandTheme = {
+  mode: 'dark',
   
-  // Text colors
-  text: '#ffffff',
-  textSecondary: '#e0e0e0',
-  textMuted: '#9e9e9e',
+  // Background colors - from BRAND_CONFIG
+  background: BRAND_CONFIG.darkTheme.background,
+  surface: BRAND_CONFIG.darkTheme.surface,
+  card: BRAND_CONFIG.darkTheme.surfaceVariant,
   
-  // Primary colors
-  primary: '#66BB6A',
-  primaryLight: '#A5D6A7',
-  primaryDark: '#43A047',
+  // Text colors - from BRAND_CONFIG
+  text: BRAND_CONFIG.darkTheme.text,
+  textSecondary: BRAND_CONFIG.darkTheme.textSecondary,
+  textMuted: BRAND_CONFIG.darkTheme.textSecondary,
   
-  // Accent colors
-  accent: '#64B5F6',
-  success: '#66BB6A',
-  warning: '#FFB74D',
-  error: '#F06292',
+  // Primary colors - from BRAND_CONFIG
+  primary: BRAND_CONFIG.colors.primary,
+  primaryLight: BRAND_CONFIG.colors.accent,
+  primaryDark: '#1F6B42',
   
-  // UI elements
-  border: '#404040',
-  shadow: '#000000',
+  // Accent colors - from BRAND_CONFIG
+  accent: BRAND_CONFIG.colors.accent,
+  success: BRAND_CONFIG.colors.success,
+  warning: BRAND_CONFIG.colors.warning,
+  error: BRAND_CONFIG.colors.error,
+  
+  // UI elements - from BRAND_CONFIG
+  border: BRAND_CONFIG.darkTheme.border,
+  shadow: BRAND_CONFIG.darkTheme.shadow,
   overlay: 'rgba(0,0,0,0.7)',
   
   // Tournament specific colors
@@ -110,17 +237,46 @@ export const darkTheme: ColorScheme = {
   silver: '#C0C0C0',
   bronze: '#CD7F32',
   
-  // Status colors
+  // Status colors - from BRAND_CONFIG
   active: '#66BB6A',
   inactive: '#616161',
+  
+  // Gradients - from BRAND_CONFIG
+  gradients: {
+    hero: BRAND_CONFIG.gradients.hero as [string, string],
+    card: [BRAND_CONFIG.darkTheme.surface, BRAND_CONFIG.darkTheme.background] as [string, string],
+    accent: BRAND_CONFIG.gradients.accent as [string, string],
+  },
+  
+  // Typography and layout
+  typography,
+  layout,
 };
 
 interface ThemeContextType {
-  theme: ColorScheme;
+  theme: BrandTheme;
   themeMode: ThemeMode;
   isDark: boolean;
   setThemeMode: (mode: ThemeMode) => void;
   toggleTheme: () => void;
+}
+
+// Map BrandTheme to React Navigation theme
+export function toNavigationTheme(brandTheme: BrandTheme): NavigationTheme {
+  const base = brandTheme.mode === 'dark' ? NavDark : NavLight;
+  return {
+    ...base,
+    dark: brandTheme.mode === 'dark',
+    colors: {
+      ...base.colors,
+      primary: brandTheme.primary,
+      background: brandTheme.background,
+      card: brandTheme.surface,
+      text: brandTheme.text,
+      border: brandTheme.border,
+      notification: brandTheme.accent,
+    },
+  };
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -207,7 +363,7 @@ export const useTheme = (): ThemeContextType => {
 
 // Helper function to create themed styles
 export const createThemedStyles = <T extends Record<string, any>>(
-  styleFactory: (theme: ColorScheme) => T
+  styleFactory: (theme: BrandTheme) => T
 ) => {
-  return (theme: ColorScheme): T => styleFactory(theme);
+  return (theme: BrandTheme): T => styleFactory(theme);
 };

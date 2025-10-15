@@ -10,13 +10,16 @@ import {
   RefreshControl
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../lib/AuthContext';
+import { useTheme } from '../lib/ThemeContext';
 import { useAOYStandings, useTournaments } from '../lib/hooks/useQueries';
 import { TournamentEvent, AOYStandingsRow } from '../lib/supabase';
 import DatabaseStatusScreen from '../components/DatabaseStatusScreen';
 import { ListSkeleton } from '../components/Skeleton';
 import TopBar from '../components/TopBar';
 import ThemeToggle from '../components/ThemeToggle';
+import { Chip } from '../components/BrandPrimitives';
 
 interface Achievement {
   id: string;
@@ -41,6 +44,8 @@ const { width: screenWidth } = Dimensions.get('window');
 
 export default function EnhancedProfileScreen() {
   const { user, profile, signOut } = useAuth();
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const { data: aoyStandings = [], isLoading: aoyLoading, refetch: refetchAOY } = useAOYStandings();
   const { data: tournaments = [], isLoading: tournamentsLoading, refetch: refetchTournaments } = useTournaments();
   
@@ -148,6 +153,30 @@ export default function EnhancedProfileScreen() {
     }
   };
 
+  // Role label from AOY boater status and membership since (derived from created_at)
+  const classifyBoaterStatus = (raw?: string | null): 'boater' | 'co-angler' | 'unknown' => {
+    if (!raw) return 'unknown';
+    const s = String(raw).trim().toLowerCase();
+    if (s === 'b' || s.includes('boater')) return 'boater';
+    if (s === 'c' || s.includes('co') || s.includes('co-angler') || s.includes('co angler')) return 'co-angler';
+    return 'unknown';
+  };
+
+  const roleLabel = useMemo(() => {
+    if (!profile?.member_code) return 'Member';
+    const entry = (aoyStandings as any[]).find(s => String(s.member_id) === String(profile.member_code));
+    const role = classifyBoaterStatus((entry as any)?.boater_status);
+    return role === 'boater' ? 'Boater' : role === 'co-angler' ? 'Co-Angler' : 'Member';
+  }, [aoyStandings, profile?.member_code]);
+
+  const memberSinceYear = useMemo(() => {
+    try {
+      return profile?.created_at ? new Date(profile.created_at).getFullYear() : null;
+    } catch {
+      return null;
+    }
+  }, [profile?.created_at]);
+
   if (showDatabaseStatus) {
     return (
       <View style={styles.container}>
@@ -158,39 +187,59 @@ export default function EnhancedProfileScreen() {
   }
 
   const renderOverviewTab = () => (
-    <ScrollView 
+    <ScrollView
       style={styles.tabContent}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
     >
-      {/* Profile Header */}
-      <View style={styles.profileHeader}>
-        <View style={styles.avatarContainer}>
-          <View style={styles.avatar}>
-            <Ionicons name="person" size={40} color="#fff" />
-          </View>
-          <TouchableOpacity style={styles.editAvatarButton}>
-            <Ionicons name="camera" size={16} color="#007bff" />
-          </TouchableOpacity>
-        </View>
-        
-        <View style={styles.profileInfo}>
-          <Text style={styles.memberName}>
-            {profile?.name || 'Member Name'}
-          </Text>
-          <Text style={styles.memberCode}>
-            ID: {profile?.member_code || 'Not Linked'}
-          </Text>
-          <Text style={styles.memberLocation}>
-            {profile?.hometown || 'Location not set'}
-          </Text>
-        </View>
+      {/* Branded Profile Hero */}
+      <View style={styles.heroCard}>
+        <LinearGradient
+          colors={theme.gradients.hero}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.heroGradient}
+        >
+          <View style={styles.heroContent}>
+            <View style={styles.avatarContainer}>
+              <View style={styles.avatar}>
+                <Ionicons name="person" size={40} color="#fff" />
+              </View>
+              <TouchableOpacity style={styles.editAvatarButton}>
+                <Ionicons name="camera" size={16} color="#007bff" />
+              </TouchableOpacity>
+            </View>
 
-        {personalStats.currentRank && (
-          <View style={styles.rankBadge}>
-            <Text style={styles.rankNumber}>#{personalStats.currentRank}</Text>
-            <Text style={styles.rankLabel}>AOY Rank</Text>
+            <View style={styles.profileInfo}>
+              <Text style={styles.heroName}>{profile?.name || 'Member Name'}</Text>
+              {personalStats.currentRank ? (
+                <View style={styles.aoyRow}>
+                  <Ionicons name="trophy" size={16} color="#FFD700" />
+                  <Text style={styles.aoyRankText}>AOY #{personalStats.currentRank}</Text>
+                  {personalStats.totalPoints ? (
+                    <Text style={styles.aoyPointsText}>{personalStats.totalPoints} pts</Text>
+                  ) : null}
+                </View>
+              ) : null}
+              <View style={styles.chipsRow}>
+                <View style={[styles.chip, { backgroundColor: 'rgba(255,255,255,0.15)', borderColor: 'rgba(255,255,255,0.4)' }]}>
+                  <Ionicons name="card" size={14} color="#fff" />
+                  <Text style={styles.chipText}>{profile?.member_code || 'Not Linked'}</Text>
+                </View>
+                <View style={[styles.chip, { backgroundColor: 'rgba(255,255,255,0.15)', borderColor: 'rgba(255,255,255,0.4)' }]}>
+                  <Ionicons name="person" size={14} color="#fff" />
+                  <Text style={styles.chipText}>{roleLabel}</Text>
+                </View>
+                {memberSinceYear && (
+                  <View style={[styles.chip, { backgroundColor: 'rgba(255,255,255,0.15)', borderColor: 'rgba(255,255,255,0.4)' }]}>
+                    <Ionicons name="calendar" size={14} color="#fff" />
+                    <Text style={styles.chipText}>Since {memberSinceYear}</Text>
+                  </View>
+                )}
+              </View>
+              <Text style={styles.heroLocation}>📍 {profile?.hometown || 'Location not set'}</Text>
+            </View>
           </View>
-        )}
+        </LinearGradient>
       </View>
 
       {/* Quick Stats */}
@@ -202,13 +251,11 @@ export default function EnhancedProfileScreen() {
             <Text style={styles.statValue}>{personalStats.totalPoints}</Text>
             <Text style={styles.statLabel}>AOY Points</Text>
           </View>
-          
           <View style={styles.statCard}>
             <Ionicons name="calendar" size={24} color="#28a745" />
             <Text style={styles.statValue}>{personalStats.totalTournaments}</Text>
             <Text style={styles.statLabel}>Tournaments</Text>
           </View>
-          
           <View style={styles.statCard}>
             <Ionicons name="medal" size={24} color="#fd7e14" />
             <Text style={styles.statValue}>
@@ -216,7 +263,6 @@ export default function EnhancedProfileScreen() {
             </Text>
             <Text style={styles.statLabel}>Best Finish</Text>
           </View>
-          
           <View style={styles.statCard}>
             <Ionicons name="trending-up" size={24} color="#6f42c1" />
             <Text style={styles.statValue}>
@@ -532,27 +578,28 @@ export default function EnhancedProfileScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1A3D4D',
+    backgroundColor: theme.background,
   },
   backButton: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
-    backgroundColor: '#2A5A6B',
+    backgroundColor: theme.surface,
   },
   backButtonText: {
     marginLeft: 8,
-    fontSize: 16,
-    color: '#F5C842',
+    fontSize: theme.typography.sizes.body,
+    fontFamily: theme.typography.family.medium,
+    color: theme.accent,
   },
   tabBar: {
     flexDirection: 'row',
-    backgroundColor: 'white',
+    backgroundColor: theme.surface,
     borderBottomWidth: 1,
-    borderBottomColor: '#e1e5e9',
+    borderBottomColor: theme.border,
   },
   tab: {
     flex: 1,
@@ -562,23 +609,23 @@ const styles = StyleSheet.create({
   },
   activeTab: {
     borderBottomWidth: 2,
-    borderBottomColor: '#007bff',
+    borderBottomColor: theme.primary,
   },
   tabLabel: {
-    fontSize: 12,
-    color: '#7f8c8d',
+    fontSize: theme.typography.sizes.label,
+    fontFamily: theme.typography.family.medium,
+    color: theme.textSecondary,
     marginTop: 4,
-    fontWeight: '500',
   },
   activeTabLabel: {
-    color: '#007bff',
-    fontWeight: '600',
+    color: theme.primary,
+    fontFamily: theme.typography.family.bold,
   },
   tabContent: {
     flex: 1,
   },
   profileHeader: {
-    backgroundColor: 'white',
+    backgroundColor: theme.surface,
     flexDirection: 'row',
     alignItems: 'center',
     padding: 20,
@@ -592,7 +639,7 @@ const styles = StyleSheet.create({
     width: 70,
     height: 70,
     borderRadius: 35,
-    backgroundColor: '#007bff',
+    backgroundColor: theme.primary,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -600,58 +647,108 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: -2,
     right: -2,
-    backgroundColor: 'white',
+    backgroundColor: theme.surface,
     borderRadius: 12,
     padding: 6,
     borderWidth: 1,
-    borderColor: '#e1e5e9',
+    borderColor: theme.border,
   },
   profileInfo: {
     flex: 1,
   },
   memberName: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#2c3e50',
+    fontSize: theme.typography.sizes.h2,
+    fontFamily: theme.typography.family.bold,
+    color: theme.text,
     marginBottom: 4,
   },
   memberCode: {
-    fontSize: 14,
-    color: '#007bff',
-    fontFamily: 'monospace',
+    fontSize: theme.typography.sizes.label,
+    fontFamily: theme.typography.family.medium,
+    color: theme.primary,
     marginBottom: 2,
   },
   memberLocation: {
-    fontSize: 14,
-    color: '#7f8c8d',
+    fontSize: theme.typography.sizes.label,
+    fontFamily: theme.typography.family.regular,
+    color: theme.textSecondary,
   },
-  rankBadge: {
-    backgroundColor: '#007bff',
-    borderRadius: 8,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
+  // New branded hero styles
+  heroCard: {
+    marginTop: 16,
+    marginHorizontal: 16,
+    marginBottom: 12,
+    borderRadius: theme.layout.radius.lg,
+    overflow: 'hidden',
+    elevation: theme.layout.elevation.lg,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+  },
+  heroGradient: {
+    padding: theme.layout.spacing.lg,
+  },
+  heroContent: {
+    flexDirection: 'row',
     alignItems: 'center',
   },
-  rankNumber: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: 'bold',
+  heroName: {
+    fontSize: theme.typography.sizes.h1,
+    fontFamily: theme.typography.family.bold,
+    color: '#fff',
+    marginBottom: 6,
   },
-  rankLabel: {
-    color: 'white',
-    fontSize: 10,
-    textTransform: 'uppercase',
+  aoyRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 8,
+  },
+  aoyRankText: {
+    marginLeft: 6,
+    color: '#fff',
+    fontWeight: '700',
+  },
+  aoyPointsText: {
+    marginLeft: 8,
+    color: 'rgba(255,255,255,0.9)',
     fontWeight: '600',
   },
+  chipsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 8,
+  },
+  chip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 14,
+    borderWidth: 1,
+  },
+  chipText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  heroLocation: {
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.9)',
+  },
   quickStatsContainer: {
-    backgroundColor: 'white',
-    padding: 20,
+    backgroundColor: theme.surface,
+    padding: theme.layout.spacing.lg,
     marginBottom: 12,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#2c3e50',
+    fontSize: theme.typography.sizes.h3,
+    fontFamily: theme.typography.family.bold,
+    color: theme.text,
     marginBottom: 16,
   },
   statsGrid: {
@@ -662,27 +759,29 @@ const styles = StyleSheet.create({
   statCard: {
     flex: 1,
     minWidth: (screenWidth - 64) / 2,
-    backgroundColor: '#f8f9fa',
-    borderRadius: 8,
-    padding: 16,
+    backgroundColor: theme.mode === 'light' ? '#f8f9fa' : theme.background,
+    borderRadius: theme.layout.radius.md,
+    padding: theme.layout.spacing.lg,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: theme.border,
   },
   statValue: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#2c3e50',
+    fontSize: theme.typography.sizes.h1,
+    fontFamily: theme.typography.family.bold,
+    color: theme.text,
     marginVertical: 8,
   },
   statLabel: {
-    fontSize: 12,
-    color: '#7f8c8d',
+    fontSize: theme.typography.sizes.caption,
+    fontFamily: theme.typography.family.bold,
+    color: theme.textSecondary,
     textAlign: 'center',
     textTransform: 'uppercase',
-    fontWeight: '600',
   },
   achievementsPreview: {
-    backgroundColor: 'white',
-    padding: 20,
+    backgroundColor: theme.surface,
+    padding: theme.layout.spacing.lg,
     marginBottom: 12,
   },
   achievementCard: {
@@ -699,20 +798,21 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   achievementTitle: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#2c3e50',
+    fontSize: theme.typography.sizes.caption,
+    fontFamily: theme.typography.family.bold,
+    color: theme.text,
     textAlign: 'center',
     marginBottom: 4,
   },
   achievementDate: {
     fontSize: 10,
-    color: '#7f8c8d',
+    fontFamily: theme.typography.family.regular,
+    color: theme.textSecondary,
     textAlign: 'center',
   },
   historyPreview: {
-    backgroundColor: 'white',
-    padding: 20,
+    backgroundColor: theme.surface,
+    padding: theme.layout.spacing.lg,
     marginBottom: 12,
   },
   tournamentHistoryItem: {
@@ -721,46 +821,48 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#f1f3f4',
+    borderBottomColor: theme.border,
   },
   tournamentInfo: {
     flex: 1,
   },
   tournamentName: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#2c3e50',
+    fontSize: theme.typography.sizes.label,
+    fontFamily: theme.typography.family.bold,
+    color: theme.text,
     marginBottom: 2,
   },
   tournamentDate: {
-    fontSize: 12,
-    color: '#7f8c8d',
+    fontSize: theme.typography.sizes.caption,
+    fontFamily: theme.typography.family.regular,
+    color: theme.textSecondary,
   },
   tournamentResult: {
     alignItems: 'flex-end',
   },
   resultPosition: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#007bff',
+    fontSize: theme.typography.sizes.body,
+    fontFamily: theme.typography.family.bold,
+    color: theme.primary,
   },
   resultPoints: {
-    fontSize: 12,
-    color: '#28a745',
+    fontSize: theme.typography.sizes.caption,
+    fontFamily: theme.typography.family.medium,
+    color: theme.accent,
   },
   statsSection: {
-    padding: 20,
+    padding: theme.layout.spacing.lg,
   },
   seasonOverview: {
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 20,
+    backgroundColor: theme.surface,
+    borderRadius: theme.layout.radius.lg,
+    padding: theme.layout.spacing.lg,
     marginBottom: 20,
   },
   subsectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#2c3e50',
+    fontSize: theme.typography.sizes.h3,
+    fontFamily: theme.typography.family.bold,
+    color: theme.text,
     marginBottom: 16,
   },
   seasonStats: {
@@ -771,20 +873,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   seasonStatValue: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#007bff',
+    fontSize: theme.typography.sizes.h1,
+    fontFamily: theme.typography.family.bold,
+    color: theme.primary,
     marginBottom: 4,
   },
   seasonStatLabel: {
-    fontSize: 12,
-    color: '#7f8c8d',
+    fontSize: theme.typography.sizes.caption,
+    fontFamily: theme.typography.family.regular,
+    color: theme.textSecondary,
     textAlign: 'center',
   },
   performanceBreakdown: {
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 20,
+    backgroundColor: theme.surface,
+    borderRadius: theme.layout.radius.lg,
+    padding: theme.layout.spacing.lg,
   },
   performanceItem: {
     flexDirection: 'row',
@@ -792,30 +895,32 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#f1f3f4',
+    borderBottomColor: theme.border,
   },
   performanceLabel: {
-    fontSize: 14,
-    color: '#2c3e50',
+    fontSize: theme.typography.sizes.label,
+    fontFamily: theme.typography.family.regular,
+    color: theme.text,
   },
   performanceValue: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#007bff',
+    fontSize: theme.typography.sizes.label,
+    fontFamily: theme.typography.family.bold,
+    color: theme.primary,
   },
   achievementsSection: {
-    padding: 20,
+    padding: theme.layout.spacing.lg,
   },
   achievementsSummary: {
-    fontSize: 14,
-    color: '#7f8c8d',
+    fontSize: theme.typography.sizes.label,
+    fontFamily: theme.typography.family.regular,
+    color: theme.textSecondary,
     marginBottom: 20,
     textAlign: 'center',
   },
   achievementItem: {
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 16,
+    backgroundColor: theme.surface,
+    borderRadius: theme.layout.radius.lg,
+    padding: theme.layout.spacing.lg,
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 12,
@@ -835,39 +940,42 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   achievementItemTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#2c3e50',
+    fontSize: theme.typography.sizes.body,
+    fontFamily: theme.typography.family.bold,
+    color: theme.text,
     marginBottom: 4,
   },
   achievementItemTitleLocked: {
-    color: '#6c757d',
+    color: theme.textSecondary,
   },
   achievementItemDescription: {
-    fontSize: 14,
-    color: '#7f8c8d',
+    fontSize: theme.typography.sizes.label,
+    fontFamily: theme.typography.family.regular,
+    color: theme.textSecondary,
     marginBottom: 4,
   },
   achievementItemDescriptionLocked: {
-    color: '#adb5bd',
+    color: theme.textSecondary,
+    opacity: 0.6,
   },
   achievementItemDate: {
-    fontSize: 12,
-    color: '#28a745',
+    fontSize: theme.typography.sizes.caption,
+    fontFamily: theme.typography.family.medium,
+    color: theme.accent,
   },
   settingsSection: {
-    padding: 20,
+    padding: theme.layout.spacing.lg,
   },
   settingsGroup: {
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 20,
+    backgroundColor: theme.surface,
+    borderRadius: theme.layout.radius.lg,
+    padding: theme.layout.spacing.lg,
     marginBottom: 20,
   },
   settingsGroupTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#2c3e50',
+    fontSize: theme.typography.sizes.h3,
+    fontFamily: theme.typography.family.bold,
+    color: theme.text,
     marginBottom: 16,
   },
   settingsItem: {
@@ -875,20 +983,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#f1f3f4',
+    borderBottomColor: theme.border,
   },
   settingsItemContent: {
     flex: 1,
     marginLeft: 12,
   },
   settingsItemLabel: {
-    fontSize: 14,
-    color: '#2c3e50',
+    fontSize: theme.typography.sizes.label,
+    fontFamily: theme.typography.family.medium,
+    color: theme.text,
     marginBottom: 2,
   },
   settingsItemValue: {
-    fontSize: 14,
-    color: '#7f8c8d',
+    fontSize: theme.typography.sizes.label,
+    fontFamily: theme.typography.family.regular,
+    color: theme.textSecondary,
   },
   settingsButton: {
     flexDirection: 'row',
@@ -898,20 +1008,21 @@ const styles = StyleSheet.create({
   settingsButtonText: {
     flex: 1,
     marginLeft: 12,
-    fontSize: 16,
-    color: '#007bff',
+    fontSize: theme.typography.sizes.body,
+    fontFamily: theme.typography.family.medium,
+    color: theme.primary,
   },
   signOutButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f8d7da',
-    borderRadius: 8,
-    padding: 16,
+    backgroundColor: theme.mode === 'light' ? '#f8d7da' : 'rgba(220,53,69,0.2)',
+    borderRadius: theme.layout.radius.md,
+    padding: theme.layout.spacing.lg,
   },
   signOutButtonText: {
     marginLeft: 12,
-    fontSize: 16,
+    fontSize: theme.typography.sizes.body,
+    fontFamily: theme.typography.family.bold,
     color: '#dc3545',
-    fontWeight: '600',
   },
 });

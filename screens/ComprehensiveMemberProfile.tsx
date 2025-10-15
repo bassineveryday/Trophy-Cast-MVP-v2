@@ -10,6 +10,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useAuth } from '../lib/AuthContext';
 import { useTheme, createThemedStyles } from '../lib/ThemeContext';
@@ -18,6 +19,7 @@ import { supabase } from '../lib/supabase';
 import { showSuccess, showError } from '../utils/toast';
 import AnimatedCard from '../components/AnimatedCard';
 import ThemeToggle from '../components/ThemeToggle';
+import { Chip } from '../components/BrandPrimitives';
 
 const { width } = Dimensions.get('window');
 
@@ -316,6 +318,21 @@ const ComprehensiveMemberProfile: React.FC = () => {
     };
   }, [memberCodeForAoy, standings]);
 
+  // Classify boater status (consistent with AOY screen)
+  const classifyBoaterStatus = (raw?: string | null): 'boater' | 'co-angler' | 'unknown' => {
+    if (!raw) return 'unknown';
+    const s = String(raw).trim().toLowerCase();
+    if (s === 'b' || s.includes('boater')) return 'boater';
+    if (s === 'c' || s.includes('co') || s.includes('co-angler') || s.includes('co angler')) return 'co-angler';
+    return 'unknown';
+  };
+
+  const memberStatus = React.useMemo(() => {
+    const entry = (standings as any[] | undefined)?.find(s => String(s.member_id) === String(memberCodeForAoy));
+    const role = classifyBoaterStatus(entry?.boater_status);
+    return role;
+  }, [standings, memberCodeForAoy]);
+
   const findEventId = (t: { tournament_name?: string; event_date?: string; lake?: string } | null) => {
     if (!t || !tournaments || tournaments.length === 0) return null;
     return (
@@ -368,7 +385,7 @@ const ComprehensiveMemberProfile: React.FC = () => {
     >
       {/* 🎣 Hero Card (Gradient) */}
       <View style={styles.heroCard}>
-        <View style={styles.heroGradient}>
+        <LinearGradient colors={theme.gradients.hero} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.heroGradient}>
           <View style={styles.heroContent}>
             <View style={styles.avatarContainer}>
               <Image 
@@ -391,10 +408,13 @@ const ComprehensiveMemberProfile: React.FC = () => {
                   )}
                 </View>
               )}
-              <Text style={styles.heroRole}>
-                {memberProfile.role}
-                {memberProfile.member_since && memberProfile.member_since !== 'Unknown' ? ` • Member Since: ${memberProfile.member_since}` : ''}
-              </Text>
+              <View style={styles.chipsRow}>
+                <Chip icon="card" text={String(memberProfile.member_id)} />
+                <Chip icon="person" text={memberStatus === 'boater' ? 'Boater' : memberStatus === 'co-angler' ? 'Co-Angler' : memberProfile.role} />
+                {memberProfile.member_since && memberProfile.member_since !== 'Unknown' && (
+                  <Chip icon="calendar" text={`Since ${memberProfile.member_since}`} />
+                )}
+              </View>
               <Text style={styles.heroLocation}>
                 📍 My Hometown: {memberProfile.hometown}
               </Text>
@@ -406,7 +426,7 @@ const ComprehensiveMemberProfile: React.FC = () => {
               </Text>
             </View>
           </View>
-        </View>
+        </LinearGradient>
       </View>
 
       {isDerivedProfile && (
@@ -688,15 +708,37 @@ const createStyles = (theme: any) => StyleSheet.create({
     flex: 1,
   },
   heroName: {
-    fontSize: 28,
-    fontWeight: 'bold',
+    fontSize: theme.typography?.sizes?.h1 ?? 28,
     color: '#fff',
     marginBottom: 4,
+    // Prefer themed font if available
+    ...(theme.typography?.family?.bold ? { fontFamily: theme.typography.family.bold } : { fontWeight: 'bold' }),
   },
   heroRole: {
     fontSize: 16,
     color: 'rgba(255,255,255,0.9)',
     marginBottom: 6,
+  },
+  chipsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 8,
+  },
+  chip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 14,
+    borderWidth: 1,
+  },
+  chipText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '700',
   },
   heroLocation: {
     fontSize: 14,
@@ -721,10 +763,10 @@ const createStyles = (theme: any) => StyleSheet.create({
     borderBottomColor: theme.border,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
+    fontSize: theme.typography?.sizes?.h3 ?? 18,
     color: theme.text,
     marginLeft: 8,
+    ...(theme.typography?.family?.bold ? { fontFamily: theme.typography.family.bold } : { fontWeight: 'bold' }),
   },
   aboutContent: {
     gap: 12,

@@ -102,9 +102,9 @@ export const opacity = {
  * Then use inside component: const themedStyles = styles(theme);
  */
 export function makeStyles<T extends StyleSheet.NamedStyles<T>>(
-  styleFactory: (theme: ColorScheme) => T
-): (theme: ColorScheme) => T {
-  return (theme: ColorScheme): T => {
+  styleFactory: (theme: any) => T
+): (theme: any) => T {
+  return (theme: any): T => {
     return StyleSheet.create(styleFactory(theme));
   };
 }

@@ -7,7 +7,7 @@
  * - Trophy rack for achievements
  * - Deep ocean themed background
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   StyleSheet,
   Text,
@@ -19,6 +19,7 @@ import {
 } from 'react-native';
 import { useAuth } from '../lib/AuthContext';
 import { useDashboard, useAOYStandings } from '../lib/hooks/useQueries';
+import { useTheme } from '../lib/ThemeContext';
 import HeroBanner from '../components/HeroBanner';
 import DashboardCards from '../components/DashboardCards';
 import TrophyRoom from '../components/TrophyRoom';
@@ -28,7 +29,6 @@ import { FishingDecorations } from '../components/FishingDecorations';
 import Skeleton from '../components/Skeleton';
 import { EmptyState } from '../components/EmptyState';
 import { useReducedMotion } from '../hooks/useReducedMotion';
-import { fishingTheme, spacing, fontSize, fontWeight } from '../lib/designTokens';
 
 // Mock trophy data (will be replaced with real data later)
 const MOCK_TROPHIES: Trophy[] = [
@@ -40,7 +40,9 @@ const MOCK_TROPHIES: Trophy[] = [
 export default function FishingThemedHomeScreen() {
   const { profile } = useAuth();
   const { width } = useWindowDimensions();
+  const { theme } = useTheme();
   const prefersReducedMotion = useReducedMotion();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   
   // Data queries
   const dashboardQuery = useDashboard(profile?.member_code);
@@ -197,20 +199,20 @@ export default function FishingThemedHomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: fishingTheme.colors.deepOcean,
+    backgroundColor: theme.background,
   },
   header: {
     flexDirection: 'column',
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.md,
+    paddingHorizontal: theme.layout.spacing.lg,
+    paddingTop: theme.layout.spacing.md,
     paddingBottom: 0,
-    backgroundColor: fishingTheme.colors.navyTeal,
+    backgroundColor: theme.surface,
     borderBottomWidth: 2,
-    borderBottomColor: fishingTheme.colors.gold,
-    shadowColor: fishingTheme.colors.gold,
+    borderBottomColor: theme.accent,
+    shadowColor: theme.accent,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
     shadowRadius: 4,
@@ -218,35 +220,35 @@ const styles = StyleSheet.create({
   },
   headerContent: {
     alignItems: 'center',
-    marginBottom: spacing.sm,
+    marginBottom: theme.layout.spacing.sm,
   },
   logoText: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: fishingTheme.colors.gold,
+    fontSize: theme.typography.sizes.h1,
+    fontFamily: theme.typography.family.bold,
+    color: theme.accent,
     letterSpacing: 1,
     textShadowColor: 'rgba(0, 0, 0, 0.3)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 3,
   },
   tagline: {
-    fontSize: 11,
-    color: fishingTheme.colors.cream,
+    fontSize: theme.typography.sizes.caption,
+    fontFamily: theme.typography.family.medium,
+    color: theme.text,
     marginTop: 2,
-    fontWeight: '500',
     letterSpacing: 0.3,
   },
   scrollContent: {
-    paddingHorizontal: spacing.md,
-    paddingTop: spacing.md,
-    paddingBottom: spacing.xxxl,
+    paddingHorizontal: theme.layout.spacing.md,
+    paddingTop: theme.layout.spacing.md,
+    paddingBottom: theme.layout.spacing.xxl,
   },
   singleColumn: {
     flexDirection: 'column',
   },
   twoColumn: {
     flexDirection: 'row',
-    gap: spacing.xl,
+    gap: theme.layout.spacing.xl,
   },
   leftColumn: {
     flex: 2,
@@ -255,10 +257,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: fishingTheme.colors.cream,
-    marginBottom: spacing.lg,
+    fontSize: theme.typography.sizes.h3,
+    fontFamily: theme.typography.family.bold,
+    color: theme.text,
+    marginBottom: theme.layout.spacing.lg,
     letterSpacing: 0.5,
   },
 });

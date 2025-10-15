@@ -17,8 +17,10 @@ import { useTournaments, useAOYStandings, useTournamentResults, useTournamentPar
 import { supabase } from '../lib/supabase';
 import { showSuccess, showError } from '../utils/toast';
 import { useMultiDayTournamentResults } from '../lib/hooks/useQueries';
+import { useTheme } from '../lib/ThemeContext';
 import EmptyState from '../components/EmptyState';
 import TopBar from '../components/TopBar';
+import { Chip } from '../components/BrandPrimitives';
 import { fishingTheme, spacing, shadows, fontSize, fontWeight, borderRadius } from '../lib/designTokens';
 
 interface TournamentDetailScreenProps {
@@ -39,6 +41,8 @@ interface Participant {
 const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
   const route = useRoute();
   const navigation = useNavigation();
+  const { theme } = useTheme();
+  const styles = React.useMemo(() => createStyles(theme), [theme]);
   const { tournamentId } = route.params as { tournamentId: string };
   
   const { data: tournaments, refetch: refetchTournaments } = useTournaments();
@@ -575,18 +579,18 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
         return (
           <ScrollView accessibilityLabel="results-list" style={{ marginTop: 8 }}>
             {/* Header */}
-            <View style={{ flexDirection: 'row', padding: 8, backgroundColor: '#eee', borderRadius: 6 }}>
-              <Text style={{ fontWeight: '700', width: 40 }}>#</Text>
-              <Text style={{ fontWeight: '700', flex: 1 }}>Name</Text>
+            <View style={{ flexDirection: 'row', padding: 8, backgroundColor: theme.mode === 'light' ? '#f5f5f5' : theme.surface, borderRadius: 6, borderWidth: 1, borderColor: theme.border }}>
+              <Text style={{ fontFamily: theme.typography.family.bold, color: theme.text, width: 40 }}>#</Text>
+              <Text style={{ fontFamily: theme.typography.family.bold, color: theme.text, flex: 1 }}>Name</Text>
               {dayCodes.map((c: string, i: number) => (
                 <View key={c} style={{ width: 140 }}>
-                  <Text style={{ fontWeight: '700', textAlign: 'center' }}>{`Day ${i + 1} #`}</Text>
-                  <Text style={{ fontWeight: '700', textAlign: 'center' }}>{`Day ${i + 1} Wt`}</Text>
+                  <Text style={{ fontFamily: theme.typography.family.bold, color: theme.text, textAlign: 'center' }}>{`Day ${i + 1} #`}</Text>
+                  <Text style={{ fontFamily: theme.typography.family.bold, color: theme.text, textAlign: 'center' }}>{`Day ${i + 1} Wt`}</Text>
                 </View>
               ))}
-              <Text style={{ fontWeight: '700', width: 80, textAlign: 'center' }}>Total #</Text>
-              <Text style={{ fontWeight: '700', width: 100, textAlign: 'center' }}>Total Wt</Text>
-              <Text style={{ fontWeight: '700', width: 80, textAlign: 'center' }}>AOY</Text>
+              <Text style={{ fontFamily: theme.typography.family.bold, color: theme.text, width: 80, textAlign: 'center' }}>Total #</Text>
+              <Text style={{ fontFamily: theme.typography.family.bold, color: theme.text, width: 100, textAlign: 'center' }}>Total Wt</Text>
+              <Text style={{ fontFamily: theme.typography.family.bold, color: theme.text, width: 80, textAlign: 'center' }}>AOY</Text>
             </View>
 
             {/* Local normalize helper to create a stable fallback key when member_id is missing */}
@@ -617,20 +621,20 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
                 }
                 
                 return (
-                  <TouchableOpacity key={rowKey} onPress={() => (navigation as any).navigate('MemberProfile', { memberId: r.member_id || undefined })} style={{ flexDirection: 'row', padding: 12, marginVertical: 6, backgroundColor: '#fff', borderRadius: 8, alignItems: 'center' }}>
+                  <TouchableOpacity key={rowKey} onPress={() => (navigation as any).navigate('MemberProfile', { memberId: r.member_id || undefined })} style={{ flexDirection: 'row', padding: 12, marginVertical: 6, backgroundColor: theme.surface, borderRadius: 8, alignItems: 'center', borderWidth: 1, borderColor: theme.border }}>
                     <View style={{ width: 40, alignItems: 'center' }}>{placeDisplay}</View>
                     <View style={{ flex: 1 }}>
-                      <Text style={{ fontWeight: '600' }}>{r.member_name}</Text>
+                      <Text style={{ fontFamily: theme.typography.family.bold, color: theme.text }}>{r.member_name}</Text>
                     </View>
                     {dayCodes.map((c: string) => (
                       <View key={c} style={{ width: 140, alignItems: 'center' }}>
-                        <Text>{r.days[c]?.fish ?? 0}</Text>
-                        <Text>{r.days[c]?.weight ? Number(r.days[c].weight).toFixed(2) : '0.00'}</Text>
+                        <Text style={{ color: theme.text, fontFamily: theme.typography.family.regular }}>{r.days[c]?.fish ?? 0}</Text>
+                        <Text style={{ color: theme.text, fontFamily: theme.typography.family.regular }}>{r.days[c]?.weight ? Number(r.days[c].weight).toFixed(2) : '0.00'}</Text>
                       </View>
                     ))}
-                    <Text style={{ width: 80, textAlign: 'center' }}>{r.total_fish}</Text>
-                    <Text style={{ width: 100, textAlign: 'center' }}>{Number(r.total_weight).toFixed(2)}</Text>
-                    <Text style={{ width: 80, textAlign: 'center' }}>{r.total_aoy || 0}</Text>
+                    <Text style={{ width: 80, textAlign: 'center', color: theme.text, fontFamily: theme.typography.family.regular }}>{r.total_fish}</Text>
+                    <Text style={{ width: 100, textAlign: 'center', color: theme.text, fontFamily: theme.typography.family.bold }}>{Number(r.total_weight).toFixed(2)}</Text>
+                    <Text style={{ width: 80, textAlign: 'center', color: theme.accent, fontFamily: theme.typography.family.bold }}>{r.total_aoy || 0}</Text>
                   </TouchableOpacity>
                 );
               });
@@ -665,12 +669,12 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
       return (
         <ScrollView accessibilityLabel="results-list" style={{ marginTop: 8 }}>
           {/* Header */}
-          <View style={{ flexDirection: 'row', padding: 8, backgroundColor: '#eee', borderRadius: 6, marginBottom: 8 }}>
-            <Text style={{ fontWeight: '700', width: 40 }}>#</Text>
-            <Text style={{ fontWeight: '700', flex: 1 }}>Name</Text>
-            {isDay2 && <Text style={{ fontWeight: '700', width: 60, textAlign: 'center' }}>Move</Text>}
-            <Text style={{ fontWeight: '700', width: 60, textAlign: 'center' }}>Fish</Text>
-            <Text style={{ fontWeight: '700', width: 80, textAlign: 'center' }}>Weight</Text>
+          <View style={{ flexDirection: 'row', padding: 8, backgroundColor: theme.mode === 'light' ? '#f5f5f5' : theme.surface, borderRadius: 6, marginBottom: 8, borderWidth: 1, borderColor: theme.border }}>
+            <Text style={{ fontFamily: theme.typography.family.bold, color: theme.text, width: 40 }}>#</Text>
+            <Text style={{ fontFamily: theme.typography.family.bold, color: theme.text, flex: 1 }}>Name</Text>
+            {isDay2 && <Text style={{ fontFamily: theme.typography.family.bold, color: theme.text, width: 60, textAlign: 'center' }}>Move</Text>}
+            <Text style={{ fontFamily: theme.typography.family.bold, color: theme.text, width: 60, textAlign: 'center' }}>Fish</Text>
+            <Text style={{ fontFamily: theme.typography.family.bold, color: theme.text, width: 80, textAlign: 'center' }}>Weight</Text>
           </View>
 
           {sortedRows.map((r: any, idx: number) => {
@@ -711,22 +715,22 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
                 accessibilityRole="button"
                 accessibilityLabel={`result-${idx + 1}-${r.member_name || r.member_id}`}
                 onPress={() => (navigation as any).navigate('MemberProfile', { memberId })}
-                style={{ padding: 12, marginVertical: 6, backgroundColor: '#fff', borderRadius: 8, flexDirection: 'row', alignItems: 'center' }}
+                style={{ padding: 12, marginVertical: 6, backgroundColor: theme.surface, borderRadius: 8, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: theme.border }}
               >
-                <Text style={{ fontWeight: '700', width: 40 }}>{currentPlace}</Text>
+                <Text style={{ fontFamily: theme.typography.family.bold, color: theme.text, width: 40 }}>{currentPlace}</Text>
                 <View style={{ flex: 1 }}>
-                  <Text style={{ fontWeight: '600' }}>{r.member_name || r.member_id}</Text>
-                  {r.boat_name ? <Text style={{ color: '#666', fontSize: 12 }}>{r.boat_name}</Text> : null}
-                  {isBigBass && <Text accessibilityLabel="big-bass" style={{ color: '#b8860b', fontSize: 12 }}>Big Bass</Text>}
+                  <Text style={{ fontFamily: theme.typography.family.bold, color: theme.text }}>{r.member_name || r.member_id}</Text>
+                  {r.boat_name ? <Text style={{ color: theme.textSecondary, fontSize: 12, fontFamily: theme.typography.family.regular }}>{r.boat_name}</Text> : null}
+                  {isBigBass && <Text accessibilityLabel="big-bass" style={{ color: theme.accent, fontSize: 12, fontFamily: theme.typography.family.bold }}>Big Bass</Text>}
                 </View>
                 {isDay2 && <View style={{ width: 60, alignItems: 'center' }}>{movement}</View>}
-                <Text style={{ width: 60, textAlign: 'center' }}>{r.fish_count || 0}</Text>
+                <Text style={{ width: 60, textAlign: 'center', color: theme.text, fontFamily: theme.typography.family.regular }}>{r.fish_count || 0}</Text>
                 <View style={{ width: 80, alignItems: 'center' }}>
-                  <Text>{r.weight_lbs ? Number(r.weight_lbs).toFixed(2) : '0.00'}</Text>
+                  <Text style={{ color: theme.text, fontFamily: theme.typography.family.bold }}>{r.weight_lbs ? Number(r.weight_lbs).toFixed(2) : '0.00'}</Text>
                   {
                     (() => {
                       const num = r.payout != null ? Number(r.payout) : (r.cash_payout != null ? Number(String(r.cash_payout).replace(/[^0-9.-]+/g, '')) : null);
-                      return num != null && Number.isFinite(num) ? <Text style={{ color: '#4a7c59', fontSize: 12 }}>${num}</Text> : null;
+                      return num != null && Number.isFinite(num) ? <Text style={{ color: theme.accent, fontSize: 12, fontFamily: theme.typography.family.medium }}>${num}</Text> : null;
                     })()
                   }
                 </View>
@@ -814,176 +818,195 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: fishingTheme.colors.cream,
+    backgroundColor: theme.background,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: spacing.xl,
-    paddingTop: spacing.giant,
-    paddingBottom: spacing.md,
-    backgroundColor: fishingTheme.colors.white,
+    paddingHorizontal: theme.layout.spacing.xl,
+    paddingTop: theme.layout.spacing.xxl,
+    paddingBottom: theme.layout.spacing.md,
+    backgroundColor: theme.surface,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: theme.border,
   },
   backButton: {
     padding: 8,
   },
   headerTitle: {
-    fontSize: fontSize.lg,
-    fontWeight: fontWeight.semibold as any,
-    color: '#13323b',
+    fontSize: theme.typography.sizes.h3,
+    fontFamily: theme.typography.family.bold,
+    color: theme.text,
   },
   shareHeaderButton: {
     padding: 8,
   },
   tabNavigation: {
-    backgroundColor: fishingTheme.colors.white,
-    paddingVertical: spacing.sm,
+    backgroundColor: theme.surface,
+    paddingVertical: theme.layout.spacing.sm,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: theme.border,
   },
   tabButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: spacing.xl,
-    paddingVertical: spacing.sm,
-    marginHorizontal: spacing.sm,
-    borderRadius: borderRadius.xxl,
-    backgroundColor: '#f5f5f5',
+    paddingHorizontal: theme.layout.spacing.xl,
+    paddingVertical: theme.layout.spacing.sm,
+    marginHorizontal: theme.layout.spacing.sm,
+    borderRadius: theme.layout.radius.xl,
+    backgroundColor: theme.mode === 'light' ? '#f5f5f5' : theme.background,
   },
   activeTabButton: {
-    backgroundColor: fishingTheme.colors.lightTeal,
+    backgroundColor: theme.accent,
   },
   tabLabel: {
-    marginLeft: spacing.sm,
-    fontSize: fontSize.md,
-    fontWeight: fontWeight.medium as any,
-    color: '#666',
+    marginLeft: theme.layout.spacing.sm,
+    fontSize: theme.typography.sizes.body,
+    fontFamily: theme.typography.family.medium,
+    color: theme.textSecondary,
   },
   activeTabLabel: {
-    color: fishingTheme.colors.white,
+    color: '#fff',
+    fontFamily: theme.typography.family.bold,
   },
   scrollView: {
     flex: 1,
   },
   tabContent: {
-    padding: spacing.xl,
+    padding: theme.layout.spacing.xl,
   },
   headerCard: {
-    marginBottom: spacing.xl,
-    borderRadius: borderRadius.xl,
-    backgroundColor: fishingTheme.colors.white,
-    ...shadows.md,
+    marginBottom: theme.layout.spacing.xl,
+    borderRadius: theme.layout.radius.xl,
+    backgroundColor: theme.surface,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: theme.layout.elevation.md },
+    shadowOpacity: 0.1,
+    shadowRadius: theme.layout.elevation.md,
+    elevation: theme.layout.elevation.md,
   },
   headerContent: {
-    padding: spacing.xxl,
+    padding: theme.layout.spacing.xl,
     alignItems: 'center',
   },
   statusBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-    borderRadius: borderRadius.xxl,
-    marginBottom: spacing.md,
+    paddingHorizontal: theme.layout.spacing.lg,
+    paddingVertical: theme.layout.spacing.sm,
+    borderRadius: theme.layout.radius.xl,
+    marginBottom: theme.layout.spacing.md,
   },
   statusText: {
-    marginLeft: spacing.sm,
-    fontSize: fontSize.xs,
-    fontWeight: fontWeight.semibold as any,
-    color: fishingTheme.colors.white,
+    marginLeft: theme.layout.spacing.sm,
+    fontSize: theme.typography.sizes.caption,
+    fontFamily: theme.typography.family.bold,
+    color: '#fff',
   },
   tournamentTitle: {
-    fontSize: fontSize.xxxl,
-    fontWeight: fontWeight.bold as any,
-    color: '#13323b',
+    fontSize: theme.typography.sizes.h1,
+    fontFamily: theme.typography.family.bold,
+    color: theme.text,
     textAlign: 'center',
-    marginBottom: spacing.sm,
+    marginBottom: theme.layout.spacing.sm,
   },
   tournamentDate: {
-    fontSize: fontSize.md,
-    color: '#666',
+    fontSize: theme.typography.sizes.body,
+    fontFamily: theme.typography.family.regular,
+    color: theme.textSecondary,
     textAlign: 'center',
   },
   statsGrid: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: spacing.xl,
+    marginBottom: theme.layout.spacing.xl,
   },
   statCard: {
     flex: 1,
-    backgroundColor: fishingTheme.colors.white,
-    padding: spacing.lg,
-    marginHorizontal: spacing.sm,
-    borderRadius: borderRadius.lg,
+    backgroundColor: theme.surface,
+    padding: theme.layout.spacing.lg,
+    marginHorizontal: theme.layout.spacing.sm,
+    borderRadius: theme.layout.radius.lg,
     alignItems: 'center',
-    ...shadows.sm,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: theme.layout.elevation.sm },
+    shadowOpacity: 0.05,
+    shadowRadius: theme.layout.elevation.sm,
+    elevation: theme.layout.elevation.sm,
+    borderWidth: 1,
+    borderColor: theme.border,
   },
   statNumber: {
-    fontSize: fontSize.md,
-    fontWeight: fontWeight.bold as any,
-    color: '#13323b',
-    marginTop: spacing.sm,
+    fontSize: theme.typography.sizes.body,
+    fontFamily: theme.typography.family.bold,
+    color: theme.text,
+    marginTop: theme.layout.spacing.sm,
     textAlign: 'center',
   },
   statLabel: {
-    fontSize: fontSize.xs,
-    color: '#666',
-    marginTop: spacing.xs,
+    fontSize: theme.typography.sizes.caption,
+    fontFamily: theme.typography.family.regular,
+    color: theme.textSecondary,
+    marginTop: theme.layout.spacing.xs,
     textAlign: 'center',
   },
   detailsCard: {
-    backgroundColor: fishingTheme.colors.white,
-    padding: spacing.lg,
-    borderRadius: borderRadius.lg,
-    marginBottom: spacing.xl,
-    ...shadows.sm,
+    backgroundColor: theme.surface,
+    padding: theme.layout.spacing.lg,
+    borderRadius: theme.layout.radius.lg,
+    marginBottom: theme.layout.spacing.xl,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: theme.layout.elevation.sm },
+    shadowOpacity: 0.05,
+    shadowRadius: theme.layout.elevation.sm,
+    elevation: theme.layout.elevation.sm,
   },
   sectionTitle: {
-    fontSize: fontSize.lg,
-    fontWeight: fontWeight.bold as any,
-    color: '#13323b',
-    marginBottom: spacing.md,
+    fontSize: theme.typography.sizes.h3,
+    fontFamily: theme.typography.family.bold,
+    color: theme.text,
+    marginBottom: theme.layout.spacing.md,
   },
   detailItem: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: theme.layout.spacing.md,
     paddingVertical: spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
   },
   detailContent: {
     flex: 1,
-    marginLeft: spacing.md,
+    marginLeft: theme.layout.spacing.md,
   },
   detailLabel: {
-    fontSize: fontSize.md,
-    color: '#666',
-    marginBottom: spacing.xs,
+    fontSize: theme.typography.sizes.label,
+    fontFamily: theme.typography.family.regular,
+    color: theme.textSecondary,
+    marginBottom: theme.layout.spacing.xs,
   },
   detailValue: {
-    fontSize: fontSize.md,
-    color: '#13323b',
-    fontWeight: fontWeight.medium as any,
+    fontSize: theme.typography.sizes.body,
+    fontFamily: theme.typography.family.medium,
+    color: theme.text,
   },
   linkText: {
-    color: fishingTheme.colors.lightTeal,
+    color: theme.accent,
     textDecorationLine: 'underline',
   },
   actionButtons: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: spacing.sm,
+    marginTop: theme.layout.spacing.sm,
   },
   registerButton: {
     flex: 1,
-    marginRight: spacing.sm,
-    borderRadius: borderRadius.xxl,
+    marginRight: theme.layout.spacing.sm,
+    borderRadius: theme.layout.radius.xl,
     overflow: 'hidden',
   },
   shareButton: {
@@ -991,47 +1014,54 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: spacing.md,
-    borderRadius: borderRadius.xxl,
+    paddingVertical: theme.layout.spacing.md,
+    borderRadius: theme.layout.radius.xl,
     borderWidth: 2,
-    borderColor: fishingTheme.colors.lightTeal,
-    backgroundColor: fishingTheme.colors.white,
+    borderColor: theme.accent,
+    backgroundColor: theme.surface,
   },
   buttonGradient: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.xxl,
-    backgroundColor: fishingTheme.colors.lightTeal,
+    paddingVertical: theme.layout.spacing.md,
+    paddingHorizontal: theme.layout.spacing.xl,
+    backgroundColor: theme.accent,
   },
   buttonText: {
-    marginLeft: spacing.sm,
-    fontSize: fontSize.lg,
-    fontWeight: fontWeight.semibold as any,
-    color: fishingTheme.colors.white,
+    marginLeft: theme.layout.spacing.sm,
+    fontSize: theme.typography.sizes.h3,
+    fontFamily: theme.typography.family.bold,
+    color: '#fff',
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: spacing.md,
+    marginBottom: theme.layout.spacing.md,
   },
   participantCount: {
-    fontSize: fontSize.md,
-    color: '#666',
+    fontSize: theme.typography.sizes.body,
+    fontFamily: theme.typography.family.regular,
+    color: theme.textSecondary,
   },
   participantsList: {
-    gap: spacing.md,
+    gap: theme.layout.spacing.md,
   },
   participantCard: {
-    backgroundColor: fishingTheme.colors.white,
-    padding: spacing.lg,
-    borderRadius: borderRadius.md,
+    backgroundColor: theme.surface,
+    padding: theme.layout.spacing.lg,
+    borderRadius: theme.layout.radius.md,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    ...shadows.sm,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: theme.layout.elevation.sm },
+    shadowOpacity: 0.05,
+    shadowRadius: theme.layout.elevation.sm,
+    elevation: theme.layout.elevation.sm,
+    borderWidth: 1,
+    borderColor: theme.border,
   },
   participantInfo: {
     flex: 1,
@@ -1043,56 +1073,59 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   participantName: {
-    fontSize: fontSize.md,
-    fontWeight: fontWeight.semibold as any,
-    color: '#13323b',
+    fontSize: theme.typography.sizes.body,
+    fontFamily: theme.typography.family.bold,
+    color: theme.text,
     flex: 1,
   },
   participantStatusBadge: {
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-    borderRadius: borderRadius.sm,
+    paddingHorizontal: theme.layout.spacing.sm,
+    paddingVertical: theme.layout.spacing.xs,
+    borderRadius: theme.layout.radius.sm,
   },
   participantStatusText: {
-    fontSize: fontSize.xs,
-    fontWeight: fontWeight.semibold as any,
-    color: fishingTheme.colors.white,
+    fontSize: theme.typography.sizes.caption,
+    fontFamily: theme.typography.family.bold,
+    color: '#fff',
   },
   registrationDate: {
-    fontSize: fontSize.xs,
-    color: '#999',
+    fontSize: theme.typography.sizes.caption,
+    fontFamily: theme.typography.family.regular,
+    color: theme.textSecondary,
   },
   participantNumber: {
-    fontSize: fontSize.xxl,
-    fontWeight: fontWeight.bold as any,
-    color: fishingTheme.colors.lightTeal,
+    fontSize: theme.typography.sizes.h2,
+    fontFamily: theme.typography.family.bold,
+    color: theme.accent,
   },
   resultsHeader: {
     flexDirection: 'row',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    backgroundColor: fishingTheme.colors.white,
-    borderRadius: borderRadius.md,
+    paddingHorizontal: theme.layout.spacing.md,
+    paddingVertical: theme.layout.spacing.sm,
+    backgroundColor: theme.surface,
+    borderRadius: theme.layout.radius.md,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: theme.border,
   },
   resultsHeaderText: {
-    fontSize: fontSize.sm,
-    fontWeight: fontWeight.bold as any,
-    color: '#666',
+    fontSize: theme.typography.sizes.label,
+    fontFamily: theme.typography.family.bold,
+    color: theme.textSecondary,
   },
   bigBassBadge: {
-    marginTop: spacing.sm,
-    backgroundColor: fishingTheme.colors.goldenOrange,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-    borderRadius: borderRadius.xl,
+    marginTop: theme.layout.spacing.sm,
+    backgroundColor: theme.accent,
+    paddingHorizontal: theme.layout.spacing.sm,
+    paddingVertical: theme.layout.spacing.xs,
+    borderRadius: theme.layout.radius.xl,
     flexDirection: 'row',
     alignItems: 'center',
   },
   bigBassText: {
-    color: fishingTheme.colors.white,
-    fontSize: fontSize.xs,
-    fontWeight: fontWeight.bold as any,
+    color: '#fff',
+    fontSize: theme.typography.sizes.caption,
+    fontFamily: theme.typography.family.bold,
   },
 });
 

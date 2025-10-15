@@ -6,7 +6,7 @@ import TopBar from '../components/TopBar';
 import Card from '../components/Card';
 import ListRow from '../components/ListRow';
 import { useTheme } from '../lib/ThemeContext';
-import { makeStyles, spacing, borderRadius, fontSize, fontWeight, shadows } from '../lib/designTokens';
+import { makeStyles } from '../lib/designTokens';
 
 interface Tournament {
   tournament_id: string;
@@ -26,8 +26,8 @@ const styles = makeStyles((theme) => ({
   },
   stickyHeader: {
     backgroundColor: theme.background,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
+    paddingHorizontal: theme.layout.spacing.lg,
+    paddingVertical: theme.layout.spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: theme.border,
     shadowColor: theme.shadow,
@@ -39,13 +39,13 @@ const styles = makeStyles((theme) => ({
   filterRow: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    gap: spacing.md,
+    gap: theme.layout.spacing.md,
   },
   filterButton: {
     flex: 1,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.lg,
-    borderRadius: borderRadius.lg,
+    paddingVertical: theme.layout.spacing.md,
+    paddingHorizontal: theme.layout.spacing.lg,
+    borderRadius: theme.layout.radius.lg,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
@@ -60,31 +60,32 @@ const styles = makeStyles((theme) => ({
   },
   filterButtonTextActive: {
     color: '#ffffff',
-    fontSize: fontSize.md,
-    fontWeight: fontWeight.semibold,
+    fontSize: theme.typography.sizes.body,
+    fontFamily: theme.typography.family.bold,
   },
   filterButtonTextInactive: {
     color: theme.textSecondary,
-    fontSize: fontSize.md,
-    fontWeight: fontWeight.medium,
+    fontSize: theme.typography.sizes.body,
+    fontFamily: theme.typography.family.medium,
   },
   listContent: {
-    padding: spacing.lg,
+    padding: theme.layout.spacing.lg,
   },
   cardContainer: {
-    marginBottom: spacing.md,
+    marginBottom: theme.layout.spacing.md,
   },
   cardWrapper: {
-    borderRadius: borderRadius.xl,
+    borderRadius: theme.layout.radius.xl,
     borderWidth: 1,
     borderColor: theme.border,
     overflow: 'hidden',
   },
   empty: {
     textAlign: 'center',
-    color: theme.textMuted,
-    marginTop: spacing.huge,
-    fontSize: fontSize.md,
+    color: theme.textSecondary,
+    marginTop: theme.layout.spacing.xxl,
+    fontSize: theme.typography.sizes.body,
+    fontFamily: theme.typography.family.regular,
   },
 }));
 
