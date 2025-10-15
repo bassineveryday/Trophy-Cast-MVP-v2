@@ -37,7 +37,7 @@
    - Troubleshooting guide
    - *Audience: Developers*
 
-3. **[DEVELOPMENT.md](./DEVELOPMENT.md)** - **DEVELOPMENT SETUP**
+3. **[DEVELOPMENT.md](./docs/guides/DEVELOPMENT.md)** - **DEVELOPMENT SETUP**
    - Environment setup
    - Running the app locally
    - Development workflow
@@ -51,20 +51,20 @@
 
 | Document | Purpose | For Who |
 |----------|---------|---------|
-| **[DEVELOPMENT.md](./DEVELOPMENT.md)** | Complete dev environment setup | Developers |
-| **[DEBUGGING-PLAYBOOK.md](./DEBUGGING-PLAYBOOK.md)** | Troubleshooting common issues | Developers |
-| **[REACT-QUERY-IMPLEMENTATION.md](./REACT-QUERY-IMPLEMENTATION.md)** | Data fetching and caching guide | Developers |
-| **[REAL-DATA-CONNECTION-GUIDE.md](./REAL-DATA-CONNECTION-GUIDE.md)** | Connecting to production data | Developers |
+| **[DEVELOPMENT.md](./docs/guides/DEVELOPMENT.md)** | Complete dev environment setup | Developers |
+| **[DEBUGGING-PLAYBOOK.md](./docs/guides/DEBUGGING-PLAYBOOK.md)** | Troubleshooting common issues | Developers |
+| **[REACT-QUERY-IMPLEMENTATION.md](./docs/guides/REACT-QUERY-IMPLEMENTATION.md)** | Data fetching and caching guide | Developers |
+| **[REAL-DATA-CONNECTION-GUIDE.md](./docs/guides/REAL-DATA-CONNECTION-GUIDE.md)** | Connecting to production data | Developers |
 
 ### **Feature Implementation Guides**
 
 | Document | Feature Area | Status |
 |----------|--------------|--------|
-| **[AUTHENTICATION-ENHANCEMENT-COMPLETE.md](./AUTHENTICATION-ENHANCEMENT-COMPLETE.md)** | User authentication system | ✅ Complete |
-| **[AOY-ENHANCEMENT-COMPLETE.md](./AOY-ENHANCEMENT-COMPLETE.md)** | Angler of the Year tracking | ✅ Complete |
-| **[TOURNAMENT-ENHANCEMENT-READY.md](./TOURNAMENT-ENHANCEMENT-READY.md)** | Tournament management | ✅ Ready |
-| **[PROFILE-ENHANCEMENT-DEPLOYMENT.md](./PROFILE-ENHANCEMENT-DEPLOYMENT.md)** | User profile system | ✅ Complete |
-| **[ENHANCEMENT-DEPLOYMENT-COMPLETE.md](./ENHANCEMENT-DEPLOYMENT-COMPLETE.md)** | Overall enhancement summary | ✅ Complete |
+| **[Authentication](./docs/features/authentication.md)** | User authentication system | ✅ Complete |
+| **[AOY Tracking](./docs/features/aoy-tracking.md)** | Angler of the Year tracking | ✅ Complete |
+| **[Tournaments](./docs/features/tournaments.md)** | Tournament management | ✅ Ready |
+| **[Profiles](./docs/features/profiles.md)** | User profile system | ✅ Complete |
+| **[Enhancement Summary](./docs/features/enhancement-summary.md)** | Overall enhancement summary | ✅ Complete |
 
 ### **Advanced Topics**
 
@@ -81,10 +81,10 @@
 
 | Document | Purpose | When to Use |
 |----------|---------|-------------|
-| **[HEALTH-CHECK-QUICK-REFERENCE.md](./HEALTH-CHECK-QUICK-REFERENCE.md)** | One-page cheat sheet | Quick lookups |
-| **[HEALTH-CHECK-GUIDE.md](./HEALTH-CHECK-GUIDE.md)** | Complete testing guide | Full testing procedures |
-| **[HEALTH-CHECK-RESULTS.md](./HEALTH-CHECK-RESULTS.md)** | Latest test results | Check current status |
-| **[HEALTH-CHECK-EXECUTION-SUMMARY.md](./HEALTH-CHECK-EXECUTION-SUMMARY.md)** | Implementation details | Understanding test infrastructure |
+| **[Health Check Quick Reference](./docs/testing/quick-reference.md)** | One-page cheat sheet | Quick lookups |
+| **[Health Check Guide](./docs/testing/health-check-guide.md)** | Complete testing guide | Full testing procedures |
+| **[Latest Test Results](./docs/testing/latest-results.md)** | Latest test results | Check current status |
+| **[Implementation Details](./docs/testing/implementation-details.md)** | Implementation details | Understanding test infrastructure |
 
 **Quick Command**: `npm run health-check`
 
@@ -92,9 +92,9 @@
 
 | Document | Coverage | Type |
 |----------|----------|------|
-| **[TESTING-CHECKLIST.md](./TESTING-CHECKLIST.md)** | Manual testing procedures | Manual QA |
-| **[INTEGRATION-TESTING-SUMMARY.md](./INTEGRATION-TESTING-SUMMARY.md)** | Integration test results | Automated |
-| **[SPRINT-SUMMARY.md](./SPRINT-SUMMARY.md)** | Sprint testing outcomes | Progress tracking |
+| **[Testing Checklist](./docs/testing/testing-checklist.md)** | Manual testing procedures | Manual QA |
+| **[Integration Testing Summary](./docs/testing/integration-summary.md)** | Integration test results | Automated |
+| **[Sprint Summary](./docs/planning/sprint-summary.md)** | Sprint testing outcomes | Progress tracking |
 
 ### **Test Files** (`__tests__/`)
 
@@ -132,7 +132,7 @@ npm run test:ci           # CI/CD pipeline tests
 
 | Document | Purpose | Location |
 |----------|---------|----------|
-| **[DATABASE-VERIFICATION.md](./DATABASE-VERIFICATION.md)** | Schema verification | Root |
+| **[Database Verification](./docs/architecture/database-verification.md)** | Schema verification | docs/architecture |
 | **[db/README.md](./db/README.md)** | Database documentation | `db/` |
 | **[db/COMPLETE-SETUP-GUIDE.md](./db/COMPLETE-SETUP-GUIDE.md)** | Full setup instructions | `db/` |
 | **[db/QUICK-START.md](./db/QUICK-START.md)** | Quick database setup | `db/` |
@@ -191,7 +191,7 @@ scripts/
 | Document | Focus Area | Status |
 |----------|------------|--------|
 | **[NEXT-PHASE-PLAN.md](./NEXT-PHASE-PLAN.md)** | Next development phase | 📋 Planning |
-| **[NEXT-DEVELOPMENT-PHASE.md](./NEXT-DEVELOPMENT-PHASE.md)** | Development roadmap | 📋 Planning |
+| **[Development Roadmap](./docs/planning/development-roadmap.md)** | Development roadmap | 📋 Planning |
 | **[NEXT-PHASE-PROFILE-ENHANCEMENT.md](./NEXT-PHASE-PROFILE-ENHANCEMENT.md)** | Profile improvements | 📋 Planning |
 | **[NEXT-AUTHENTICATION-PRIORITY.md](./NEXT-AUTHENTICATION-PRIORITY.md)** | Auth priorities | ✅ Complete |
 
@@ -507,7 +507,7 @@ Lines       : 8.05%
 
 **Start with:**
 1. [README.md](./README.md) - Project overview
-2. [DEVELOPMENT.md](./DEVELOPMENT.md) - Setup environment
+2. [DEVELOPMENT.md](./docs/guides/DEVELOPMENT.md) - Setup environment
 3. [NEXT-STEPS.md](./NEXT-STEPS.md) - First tasks
 4. [DEBUGGING-PLAYBOOK.md](./DEBUGGING-PLAYBOOK.md) - Common issues
 
@@ -520,16 +520,16 @@ Lines       : 8.05%
 ### **QA/Testers**
 
 **Start with:**
-1. [TESTING-CHECKLIST.md](./TESTING-CHECKLIST.md) - Manual testing
-2. [HEALTH-CHECK-GUIDE.md](./HEALTH-CHECK-GUIDE.md) - Automated tests
-3. [HEALTH-CHECK-QUICK-REFERENCE.md](./HEALTH-CHECK-QUICK-REFERENCE.md) - Quick commands
+1. [Testing Checklist](./docs/testing/testing-checklist.md) - Manual testing
+2. [Health Check Guide](./docs/testing/health-check-guide.md) - Automated tests
+3. [Health Quick Reference](./docs/testing/quick-reference.md) - Quick commands
 
 **Run:** `npm run health-check`
 
 ### **Database Administrators**
 
 **Start with:**
-1. [DATABASE-VERIFICATION.md](./DATABASE-VERIFICATION.md) - Schema overview
+1. [Database Verification](./docs/architecture/database-verification.md) - Schema overview
 2. [db/README.md](./db/README.md) - Database docs
 3. [db/SCHEMA-MAPPING.md](./db/SCHEMA-MAPPING.md) - Relationships
 
@@ -541,8 +541,8 @@ Lines       : 8.05%
 
 **Start with:**
 1. [README.md](./README.md) - Product overview
-2. [ENHANCEMENT-DEPLOYMENT-COMPLETE.md](./ENHANCEMENT-DEPLOYMENT-COMPLETE.md) - Feature summary
-3. [NEXT-PHASE-PLAN.md](./NEXT-PHASE-PLAN.md) - Roadmap
+2. [Enhancement Summary](./docs/features/enhancement-summary.md) - Feature summary
+3. [Next Phase Plan](./docs/planning/next-phase.md) - Roadmap
 
 **Note**: Dedicated business docs folder recommended (see [Business & Strategy](#-business--strategy))
 
@@ -563,10 +563,10 @@ Lines       : 8.05%
 
 | Question | Answer |
 |----------|--------|
-| **...set up the project?** | [DEVELOPMENT.md](./DEVELOPMENT.md) |
-| **...run tests?** | [TESTING-CHECKLIST.md](./TESTING-CHECKLIST.md) or `npm test` |
-| **...check system health?** | [HEALTH-CHECK-QUICK-REFERENCE.md](./HEALTH-CHECK-QUICK-REFERENCE.md) or `npm run health-check` |
-| **...fix database issues?** | [DEBUGGING-PLAYBOOK.md](./DEBUGGING-PLAYBOOK.md) + [db/FINAL-FIX-GUIDE.md](./db/FINAL-FIX-GUIDE.md) |
+| **...set up the project?** | [DEVELOPMENT.md](./docs/guides/DEVELOPMENT.md) |
+| **...run tests?** | [Testing Checklist](./docs/testing/testing-checklist.md) or `npm test` |
+| **...check system health?** | [Quick Reference](./docs/testing/quick-reference.md) or `npm run health-check` |
+| **...fix database issues?** | [DEBUGGING-PLAYBOOK.md](./docs/guides/DEBUGGING-PLAYBOOK.md) + [db/FINAL-FIX-GUIDE.md](./db/FINAL-FIX-GUIDE.md) |
 | **...add authentication?** | [docs/ENHANCED-AUTH-IMPLEMENTATION.md](./docs/ENHANCED-AUTH-IMPLEMENTATION.md) |
 | **...understand tournaments?** | [docs/DENVER-BM-TOURNAMENT-LOGIC.md](./docs/DENVER-BM-TOURNAMENT-LOGIC.md) |
 | **...deploy to production?** | [ENHANCEMENT-DEPLOYMENT-COMPLETE.md](./ENHANCEMENT-DEPLOYMENT-COMPLETE.md) |
@@ -582,7 +582,7 @@ Lines       : 8.05%
 | **Documentation** | Root `.md` files + `docs/` folder |
 | **Assets** | `assets/` |
 | **Configuration** | Root config files (`.config.js`, `tsconfig.json`, etc.) |
-| **Health checks** | [HEALTH-CHECK-QUICK-REFERENCE.md](./HEALTH-CHECK-QUICK-REFERENCE.md) |
+| **Health checks** | [Quick Reference](./docs/testing/quick-reference.md) |
 
 ---
 
@@ -617,7 +617,7 @@ Lines       : 8.05%
 ### **Weekly**
 
 - [ ] Run `npm run health-check`
-- [ ] Check `HEALTH-CHECK-RESULTS.md` for status
+- [ ] Check [Latest Health Results](./docs/testing/latest-results.md) for status
 - [ ] Review open GitHub issues
 - [ ] Update `CHANGELOG.md` if needed
 
@@ -627,7 +627,7 @@ Lines       : 8.05%
 - [ ] Review and update documentation
 - [ ] Check dependency updates: `npm outdated`
 - [ ] Review database performance
-- [ ] Update roadmap in `NEXT-PHASE-PLAN.md`
+- [ ] Update roadmap in [Next Phase Plan](./docs/planning/next-phase.md)
 
 ### **Quarterly**
 

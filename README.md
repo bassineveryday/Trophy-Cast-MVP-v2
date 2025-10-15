@@ -39,7 +39,7 @@ Trophy Cast is entering a new phase of development focused on long-term maintain
 [![TypeScript](https://img.shields.io/badge/TypeScript-4.9+-blue.svg)](https://www.typescriptlang.org/)
 [![React Native](https://img.shields.io/badge/React%20Native-0.72+-61DAFB.svg)](https://reactnative.dev/)
 [![Supabase](https://img.shields.io/badge/Supabase-Backend-green.svg)](https://supabase.com)
-[![Health Status](https://img.shields.io/badge/Health-Production%20Ready-success)](https://github.com)
+[![Health Status](https://img.shields.io/badge/Health-Production%20Ready-success)](./docs/README.md)
 
 A modern, production-ready React Native application for managing fishing tournaments with AI coaching, club management, and comprehensive member tracking. Built for Denver Bassmasters and designed to scale nationwide.
 
@@ -384,7 +384,7 @@ trophy-cast/
 │   ├── __tests__/         # Test files 📝 (Next)
 │   └── types/             # TypeScript definitions ✅
 ├── .github/workflows/     # CI/CD pipelines 📝 (Next)
-├── docs/                  # Documentation 📝 (Next)
+├── docs/                  # Documentation hub
 └── assets/                # Images, fonts, etc. ✅
 ```
 

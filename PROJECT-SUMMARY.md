@@ -73,7 +73,7 @@ Trophy-Cast-MVP-v2/
 ### **2. Health Checks & Testing** ✅
 - **HEALTH-CHECK-QUICK-REFERENCE.md** - Quick testing guide
 - **HEALTH-CHECK-GUIDE.md** - Complete testing manual
-- **HEALTH-CHECK-RESULTS.md** - Latest test results
+- **docs/testing/latest-results.md** - Latest test results
 - **TESTING-CHECKLIST.md** - Manual QA procedures
 
 ### **3. Features** 🎯
@@ -89,7 +89,7 @@ Trophy-Cast-MVP-v2/
 
 ### **5. Planning** 📋
 - **NEXT-PHASE-PLAN.md** - Next development phase
-- **NEXT-DEVELOPMENT-PHASE.md** - Roadmap
+- **docs/planning/development-roadmap.md** - Roadmap
 - **SPRINT-SUMMARY.md** - Sprint outcomes
 
 ### **6. Database** 🗄️
@@ -212,7 +212,7 @@ npm run build               # Production build
 ### **For QA/Testers**
 - **Start**: TESTING-CHECKLIST.md
 - **Run**: `npm run health-check`
-- **Check**: HEALTH-CHECK-RESULTS.md
+- **Check**: docs/testing/latest-results.md
 - **Report**: Create GitHub issues
 
 ### **For Database Admins**
@@ -379,7 +379,7 @@ Future (2026+)
 |----------|----------|
 | **Full Navigation Guide** | PROJECT-MASTER-GUIDE.md |
 | **Reorganization Plan** | REORGANIZATION-PLAN.md |
-| **Health Check Results** | HEALTH-CHECK-RESULTS.md |
+| **Health Check Results** | docs/testing/latest-results.md |
 | **Main Documentation** | README.md |
 | **Next Steps** | NEXT-STEPS.md |
 

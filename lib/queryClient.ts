@@ -1,4 +1,7 @@
 import { QueryClient } from '@tanstack/react-query';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { persistQueryClient } from '@tanstack/query-persist-client-core';
+import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
 
 /**
  * React Query Client Configuration
@@ -36,3 +39,28 @@ export const queryClient = new QueryClient({
     },
   },
 });
+
+// Persist React Query cache to device storage for basic offline support
+// This improves startup performance and enables viewing last-known data offline.
+try {
+  const persister = createAsyncStoragePersister({
+    storage: AsyncStorage,
+    key: 'trophy-cast-query-cache-v1',
+    throttleTime: 1000, // debounce writes
+  });
+
+  // Note: Type cast to any to avoid versioned type mismatch between
+  // @tanstack/react-query and @tanstack/query-persist-client-core.
+  persistQueryClient({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    queryClient: queryClient as any,
+    persister,
+    maxAge: 1000 * 60 * 60, // 1 hour
+    dehydrateOptions: {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      shouldDehydrateQuery: (q: any) => q.state?.status === 'success',
+    },
+  } as any);
+} catch (_e) {
+  // Ignore persistence errors in non-RN environments (e.g., tests)
+}
