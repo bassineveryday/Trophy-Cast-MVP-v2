@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-unused-styles, react-native/no-color-literals, react-native/sort-styles, @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -13,15 +14,15 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRoute, useNavigation } from '@react-navigation/native';
-import { useTournaments, useAOYStandings, useTournamentResults, useTournamentParticipants } from '../lib/hooks/useQueries';
+import { useTournaments, useTournamentResults, useTournamentParticipants } from '../lib/hooks/useQueries';
 import { supabase } from '../lib/supabase';
 import { showSuccess, showError } from '../utils/toast';
 import { useMultiDayTournamentResults } from '../lib/hooks/useQueries';
 import { useTheme } from '../lib/ThemeContext';
 import EmptyState from '../components/EmptyState';
 import TopBar from '../components/TopBar';
-import { Chip } from '../components/BrandPrimitives';
-import { fishingTheme, spacing, shadows, fontSize, fontWeight, borderRadius } from '../lib/designTokens';
+import { fishingTheme, spacing } from '../lib/designTokens';
+import type { BrandTheme } from '../lib/ThemeContext';
 
 interface TournamentDetailScreenProps {
   route: {
@@ -46,12 +47,13 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
   const { tournamentId } = route.params as { tournamentId: string };
   
   const { data: tournaments, refetch: refetchTournaments } = useTournaments();
-  const { data: standings } = useAOYStandings();
+  // const { data: standings } = useAOYStandings();
   
   const [activeTab, setActiveTab] = useState<'overview' | 'participants' | 'results'>('overview');
   const [selectedResultTab, setSelectedResultTab] = useState<string | null>(null);
   const [participants, setParticipants] = useState<Participant[]>([]);
-  const [loading, setLoading] = useState(false);
+  // removed unused loading state
+  // const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [isRegistered, setIsRegistered] = useState(false);
   
@@ -69,7 +71,7 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
   }
 
   // Fetch results for this tournament (use resolvedCode which may be tournament_code or event_id)
-  const { data: resultsData, isLoading: resultsLoading, error: resultsError, refetch: refetchResults } = useTournamentResults(resolvedCode) as any;
+  const { data: resultsData, isLoading: resultsLoading, error: resultsError, refetch: refetchResults } = useTournamentResults(resolvedCode);
   // Fetch registered participants live
   const { data: liveParticipants, isLoading: participantsLoading, error: participantsError, refetch: refetchParticipants } = useTournamentParticipants(resolvedCode);
 
@@ -122,7 +124,7 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
     } else {
       setSelectedResultTab('combined');
     }
-  }, [multiDay?.dayEvents?.length]);
+  }, [multiDay]);
 
   // Debug: log multi-day data when it changes so we can verify Day1/Day2/Final
   // Keep a minimal dev-only summary log for multi-day changes
@@ -133,21 +135,21 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
       dayCount: (multiDay?.dayEvents || []).length,
       combinedCount: (multiDay?.combined || []).length,
     });
-  }, [multiDay?.dayEvents?.length, multiDay?.combined?.length]);
+  }, [multiDay]);
 
   // Force refetch of results/participants when the resolvedCode changes
   useEffect(() => {
     if (!resolvedCode) return;
     refetchParticipants && refetchParticipants();
     if (typeof refetchResults === 'function') refetchResults();
-  }, [resolvedCode]);
+  }, [refetchParticipants, refetchResults, resolvedCode]);
 
   useEffect(() => {
-    if (liveParticipants) {
+  if (Array.isArray(liveParticipants)) {
       // Map live rows into Participant shape used by the UI
-      const mapped = liveParticipants.map((p: any) => ({
+      const mapped: Participant[] = (liveParticipants as any[]).map((p: { id: string; member_name?: string; member_id?: string; registration_date?: string; status?: Participant['status']; active?: boolean }) => ({
         id: p.id,
-        member_name: p.member_name || p.member_id,
+        member_name: p.member_name || p.member_id || 'Unknown',
         registration_date: p.registration_date || new Date().toISOString(),
         status: p.status || (p.active ? 'confirmed' : 'pending'),
       }));
@@ -159,7 +161,7 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
   const uniqueResultParticipants = React.useMemo(() => {
     const rows = resultsData || [];
     const map = new Map<string, { member_id: string; member_name: string }>();
-    rows.forEach((r: any) => {
+  rows.forEach((r: any) => {
       const id = r.member_id || r.member?.dbm_number || r.member?.member_code || r.member_code;
       if (!id) return;
       if (!map.has(id)) {
@@ -187,7 +189,7 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
   }, [tournamentId, resultsLoading, participantsLoading]);
   
   const loadTournamentData = async () => {
-    setLoading(true);
+  // setLoading(true);
     try {
       // Keep this function for any future preload work.
       // Live participants are provided by useTournamentParticipants hook.
@@ -196,7 +198,7 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
       console.error('Error loading tournament data:', error);
       showError('Failed to load tournament details');
     } finally {
-      setLoading(false);
+  // setLoading(false);
     }
   };
   
@@ -287,14 +289,14 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
     }
   };
   
-  const renderTabButton = (tab: string, icon: string, label: string) => (
+  const renderTabButton = (tab: 'overview' | 'participants' | 'results', icon: keyof typeof Ionicons.glyphMap, label: string) => (
     <TouchableOpacity
       key={tab}
       style={[styles.tabButton, activeTab === tab && styles.activeTabButton]}
-      onPress={() => setActiveTab(tab as any)}
+  onPress={() => setActiveTab(tab)}
     >
       <Ionicons
-        name={icon as any}
+        name={icon}
         size={20}
         color={activeTab === tab ? fishingTheme.colors.white : fishingTheme.colors.cream}
       />
@@ -419,7 +421,7 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
       {resultsLoading && <ActivityIndicator accessibilityLabel="participants-loading" />}
 
       {resultsError && (
-        <View style={{ padding: 8 }}>
+        <View style={styles.inlinePad8}>
           <Text accessibilityRole="alert">Error loading participants</Text>
         </View>
       )}
@@ -432,7 +434,7 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
               key={p.member_id}
               style={styles.participantCard}
               accessibilityRole="button"
-              onPress={() => (navigation as any).navigate('MemberProfile', { memberId: p.member_id })}
+              onPress={() => (navigation as unknown as { navigate: (route: string, params?: { memberId?: string }) => void }).navigate('MemberProfile', { memberId: p.member_id })}
             >
               <View style={styles.participantInfo}>
                 <Text style={styles.participantName}>{p.member_name}</Text>
@@ -456,10 +458,10 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
                 <View style={styles.participantInfo}>
                   <View style={styles.participantHeader}>
                     <Text style={styles.participantName}>{participant.member_name}</Text>
-                    <View style={[styles.participantStatusBadge, { 
-                      backgroundColor: participant.status === 'confirmed' ? '#4CAF50' : 
-                                     participant.status === 'pending' ? '#FF9800' : '#757575'
-                    }]}>
+            <View style={[styles.participantStatusBadge, { 
+              backgroundColor: participant.status === 'confirmed' ? theme.success : 
+                 participant.status === 'pending' ? theme.warning : theme.textSecondary
+            }]}>
                       <Text style={styles.participantStatusText}>
                         {participant.status.toUpperCase()}
                       </Text>
@@ -494,20 +496,20 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
         ]
       : [{ key: 'combined', label: 'Final', isFinal: true }];
 
-    const ResultsTable = ({ rows, combined }: { rows: any[]; combined?: boolean }) => {
+  const ResultsTable = ({ rows, combined }: { rows: Array<any>; combined?: boolean }) => {
       if (!rows || rows.length === 0) return <EmptyState icon="trophy" title={combined ? 'Final results pending' : 'Results pending'} message={combined ? 'Final combined results will appear once both days are available' : 'Results will be available after the day'} />;
 
       // Combined view: build table with Day1/Day2 columns and totals
       if (combined) {
         // multiDay.dayResults is available in outer scope; if rows is the combined array, use multiDay to build detailed table
-        const dayCodes = (multiDay?.dayEvents || []).map((d: any) => d.tournament_code || d.event_id);
+  const dayCodes = (multiDay?.dayEvents || []).map((d: { tournament_code?: string; event_id?: string }) => d.tournament_code || d.event_id);
 
         // Aggregate per-day stats per member with deduplication by row id to avoid double-counting
-        const perMember: Record<string, any> = {};
+  const perMember: Record<string, { member_id: string; member_name: string; days: Record<string, { fish: number; weight: number }>; total_weight: number; total_fish: number; total_aoy: number; places: number[]; }> = {};
         const seenRowIds = new Set<string>();
 
         dayCodes.forEach((code: string) => {
-          const dayRows = (multiDay?.dayResults?.[code] || []) as any[];
+          const dayRows = (multiDay?.dayResults?.[code] || []) as Array<any>;
           dayRows.forEach((r: any) => {
             // Determine a stable row id if available
             const rowId = r.id || r.result_id || `${r.member_id || r.member?.member_code || r.member_name || ''}::${r.place || ''}::${r.weight_lbs || ''}`;
@@ -530,13 +532,13 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
           });
         });
 
-        const combinedRows = Object.values(perMember).map((m: any) => ({
+        const combinedRows = Object.values(perMember).map((m) => ({
           ...m,
           best_place: m.places.length ? Math.min(...m.places) : null,
         }));
 
         // If AOY points weren't provided but best_place is 1, default AOY to 100 per your rules
-        combinedRows.forEach((r: any) => {
+        combinedRows.forEach((r) => {
           if ((!r.total_aoy || r.total_aoy === 0) && r.best_place === 1) {
             r.total_aoy = 100;
           }
@@ -577,20 +579,20 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
         });
 
         return (
-          <ScrollView accessibilityLabel="results-list" style={{ marginTop: 8 }}>
+          <ScrollView accessibilityLabel="results-list" style={styles.resultsScroll}>
             {/* Header */}
-            <View style={{ flexDirection: 'row', padding: 8, backgroundColor: theme.mode === 'light' ? '#f5f5f5' : theme.surface, borderRadius: 6, borderWidth: 1, borderColor: theme.border }}>
-              <Text style={{ fontFamily: theme.typography.family.bold, color: theme.text, width: 40 }}>#</Text>
-              <Text style={{ fontFamily: theme.typography.family.bold, color: theme.text, flex: 1 }}>Name</Text>
+            <View style={styles.resultsHeaderRow}>
+              <Text style={styles.resultsHeaderTextFixed40}>#</Text>
+              <Text style={styles.resultsHeaderTextFlex}>Name</Text>
               {dayCodes.map((c: string, i: number) => (
-                <View key={c} style={{ width: 140 }}>
-                  <Text style={{ fontFamily: theme.typography.family.bold, color: theme.text, textAlign: 'center' }}>{`Day ${i + 1} #`}</Text>
-                  <Text style={{ fontFamily: theme.typography.family.bold, color: theme.text, textAlign: 'center' }}>{`Day ${i + 1} Wt`}</Text>
+                <View key={c} style={styles.resultsDayCol}>
+                  <Text style={styles.resultsHeaderTextCenter}>{`Day ${i + 1} #`}</Text>
+                  <Text style={styles.resultsHeaderTextCenter}>{`Day ${i + 1} Wt`}</Text>
                 </View>
               ))}
-              <Text style={{ fontFamily: theme.typography.family.bold, color: theme.text, width: 80, textAlign: 'center' }}>Total #</Text>
-              <Text style={{ fontFamily: theme.typography.family.bold, color: theme.text, width: 100, textAlign: 'center' }}>Total Wt</Text>
-              <Text style={{ fontFamily: theme.typography.family.bold, color: theme.text, width: 80, textAlign: 'center' }}>AOY</Text>
+              <Text style={styles.resultsHeaderTextSm}>Total #</Text>
+              <Text style={styles.resultsHeaderTextMd}>Total Wt</Text>
+              <Text style={styles.resultsHeaderTextSm}>AOY</Text>
             </View>
 
             {/* Local normalize helper to create a stable fallback key when member_id is missing */}
@@ -611,30 +613,30 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
                 // Trophy icon for top 3 in Final (combined) view
                 let placeDisplay = null;
                 if (place === 1) {
-                  placeDisplay = <Ionicons name="trophy" size={24} color="#FFD700" />; // Gold
+                  placeDisplay = <Ionicons name="trophy" size={24} color={theme.gold} />; // Gold
                 } else if (place === 2) {
-                  placeDisplay = <Ionicons name="trophy" size={24} color="#C0C0C0" />; // Silver
+                  placeDisplay = <Ionicons name="trophy" size={24} color={theme.silver} />; // Silver
                 } else if (place === 3) {
-                  placeDisplay = <Ionicons name="trophy" size={24} color="#CD7F32" />; // Bronze
+                  placeDisplay = <Ionicons name="trophy" size={24} color={theme.bronze} />; // Bronze
                 } else {
-                  placeDisplay = <Text style={{ fontWeight: '700' }}>{place}</Text>;
+                  placeDisplay = <Text style={styles.placeBold}>{place}</Text>;
                 }
                 
                 return (
-                  <TouchableOpacity key={rowKey} onPress={() => (navigation as any).navigate('MemberProfile', { memberId: r.member_id || undefined })} style={{ flexDirection: 'row', padding: 12, marginVertical: 6, backgroundColor: theme.surface, borderRadius: 8, alignItems: 'center', borderWidth: 1, borderColor: theme.border }}>
-                    <View style={{ width: 40, alignItems: 'center' }}>{placeDisplay}</View>
-                    <View style={{ flex: 1 }}>
-                      <Text style={{ fontFamily: theme.typography.family.bold, color: theme.text }}>{r.member_name}</Text>
+                  <TouchableOpacity key={rowKey} onPress={() => (navigation as unknown as { navigate: (route: string, params?: { memberId?: string }) => void }).navigate('MemberProfile', { memberId: r.member_id || undefined })} style={styles.resultsRow}>
+                    <View style={styles.resultsColPlace}>{placeDisplay}</View>
+                    <View style={styles.resultsColName}>
+                      <Text style={styles.resultsName}>{r.member_name}</Text>
                     </View>
                     {dayCodes.map((c: string) => (
-                      <View key={c} style={{ width: 140, alignItems: 'center' }}>
-                        <Text style={{ color: theme.text, fontFamily: theme.typography.family.regular }}>{r.days[c]?.fish ?? 0}</Text>
-                        <Text style={{ color: theme.text, fontFamily: theme.typography.family.regular }}>{r.days[c]?.weight ? Number(r.days[c].weight).toFixed(2) : '0.00'}</Text>
+                      <View key={c} style={styles.resultsDayColCenter}>
+                        <Text style={styles.resultsCell}>{r.days[c]?.fish ?? 0}</Text>
+                        <Text style={styles.resultsCell}>{r.days[c]?.weight ? Number(r.days[c].weight).toFixed(2) : '0.00'}</Text>
                       </View>
                     ))}
-                    <Text style={{ width: 80, textAlign: 'center', color: theme.text, fontFamily: theme.typography.family.regular }}>{r.total_fish}</Text>
-                    <Text style={{ width: 100, textAlign: 'center', color: theme.text, fontFamily: theme.typography.family.bold }}>{Number(r.total_weight).toFixed(2)}</Text>
-                    <Text style={{ width: 80, textAlign: 'center', color: theme.accent, fontFamily: theme.typography.family.bold }}>{r.total_aoy || 0}</Text>
+                    <Text style={styles.resultsSm}>{r.total_fish}</Text>
+                    <Text style={styles.resultsMdBold}>{Number(r.total_weight).toFixed(2)}</Text>
+                    <Text style={styles.resultsSmAccent}>{r.total_aoy || 0}</Text>
                   </TouchableOpacity>
                 );
               });
@@ -653,7 +655,7 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
 
       // Determine if this is Day 2 by checking selectedResultTab
       const isDay2 = selectedResultTab && selectedResultTab !== 'combined' && dayEvents.length >= 2 && selectedResultTab === (dayEvents[1]?.tournament_code || dayEvents[1]?.event_id);
-      const isDay1 = selectedResultTab && selectedResultTab !== 'combined' && dayEvents.length >= 1 && selectedResultTab === (dayEvents[0]?.tournament_code || dayEvents[0]?.event_id);
+  // const isDay1 = selectedResultTab && selectedResultTab !== 'combined' && dayEvents.length >= 1 && selectedResultTab === (dayEvents[0]?.tournament_code || dayEvents[0]?.event_id);
       
       // Build Day 1 placement map for movement comparison
       const day1Placements = new Map<string, number>();
@@ -667,14 +669,14 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
       }
 
       return (
-        <ScrollView accessibilityLabel="results-list" style={{ marginTop: 8 }}>
+  <ScrollView accessibilityLabel="results-list" style={styles.resultsScroll}>
           {/* Header */}
-          <View style={{ flexDirection: 'row', padding: 8, backgroundColor: theme.mode === 'light' ? '#f5f5f5' : theme.surface, borderRadius: 6, marginBottom: 8, borderWidth: 1, borderColor: theme.border }}>
-            <Text style={{ fontFamily: theme.typography.family.bold, color: theme.text, width: 40 }}>#</Text>
-            <Text style={{ fontFamily: theme.typography.family.bold, color: theme.text, flex: 1 }}>Name</Text>
-            {isDay2 && <Text style={{ fontFamily: theme.typography.family.bold, color: theme.text, width: 60, textAlign: 'center' }}>Move</Text>}
-            <Text style={{ fontFamily: theme.typography.family.bold, color: theme.text, width: 60, textAlign: 'center' }}>Fish</Text>
-            <Text style={{ fontFamily: theme.typography.family.bold, color: theme.text, width: 80, textAlign: 'center' }}>Weight</Text>
+          <View style={[styles.resultsHeaderRow, styles.resultsHeaderRowBottom]}>
+            <Text style={styles.resultsHeaderTextFixed40}>#</Text>
+            <Text style={styles.resultsHeaderTextFlex}>Name</Text>
+            {isDay2 && <Text style={styles.resultsHeaderTextMove}>Move</Text>}
+            <Text style={styles.resultsHeaderTextMove}>Fish</Text>
+            <Text style={styles.resultsHeaderTextWeight}>Weight</Text>
           </View>
 
           {sortedRows.map((r: any, idx: number) => {
@@ -691,20 +693,20 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
                 const delta = day1Place - currentPlace;
                 if (delta > 0) {
                   movement = (
-                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-                      <Ionicons name="arrow-up" size={14} color="#4CAF50" />
-                      <Text style={{ color: '#4CAF50', fontSize: 12, fontWeight: '700', marginLeft: 2 }}>+{delta}</Text>
+                    <View style={styles.moveContainer}>
+                      <Ionicons name="arrow-up" size={14} color={theme.success} />
+                      <Text style={[styles.moveText, { color: theme.success }]}>+{delta}</Text>
                     </View>
                   );
                 } else if (delta < 0) {
                   movement = (
-                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-                      <Ionicons name="arrow-down" size={14} color="#E53935" />
-                      <Text style={{ color: '#E53935', fontSize: 12, fontWeight: '700', marginLeft: 2 }}>{Math.abs(delta)}</Text>
+                    <View style={styles.moveContainer}>
+                      <Ionicons name="arrow-down" size={14} color={theme.error} />
+                      <Text style={[styles.moveText, { color: theme.error }]}>{Math.abs(delta)}</Text>
                     </View>
                   );
                 } else {
-                  movement = <Text style={{ color: '#888', fontSize: 12 }}>—</Text>;
+                  movement = <Text style={styles.moveDash}>—</Text>;
                 }
               }
             }
@@ -714,23 +716,23 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
                 key={r.id}
                 accessibilityRole="button"
                 accessibilityLabel={`result-${idx + 1}-${r.member_name || r.member_id}`}
-                onPress={() => (navigation as any).navigate('MemberProfile', { memberId })}
-                style={{ padding: 12, marginVertical: 6, backgroundColor: theme.surface, borderRadius: 8, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: theme.border }}
+                onPress={() => (navigation as unknown as { navigate: (route: string, params?: { memberId?: string }) => void }).navigate('MemberProfile', { memberId })}
+                style={styles.resultsRow}
               >
-                <Text style={{ fontFamily: theme.typography.family.bold, color: theme.text, width: 40 }}>{currentPlace}</Text>
-                <View style={{ flex: 1 }}>
-                  <Text style={{ fontFamily: theme.typography.family.bold, color: theme.text }}>{r.member_name || r.member_id}</Text>
-                  {r.boat_name ? <Text style={{ color: theme.textSecondary, fontSize: 12, fontFamily: theme.typography.family.regular }}>{r.boat_name}</Text> : null}
-                  {isBigBass && <Text accessibilityLabel="big-bass" style={{ color: theme.accent, fontSize: 12, fontFamily: theme.typography.family.bold }}>Big Bass</Text>}
+                <Text style={styles.resultsPlace}>{currentPlace}</Text>
+                <View style={styles.resultsColName}>
+                  <Text style={styles.resultsName}>{r.member_name || r.member_id}</Text>
+                  {r.boat_name ? <Text style={styles.resultsBoat}>{r.boat_name}</Text> : null}
+                  {isBigBass && <Text accessibilityLabel="big-bass" style={styles.resultsBigBass}>Big Bass</Text>}
                 </View>
-                {isDay2 && <View style={{ width: 60, alignItems: 'center' }}>{movement}</View>}
-                <Text style={{ width: 60, textAlign: 'center', color: theme.text, fontFamily: theme.typography.family.regular }}>{r.fish_count || 0}</Text>
-                <View style={{ width: 80, alignItems: 'center' }}>
-                  <Text style={{ color: theme.text, fontFamily: theme.typography.family.bold }}>{r.weight_lbs ? Number(r.weight_lbs).toFixed(2) : '0.00'}</Text>
+                {isDay2 && <View style={styles.resultsMove}>{movement}</View>}
+                <Text style={styles.resultsFish}>{r.fish_count || 0}</Text>
+                <View style={styles.resultsWeight}>
+                  <Text style={styles.resultsWeightText}>{r.weight_lbs ? Number(r.weight_lbs).toFixed(2) : '0.00'}</Text>
                   {
                     (() => {
                       const num = r.payout != null ? Number(r.payout) : (r.cash_payout != null ? Number(String(r.cash_payout).replace(/[^0-9.-]+/g, '')) : null);
-                      return num != null && Number.isFinite(num) ? <Text style={{ color: theme.accent, fontSize: 12, fontFamily: theme.typography.family.medium }}>${num}</Text> : null;
+                      return num != null && Number.isFinite(num) ? <Text style={styles.resultsPayout}>${num}</Text> : null;
                     })()
                   }
                 </View>
@@ -750,10 +752,17 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
         {!multiLoading && (
           <View>
             {/* Tabs header */}
-            <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
+            <View style={styles.resultsTabsHeader}>
               {tabs.map((t: any) => (
-                <TouchableOpacity key={t.key} onPress={() => setSelectedResultTab(t.key)} style={{ padding: 8, backgroundColor: selectedResultTab === t.key ? '#cfe8d8' : '#f0f0f0', borderRadius: 6 }}>
-                  <Text>{t.label}</Text>
+                <TouchableOpacity
+                  key={t.key}
+                  onPress={() => setSelectedResultTab(t.key)}
+                  style={[
+                    styles.resultsTab,
+                    selectedResultTab === t.key ? styles.resultsTabActive : styles.resultsTabInactive,
+                  ]}
+                >
+                  <Text style={styles.resultsTabText}>{t.label}</Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -818,7 +827,7 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
   );
 };
 
-const createStyles = (theme: any) => StyleSheet.create({
+const createStyles = (theme: BrandTheme) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.background,
@@ -861,7 +870,12 @@ const createStyles = (theme: any) => StyleSheet.create({
     backgroundColor: theme.mode === 'light' ? '#f5f5f5' : theme.background,
   },
   activeTabButton: {
-    backgroundColor: theme.primary,
+    backgroundColor: theme.components.buttonPrimary.filled.backgroundColor,
+    // focus glow for active tab
+    shadowColor: theme.glow.subtle.shadowColor,
+    shadowOffset: theme.glow.subtle.shadowOffset,
+    shadowOpacity: theme.glow.subtle.shadowOpacity,
+    shadowRadius: theme.glow.subtle.shadowRadius,
   },
   tabLabel: {
     marginLeft: theme.layout.spacing.sm,
@@ -883,11 +897,12 @@ const createStyles = (theme: any) => StyleSheet.create({
     marginBottom: theme.layout.spacing.xl,
     borderRadius: theme.layout.radius.xl,
     backgroundColor: theme.surface,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: theme.layout.elevation.md },
-    shadowOpacity: 0.1,
-    shadowRadius: theme.layout.elevation.md,
-    elevation: theme.layout.elevation.md,
+    // subtle glow
+    shadowColor: theme.glow.subtle.shadowColor,
+    shadowOffset: theme.glow.subtle.shadowOffset,
+    shadowOpacity: theme.glow.subtle.shadowOpacity,
+    shadowRadius: theme.glow.subtle.shadowRadius,
+    elevation: theme.glow.subtle.elevation,
   },
   headerContent: {
     padding: theme.layout.spacing.xl,
@@ -932,11 +947,11 @@ const createStyles = (theme: any) => StyleSheet.create({
     marginHorizontal: theme.layout.spacing.sm,
     borderRadius: theme.layout.radius.lg,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: theme.layout.elevation.sm },
-    shadowOpacity: 0.05,
-    shadowRadius: theme.layout.elevation.sm,
-    elevation: theme.layout.elevation.sm,
+    shadowColor: theme.glow.subtle.shadowColor,
+    shadowOffset: theme.glow.subtle.shadowOffset,
+    shadowOpacity: theme.glow.subtle.shadowOpacity,
+    shadowRadius: theme.glow.subtle.shadowRadius,
+    elevation: theme.glow.subtle.elevation,
     borderWidth: 1,
     borderColor: theme.border,
   },
@@ -959,11 +974,11 @@ const createStyles = (theme: any) => StyleSheet.create({
     padding: theme.layout.spacing.lg,
     borderRadius: theme.layout.radius.lg,
     marginBottom: theme.layout.spacing.xl,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: theme.layout.elevation.sm },
-    shadowOpacity: 0.05,
-    shadowRadius: theme.layout.elevation.sm,
-    elevation: theme.layout.elevation.sm,
+    shadowColor: theme.glow.subtle.shadowColor,
+    shadowOffset: theme.glow.subtle.shadowOffset,
+    shadowOpacity: theme.glow.subtle.shadowOpacity,
+    shadowRadius: theme.glow.subtle.shadowRadius,
+    elevation: theme.glow.subtle.elevation,
   },
   sectionTitle: {
     fontSize: theme.typography.sizes.h3,
@@ -977,7 +992,7 @@ const createStyles = (theme: any) => StyleSheet.create({
     marginBottom: theme.layout.spacing.md,
     paddingVertical: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: theme.divider,
   },
   detailContent: {
     flex: 1,
@@ -1026,13 +1041,13 @@ const createStyles = (theme: any) => StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: theme.layout.spacing.md,
     paddingHorizontal: theme.layout.spacing.xl,
-    backgroundColor: theme.primary,
+    backgroundColor: theme.components.buttonPrimary.filled.backgroundColor,
   },
   buttonText: {
     marginLeft: theme.layout.spacing.sm,
     fontSize: theme.typography.sizes.h3,
     fontFamily: theme.typography.family.bold,
-    color: '#fff',
+    color: theme.onPrimary,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -1055,11 +1070,11 @@ const createStyles = (theme: any) => StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: theme.layout.elevation.sm },
-    shadowOpacity: 0.05,
-    shadowRadius: theme.layout.elevation.sm,
-    elevation: theme.layout.elevation.sm,
+    shadowColor: theme.glow.subtle.shadowColor,
+    shadowOffset: theme.glow.subtle.shadowOffset,
+    shadowOpacity: theme.glow.subtle.shadowOpacity,
+    shadowRadius: theme.glow.subtle.shadowRadius,
+    elevation: theme.glow.subtle.elevation,
     borderWidth: 1,
     borderColor: theme.border,
   },
@@ -1108,7 +1123,7 @@ const createStyles = (theme: any) => StyleSheet.create({
     borderWidth: 1,
     borderColor: theme.border,
   },
-  resultsHeaderText: {
+  resultsHeaderLabelText: {
     fontSize: theme.typography.sizes.label,
     fontFamily: theme.typography.family.bold,
     color: theme.textSecondary,
@@ -1126,6 +1141,199 @@ const createStyles = (theme: any) => StyleSheet.create({
     color: '#fff',
     fontSize: theme.typography.sizes.caption,
     fontFamily: theme.typography.family.bold,
+  },
+  // Results table themed styles (replaces inline styles)
+  resultsScroll: {
+    marginTop: 8,
+  },
+  resultsHeaderRow: {
+    flexDirection: 'row',
+    padding: 8,
+    backgroundColor: theme.mode === 'light' ? theme.card : theme.surface,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: theme.border,
+  },
+  resultsHeaderRowBottom: {
+    marginBottom: 8,
+  },
+  resultsDayCol: {
+    width: 140,
+  },
+  resultsHeaderText: {
+    color: theme.text,
+    fontFamily: theme.typography.family.bold,
+  },
+  resultsHeaderTextFixed40: {
+    color: theme.text,
+    fontFamily: theme.typography.family.bold,
+    width: 40,
+  },
+  resultsHeaderTextFlex: {
+    color: theme.text,
+    fontFamily: theme.typography.family.bold,
+    flex: 1,
+  },
+  resultsHeaderTextCenter: {
+    color: theme.text,
+    fontFamily: theme.typography.family.bold,
+    textAlign: 'center',
+  },
+  resultsHeaderTextSm: {
+    color: theme.text,
+    fontFamily: theme.typography.family.bold,
+    width: 80,
+    textAlign: 'center',
+  },
+  resultsHeaderTextMd: {
+    color: theme.text,
+    fontFamily: theme.typography.family.bold,
+    width: 100,
+    textAlign: 'center',
+  },
+  resultsHeaderTextMove: {
+    color: theme.text,
+    fontFamily: theme.typography.family.bold,
+    width: 60,
+    textAlign: 'center',
+  },
+  resultsHeaderTextWeight: {
+    color: theme.text,
+    fontFamily: theme.typography.family.bold,
+    width: 80,
+    textAlign: 'center',
+  },
+  placeBold: {
+    fontWeight: '700',
+  },
+  resultsRow: {
+    flexDirection: 'row',
+    padding: 12,
+    marginVertical: 6,
+    backgroundColor: theme.surface,
+    borderRadius: 8,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: theme.border,
+  },
+  resultsColPlace: {
+    width: 40,
+    alignItems: 'center',
+  },
+  resultsColName: {
+    flex: 1,
+  },
+  resultsName: {
+    fontFamily: theme.typography.family.bold,
+    color: theme.text,
+  },
+  resultsDayColCenter: {
+    width: 140,
+    alignItems: 'center',
+  },
+  resultsCell: {
+    color: theme.text,
+    fontFamily: theme.typography.family.regular,
+  },
+  resultsSm: {
+    width: 80,
+    textAlign: 'center',
+    color: theme.text,
+    fontFamily: theme.typography.family.regular,
+  },
+  resultsMdBold: {
+    width: 100,
+    textAlign: 'center',
+    color: theme.text,
+    fontFamily: theme.typography.family.bold,
+  },
+  resultsSmAccent: {
+    width: 80,
+    textAlign: 'center',
+    color: theme.accent,
+    fontFamily: theme.typography.family.bold,
+  },
+  resultsPlace: {
+    fontFamily: theme.typography.family.bold,
+    color: theme.text,
+    width: 40,
+    textAlign: 'center',
+  },
+  resultsMove: {
+    width: 60,
+    alignItems: 'center',
+  },
+  resultsFish: {
+    width: 60,
+    textAlign: 'center',
+    color: theme.text,
+    fontFamily: theme.typography.family.regular,
+  },
+  resultsWeight: {
+    width: 80,
+    alignItems: 'center',
+  },
+  resultsWeightText: {
+    color: theme.text,
+    fontFamily: theme.typography.family.bold,
+  },
+  resultsPayout: {
+    color: theme.accent,
+    fontSize: 12,
+    fontFamily: theme.typography.family.medium,
+  },
+  resultsBoat: {
+    color: theme.textSecondary,
+    fontSize: 12,
+    fontFamily: theme.typography.family.regular,
+  },
+  resultsBigBass: {
+    color: theme.accent,
+    fontSize: 12,
+    fontFamily: theme.typography.family.bold,
+  },
+  // Movement indicator styles
+  moveContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  moveText: {
+    fontSize: 12,
+    fontWeight: '700',
+    marginLeft: 2,
+  },
+  moveDash: {
+    color: theme.textSecondary,
+    fontSize: 12,
+    textAlign: 'center',
+  },
+  // Tabs in results header
+  resultsTabsHeader: {
+    flexDirection: 'row',
+    marginBottom: 12,
+  },
+  resultsTab: {
+    padding: 8,
+    borderRadius: 6,
+    marginRight: 8,
+    borderWidth: 1,
+  },
+  resultsTabActive: {
+    backgroundColor: theme.components.chipPrimary.filled.backgroundColor,
+    borderColor: theme.primary,
+  },
+  resultsTabInactive: {
+    backgroundColor: theme.surface,
+    borderColor: theme.border,
+  },
+  resultsTabText: {
+    color: theme.text,
+    fontFamily: theme.typography.family.medium,
+  },
+  // Misc small helpers
+  inlinePad8: {
+    padding: 8,
   },
 });
 

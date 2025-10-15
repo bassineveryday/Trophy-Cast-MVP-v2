@@ -178,7 +178,9 @@ const ComprehensiveMemberProfile: React.FC = () => {
           // Prefer AOY standings if available in memory
           const standing = (standings || []).find((s: any) => String(s.member_id) === String(memberCodeToUse));
           derivedName = (standing?.member_name ?? undefined) as string | undefined;
-        } catch {}
+        } catch {
+          // ignore: optional AOY fallback lookup
+        }
 
         if (!derivedName) {
           try {
@@ -190,7 +192,9 @@ const ComprehensiveMemberProfile: React.FC = () => {
               .limit(1)
               .maybeSingle();
             derivedName = (nameRow as any)?.member_name || undefined;
-          } catch {}
+          } catch {
+            // ignore: optional name fallback lookup
+          }
         }
 
         const mockProfile: MemberProfile = {

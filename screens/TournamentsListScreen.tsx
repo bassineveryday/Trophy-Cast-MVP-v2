@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { supabase } from '../lib/supabase';
 import { useNavigation } from '@react-navigation/native';
@@ -29,12 +30,13 @@ const styles = makeStyles((theme) => ({
     paddingHorizontal: theme.layout.spacing.lg,
     paddingVertical: theme.layout.spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: theme.border,
-    shadowColor: theme.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    borderBottomColor: theme.divider,
+    // subtle gold glow instead of heavy shadow
+    shadowColor: theme.glow.subtle.shadowColor,
+    shadowOffset: theme.glow.subtle.shadowOffset,
+    shadowOpacity: theme.glow.subtle.shadowOpacity,
+    shadowRadius: theme.glow.subtle.shadowRadius,
+    elevation: theme.glow.subtle.elevation,
   },
   filterRow: {
     flexDirection: 'row',
@@ -46,21 +48,29 @@ const styles = makeStyles((theme) => ({
     paddingVertical: theme.layout.spacing.md,
     paddingHorizontal: theme.layout.spacing.lg,
     borderRadius: theme.layout.radius.lg,
-    borderWidth: 1,
+    borderWidth: theme.components.buttonPrimary.outline.borderWidth,
+    borderColor: theme.components.buttonPrimary.outline.borderColor,
+    backgroundColor: theme.components.buttonPrimary.outline.backgroundColor,
     alignItems: 'center',
     justifyContent: 'center',
   },
   filterButtonActive: {
-    backgroundColor: theme.primary,
-    borderColor: theme.primary,
+    backgroundColor: theme.components.buttonPrimary.outline.backgroundColor,
+    borderColor: theme.components.buttonPrimary.outline.borderColor,
+    borderWidth: 2,
+    // subtle active glow to imply selection
+    shadowColor: theme.glow.subtle.shadowColor,
+    shadowOffset: theme.glow.subtle.shadowOffset,
+    shadowOpacity: theme.glow.subtle.shadowOpacity,
+    shadowRadius: theme.glow.subtle.shadowRadius,
+    elevation: theme.glow.subtle.elevation,
   },
   filterButtonInactive: {
-    backgroundColor: 'transparent',
+    backgroundColor: theme.components.buttonPrimary.outline.backgroundColor,
     borderColor: theme.border,
   },
   filterButtonTextActive: {
-    // Deep Navy text on Gold for strong contrast
-    color: '#0C1A23',
+    color: theme.components.buttonPrimary.outline.textColor,
     fontSize: theme.typography.sizes.body,
     fontFamily: theme.typography.family.bold,
   },
@@ -88,6 +98,11 @@ const styles = makeStyles((theme) => ({
     fontSize: theme.typography.sizes.body,
     fontFamily: theme.typography.family.regular,
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 }));
 
 export default function TournamentsListScreen() {
@@ -98,11 +113,7 @@ export default function TournamentsListScreen() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<FilterType>('upcoming');
 
-  useEffect(() => {
-    fetchTournaments();
-  }, [filter]);
-
-  const fetchTournaments = async () => {
+  const fetchTournaments = useCallback(async () => {
     setLoading(true);
     const today = new Date().toISOString().slice(0, 10);
     let query = supabase
@@ -117,7 +128,11 @@ export default function TournamentsListScreen() {
     const { data, error } = await query;
     if (!error) setTournaments(data || []);
     setLoading(false);
-  };
+  }, [filter]);
+
+  useEffect(() => {
+    fetchTournaments();
+  }, [fetchTournaments]);
 
   const formatDate = (dateString: string) => {
     try {
@@ -216,7 +231,7 @@ export default function TournamentsListScreen() {
     <View style={themedStyles.container}>
       <TopBar title="Tournaments" subtitle="Browse and register" />
       {loading ? (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <View style={themedStyles.loadingContainer}>
           <ActivityIndicator size="large" color={theme.primary} />
         </View>
       ) : (

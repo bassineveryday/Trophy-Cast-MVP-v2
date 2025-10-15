@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-unused-styles, react-native/sort-styles */
 import React, { useState, useMemo } from 'react';
 import {
   StyleSheet,
@@ -8,7 +9,6 @@ import {
   TouchableOpacity,
   TextInput,
   ScrollView,
-  Animated,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -17,7 +17,7 @@ import { useAOYStandings } from '../lib/hooks/useQueries';
 import { useTheme } from '../lib/ThemeContext';
 import { ListSkeleton } from '../components/Skeleton';
 import EmptyState from '../components/EmptyState';
-import { Chip } from '../components/BrandPrimitives';
+import type { BrandTheme } from '../lib/ThemeContext';
 
 interface FilterOptions {
   search: string;
@@ -76,13 +76,13 @@ export default function EnhancedAOYScreen() {
   }, [standings]);
 
   const getRankBadgeStyle = (rank: number | null) => {
-    if (!rank) return { backgroundColor: '#6c757d' };
-    if (rank === 1) return { backgroundColor: '#ffd700' }; // Gold
-    if (rank === 2) return { backgroundColor: '#c0c0c0' }; // Silver
-    if (rank === 3) return { backgroundColor: '#cd7f32' }; // Bronze
-    if (rank <= 10) return { backgroundColor: '#28a745' }; // Top 10
-    if (rank <= 25) return { backgroundColor: '#007bff' }; // Top 25
-    return { backgroundColor: '#6c757d' }; // Others
+    if (!rank) return { backgroundColor: theme.textSecondary };
+    if (rank === 1) return { backgroundColor: theme.gold }; // Gold
+    if (rank === 2) return { backgroundColor: theme.silver }; // Silver
+    if (rank === 3) return { backgroundColor: theme.bronze }; // Bronze
+    if (rank <= 10) return { backgroundColor: theme.success }; // Top 10
+    if (rank <= 25) return { backgroundColor: theme.accent }; // Top 25
+    return { backgroundColor: theme.textSecondary }; // Others
   };
 
   const getRankIcon = (rank: number | null) => {
@@ -96,10 +96,10 @@ export default function EnhancedAOYScreen() {
 
   const getTrendIcon = (trend: 'up' | 'down' | 'same' | null | undefined) => {
     switch (trend) {
-      case 'up': return { name: 'trending-up', color: '#28a745' };
-      case 'down': return { name: 'trending-down', color: '#dc3545' };
-      case 'same': return { name: 'remove', color: '#6c757d' };
-      default: return { name: 'remove', color: '#6c757d' };
+      case 'up': return { name: 'trending-up', color: theme.success };
+      case 'down': return { name: 'trending-down', color: theme.error };
+      case 'same': return { name: 'remove', color: theme.textSecondary };
+      default: return { name: 'remove', color: theme.textSecondary };
     }
   };
 
@@ -143,7 +143,7 @@ export default function EnhancedAOYScreen() {
     refetch();
   };
 
-  const renderMemberCard = ({ item, index }: { item: StandingWithTrend; index: number }) => {
+  const renderMemberCard = ({ item }: { item: StandingWithTrend }) => {
     const rankBadgeStyle = getRankBadgeStyle(item.aoy_rank);
     const rankIcon = getRankIcon(item.aoy_rank);
     const trendInfo = getTrendIcon(item.trend);
@@ -159,7 +159,7 @@ export default function EnhancedAOYScreen() {
         <View style={styles.cardHeader}>
           {/* Rank Badge */}
           <View style={[styles.rankBadge, rankBadgeStyle]}>
-            <Ionicons name={rankIcon as any} size={20} color="white" />
+            <Ionicons name={rankIcon as keyof typeof Ionicons.glyphMap} size={20} color={theme.onPrimary} />
             <Text style={styles.rankNumber}>
               {item.aoy_rank || 'NR'}
             </Text>
@@ -195,7 +195,7 @@ export default function EnhancedAOYScreen() {
             {item.trend && (
               <View style={styles.trendContainer}>
                 <Ionicons 
-                  name={trendInfo.name as any} 
+                  name={trendInfo.name as keyof typeof Ionicons.glyphMap} 
                   size={16} 
                   color={trendInfo.color} 
                 />
@@ -239,8 +239,11 @@ export default function EnhancedAOYScreen() {
               </View>
             </View>
 
-            <TouchableOpacity style={styles.actionButton} onPress={() => (navigation as any).navigate('MemberProfile', { memberId: item.member_id })}>
-              <Ionicons name="person-outline" size={18} color="#007bff" />
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => (navigation as unknown as { navigate: (route: string, params?: { memberId: string }) => void }).navigate('MemberProfile', { memberId: item.member_id })}
+            >
+              <Ionicons name="person-outline" size={18} color={theme.accent} />
               <Text style={styles.actionButtonText}>View Member Profile</Text>
             </TouchableOpacity>
           </View>
@@ -251,7 +254,7 @@ export default function EnhancedAOYScreen() {
           <Ionicons 
             name={isExpanded ? "chevron-up" : "chevron-down"} 
             size={20} 
-            color="#999" 
+            color={theme.textSecondary} 
           />
         </View>
       </TouchableOpacity>
@@ -262,11 +265,11 @@ export default function EnhancedAOYScreen() {
     <View style={styles.filterContainer}>
       {/* Search Input */}
       <View style={styles.searchContainer}>
-        <Ionicons name="search-outline" size={20} color="#F5C842" style={styles.searchIcon} />
+        <Ionicons name="search-outline" size={20} color={theme.primary} style={styles.searchIcon} />
         <TextInput
           style={styles.searchInput}
           placeholder="Search members..."
-          placeholderTextColor="rgba(245, 239, 230, 0.6)"
+          placeholderTextColor={theme.textSecondary}
           value={filters.search}
           onChangeText={(text) => setFilters(prev => ({ ...prev, search: text }))}
         />
@@ -275,7 +278,7 @@ export default function EnhancedAOYScreen() {
             onPress={() => setFilters(prev => ({ ...prev, search: '' }))}
             style={styles.clearButton}
           >
-            <Ionicons name="close-circle" size={20} color="#999" />
+            <Ionicons name="close-circle" size={20} color={theme.textSecondary} />
           </TouchableOpacity>
         )}
       </View>
@@ -399,7 +402,7 @@ export default function EnhancedAOYScreen() {
   );
 }
 
-const createStyles = (theme: any) => StyleSheet.create({
+const createStyles = (theme: BrandTheme) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.background,
@@ -408,18 +411,19 @@ const createStyles = (theme: any) => StyleSheet.create({
     backgroundColor: theme.surface,
     paddingHorizontal: theme.layout.spacing.md,
     paddingVertical: theme.layout.spacing.sm,
-    borderBottomWidth: 2,
-    borderBottomColor: theme.primary,
-    shadowColor: theme.shadow,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.divider,
+    // subtle glow instead of heavy shadow
+    shadowColor: theme.glow.subtle.shadowColor,
+    shadowOffset: theme.glow.subtle.shadowOffset,
+    shadowOpacity: theme.glow.subtle.shadowOpacity,
+    shadowRadius: theme.glow.subtle.shadowRadius,
+    elevation: theme.glow.subtle.elevation,
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: theme.card,
     borderRadius: theme.layout.radius.md,
     paddingHorizontal: theme.layout.spacing.sm,
     marginBottom: theme.layout.spacing.sm,
@@ -443,26 +447,32 @@ const createStyles = (theme: any) => StyleSheet.create({
     flexDirection: 'row',
   },
   filterChip: {
-    backgroundColor: theme.mode === 'light' ? '#f0f0f0' : theme.surface,
-    borderRadius: 20,
-    paddingHorizontal: 16,
+    backgroundColor: theme.components.chipPrimary.outline.backgroundColor,
+    borderRadius: theme.components.chipPrimary.outline.borderRadius,
+    paddingHorizontal: theme.components.chipPrimary.outline.paddingHorizontal,
     paddingVertical: 8,
     marginRight: 8,
-    borderWidth: 1,
-    borderColor: theme.border,
+    borderWidth: theme.components.chipPrimary.outline.borderWidth,
+    borderColor: theme.components.chipPrimary.outline.borderColor,
   },
   activeChip: {
-    backgroundColor: 'transparent',
-    borderColor: theme.primary,
+    backgroundColor: theme.components.chipPrimary.outline.backgroundColor,
+    borderColor: theme.components.chipPrimary.outline.borderColor,
     borderWidth: 2,
+    // subtle active glow
+    shadowColor: theme.glow.subtle.shadowColor,
+    shadowOffset: theme.glow.subtle.shadowOffset,
+    shadowOpacity: theme.glow.subtle.shadowOpacity,
+    shadowRadius: theme.glow.subtle.shadowRadius,
+    elevation: theme.glow.subtle.elevation,
   },
   chipText: {
     fontSize: 14,
-    color: '#F5EFE6', // fishingTheme.colors.cream
+    color: theme.components.chipPrimary.outline.textColor,
     fontWeight: '500',
   },
   activeChipText: {
-    color: theme.primary,
+    color: theme.components.chipPrimary.outline.textColor,
     fontWeight: '700',
   },
   headerStats: {
@@ -476,11 +486,12 @@ const createStyles = (theme: any) => StyleSheet.create({
     borderRadius: theme.layout.radius.md,
     padding: theme.layout.spacing.md,
     alignItems: 'center',
-    shadowColor: theme.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 6,
-    elevation: theme.layout.elevation.sm,
+    // subtle glow
+    shadowColor: theme.glow.subtle.shadowColor,
+    shadowOffset: theme.glow.subtle.shadowOffset,
+    shadowOpacity: theme.glow.subtle.shadowOpacity,
+    shadowRadius: theme.glow.subtle.shadowRadius,
+    elevation: theme.glow.subtle.elevation,
     borderWidth: 1,
     borderColor: theme.border,
   },
@@ -504,19 +515,24 @@ const createStyles = (theme: any) => StyleSheet.create({
     borderRadius: theme.layout.radius.lg,
     padding: theme.layout.spacing.md,
     marginBottom: theme.layout.spacing.sm,
-    shadowColor: theme.shadow,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 10,
-    elevation: theme.layout.elevation.md,
+    // subtle glow
+    shadowColor: theme.glow.subtle.shadowColor,
+    shadowOffset: theme.glow.subtle.shadowOffset,
+    shadowOpacity: theme.glow.subtle.shadowOpacity,
+    shadowRadius: theme.glow.subtle.shadowRadius,
+    elevation: theme.glow.subtle.elevation,
     borderWidth: 1,
     borderColor: theme.border,
   },
   expandedCard: {
     borderColor: theme.primary,
     borderWidth: 2,
-    shadowColor: theme.primary,
-    shadowOpacity: 0.3,
+    // focus glow
+    shadowColor: theme.glow.focus.shadowColor,
+    shadowOffset: theme.glow.focus.shadowOffset,
+    shadowOpacity: theme.glow.focus.shadowOpacity,
+    shadowRadius: theme.glow.focus.shadowRadius,
+    elevation: theme.glow.focus.elevation,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -531,7 +547,7 @@ const createStyles = (theme: any) => StyleSheet.create({
     marginRight: 16,
   },
   rankNumber: {
-    color: 'white',
+    color: theme.onPrimary,
     fontSize: 12,
     fontWeight: 'bold',
     marginTop: 2,
@@ -553,18 +569,18 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   memberId: {
     fontSize: 12,
-    color: 'rgba(255, 255, 255, 0.7)', // fishingTheme.colors.mutedWhite
+    color: theme.textSecondary,
     fontFamily: 'monospace',
   },
   statusBadge: {
-    backgroundColor: 'rgba(245, 200, 66, 0.2)',
+    backgroundColor: theme.card,
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,
   },
   statusText: {
     fontSize: 10,
-    color: '#F5C842', // fishingTheme.colors.gold
+    color: theme.primary,
     fontWeight: '600',
     textTransform: 'uppercase',
   },
@@ -578,7 +594,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   pointsLabel: {
     fontSize: 12,
-    color: 'rgba(255, 255, 255, 0.7)', // fishingTheme.colors.mutedWhite
+    color: theme.textSecondary,
     textTransform: 'uppercase',
     fontWeight: '600',
   },
@@ -590,7 +606,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   separator: {
     height: 1,
-    backgroundColor: 'rgba(245, 200, 66, 0.2)',
+    backgroundColor: theme.divider,
     marginBottom: 16,
   },
   statsGrid: {
@@ -605,29 +621,29 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   statLabel: {
     fontSize: 12,
-    color: 'rgba(255, 255, 255, 0.7)', // fishingTheme.colors.mutedWhite
+    color: theme.textSecondary,
     textTransform: 'uppercase',
     fontWeight: '600',
     marginBottom: 4,
   },
   statValue: {
     fontSize: 16,
-    color: '#F5EFE6', // fishingTheme.colors.cream
+    color: theme.text,
     fontWeight: '600',
   },
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'transparent',
+    backgroundColor: theme.components.buttonPrimary.outline.backgroundColor,
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 8,
     alignSelf: 'flex-start',
-    borderWidth: 2,
-    borderColor: theme.primary,
+    borderWidth: theme.components.buttonPrimary.outline.borderWidth,
+    borderColor: theme.components.buttonPrimary.outline.borderColor,
   },
   actionButtonText: {
-    color: theme.primary,
+    color: theme.components.buttonPrimary.outline.textColor,
     fontSize: 14,
     fontWeight: '600',
     marginLeft: 8,

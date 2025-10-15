@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-unused-styles, react-native/no-color-literals, react-native/sort-styles, @typescript-eslint/no-explicit-any */
 /**
  * EnhancedTournamentsScreen - Tournament list with UX polish
  * ✓ Loading → shows skeletons (no layout shift flashes)
@@ -21,11 +22,9 @@ import { useNavigation } from '@react-navigation/native';
 import { TournamentEvent } from '../lib/supabase';
 import { useGroupedTournaments, useTournamentParticipants, useParticipantCounts } from '../lib/hooks/useQueries';
 import { useTheme } from '../lib/ThemeContext';
-import { ListSkeleton, TableRowSkeleton } from '../components/Skeleton';
+import { ListSkeleton } from '../components/Skeleton';
 import { EmptyState } from '../components/EmptyState';
-import { CardPressable } from '../components/Card';
-import { Chip } from '../components/BrandPrimitives';
-import ListRow from '../components/ListRow';
+// Removed unused imports
 
 interface FilterOptions {
   search: string;
@@ -51,7 +50,7 @@ export default function EnhancedTournamentsScreen() {
 
   // Participant counts lookup - call hook unconditionally to preserve hooks order
   const lookupsInitial = (tournaments || []).map(t => ({ code: t.tournament_code, eventId: t.event_id }));
-  const { data: participantCounts = {}, isLoading: countsLoading } = useParticipantCounts(lookupsInitial as any);
+  const { data: participantCounts = {} } = useParticipantCounts(lookupsInitial as any);
 
   // Compute visible tournament codes and fetch participant counts for them
   // (moved below where filteredTournaments is computed to avoid duplicate declarations)
@@ -337,26 +336,26 @@ export default function EnhancedTournamentsScreen() {
 
 const createStyles = (theme: any) => StyleSheet.create({
   container: {
-    flex: 1,
     backgroundColor: theme.background,
+    flex: 1,
   },
   filterContainer: {
     backgroundColor: theme.surface,
+    borderBottomColor: theme.divider,
+    borderBottomWidth: 1,
     paddingHorizontal: theme.layout.spacing.lg,
     paddingVertical: theme.layout.spacing.md,
-    borderBottomWidth: 2,
-    borderBottomColor: theme.accent,
   },
   searchContainer: {
-    flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: theme.mode === 'light' ? '#f8f8f8' : theme.surface,
-    borderRadius: theme.layout.radius.md,
-    paddingHorizontal: theme.layout.spacing.md,
-    marginBottom: theme.layout.spacing.md,
-    height: 44,
-    borderWidth: 1,
     borderColor: theme.border,
+    borderRadius: theme.layout.radius.md,
+    borderWidth: 1,
+    flexDirection: 'row',
+    height: 44,
+    marginBottom: theme.layout.spacing.md,
+    paddingHorizontal: theme.layout.spacing.md,
   },
   searchIcon: {
     marginRight: 8,
@@ -374,50 +373,64 @@ const createStyles = (theme: any) => StyleSheet.create({
     flexDirection: 'row',
   },
   filterChip: {
-    backgroundColor: theme.mode === 'light' ? '#f0f0f0' : theme.surface,
-    borderRadius: theme.layout.radius.xl,
-    paddingHorizontal: theme.layout.spacing.lg,
-    paddingVertical: theme.layout.spacing.sm,
+    backgroundColor: theme.components.chipPrimary.outline.backgroundColor,
+    borderColor: theme.components.chipPrimary.outline.borderColor,
+    borderRadius: theme.components.chipPrimary.outline.borderRadius,
+    borderWidth: theme.components.chipPrimary.outline.borderWidth,
     marginRight: theme.layout.spacing.sm,
-    borderWidth: 1,
-    borderColor: theme.border,
+    paddingHorizontal: theme.components.chipPrimary.outline.paddingHorizontal,
+    paddingVertical: theme.layout.spacing.sm,
   },
   activeChip: {
-    backgroundColor: theme.accent,
-    borderColor: theme.accent,
+    borderColor: theme.components.chipPrimary.outline.borderColor,
+    borderWidth: 2,
+    elevation: theme.glow.subtle.elevation,
+    // subtle glow when active
+    shadowColor: theme.glow.subtle.shadowColor,
+    shadowOffset: theme.glow.subtle.shadowOffset,
+    shadowOpacity: theme.glow.subtle.shadowOpacity,
+    shadowRadius: theme.glow.subtle.shadowRadius,
   },
   chipText: {
-    fontSize: theme.typography.sizes.body,
+    color: theme.components.chipPrimary.outline.textColor,
     fontFamily: theme.typography.family.medium,
-    color: theme.text,
+    fontSize: theme.typography.sizes.body,
   },
   activeChipText: {
-    color: '#fff',
+    color: theme.components.chipPrimary.outline.textColor,
+    fontFamily: theme.typography.family.bold,
   },
   listContainer: {
     padding: theme.layout.spacing.lg,
   },
   tournamentCard: {
     backgroundColor: theme.surface,
-    borderRadius: theme.layout.radius.lg,
-    padding: theme.layout.spacing.lg,
-    marginBottom: theme.layout.spacing.md,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: theme.layout.elevation.md },
-    shadowOpacity: 0.1,
-    shadowRadius: theme.layout.elevation.md,
-    elevation: theme.layout.elevation.md,
-    borderWidth: 1,
     borderColor: theme.border,
+    borderRadius: theme.layout.radius.lg,
+    borderWidth: 1,
+    elevation: theme.glow.subtle.elevation,
+    marginBottom: theme.layout.spacing.md,
+    padding: theme.layout.spacing.lg,
+    // subtle gold glow instead of heavy shadow
+    shadowColor: theme.glow.subtle.shadowColor,
+    shadowOffset: theme.glow.subtle.shadowOffset,
+    shadowOpacity: theme.glow.subtle.shadowOpacity,
+    shadowRadius: theme.glow.subtle.shadowRadius,
   },
   expandedCard: {
-    borderColor: theme.accent,
+    borderColor: theme.primary,
     borderWidth: 2,
+    elevation: theme.glow.focus.elevation,
+    // focused glow on expand
+    shadowColor: theme.glow.focus.shadowColor,
+    shadowOffset: theme.glow.focus.shadowOffset,
+    shadowOpacity: theme.glow.focus.shadowOpacity,
+    shadowRadius: theme.glow.focus.shadowRadius,
   },
   cardHeader: {
+    alignItems: 'flex-start',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
     marginBottom: 12,
   },
   titleContainer: {
@@ -425,23 +438,23 @@ const createStyles = (theme: any) => StyleSheet.create({
     marginRight: 12,
   },
   tournamentName: {
-    fontSize: theme.typography.sizes.h2,
-    fontFamily: theme.typography.family.bold,
     color: theme.text,
+    fontFamily: theme.typography.family.bold,
+    fontSize: theme.typography.sizes.h2,
     marginBottom: theme.layout.spacing.sm,
   },
   statusBadge: {
-    flexDirection: 'row',
     alignItems: 'center',
+    alignSelf: 'flex-start',
+    borderRadius: theme.layout.radius.xl,
+    flexDirection: 'row',
     paddingHorizontal: theme.layout.spacing.sm,
     paddingVertical: theme.layout.spacing.xs,
-    borderRadius: theme.layout.radius.xl,
-    alignSelf: 'flex-start',
   },
   statusText: {
-    color: '#fff',
-    fontSize: theme.typography.sizes.caption,
+    color: theme.onPrimary,
     fontFamily: theme.typography.family.bold,
+    fontSize: theme.typography.sizes.caption,
     marginLeft: theme.layout.spacing.xs,
   },
   participantBadge: {
@@ -488,7 +501,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   separator: {
     height: 1,
-    backgroundColor: theme.border,
+    backgroundColor: theme.divider,
     marginBottom: theme.layout.spacing.md,
   },
   detailSection: {
@@ -528,16 +541,16 @@ const createStyles = (theme: any) => StyleSheet.create({
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: theme.primary,
+    backgroundColor: theme.components.buttonPrimary.outline.backgroundColor,
     paddingVertical: theme.layout.spacing.sm,
     paddingHorizontal: theme.layout.spacing.md,
     borderRadius: theme.layout.radius.md,
     alignSelf: 'flex-start',
-    borderWidth: 1,
-    borderColor: theme.primary,
+    borderWidth: theme.components.buttonPrimary.outline.borderWidth,
+    borderColor: theme.components.buttonPrimary.outline.borderColor,
   },
   actionButtonText: {
-    color: '#0C1A23',
+    color: theme.components.buttonPrimary.outline.textColor,
     fontSize: theme.typography.sizes.body,
     fontFamily: theme.typography.family.bold,
     marginLeft: theme.layout.spacing.sm,

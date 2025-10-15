@@ -43,7 +43,7 @@ const getImageForOfficer = (officer: any) => {
   if (key === 'jeremiah hofstetter') return null;
 
   // Prefer local mapped images (shifted)
-  if (localImageMap.hasOwnProperty(key) && localImageMap[key]) return localImageMap[key];
+  if (Object.prototype.hasOwnProperty.call(localImageMap, key) && localImageMap[key]) return localImageMap[key];
 
   // Fallback to officer-provided image fields
   if (officer.image) return officer.image;

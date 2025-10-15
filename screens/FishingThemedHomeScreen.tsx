@@ -7,6 +7,7 @@
  * - Trophy rack for achievements
  * - Deep ocean themed background
  */
+/* eslint-disable react-native/no-unused-styles, react-native/no-color-literals, react-native/sort-styles */
 import React, { useMemo } from 'react';
 import {
   StyleSheet,
@@ -27,7 +28,7 @@ import { TrophyRack, Trophy } from '../components/TrophyRack';
 import { DailyChallenge } from '../components/DailyChallenge';
 import { FishingDecorations } from '../components/FishingDecorations';
 import Skeleton from '../components/Skeleton';
-import { EmptyState } from '../components/EmptyState';
+import type { BrandTheme } from '../lib/ThemeContext';
 import { useReducedMotion } from '../hooks/useReducedMotion';
 
 // Mock trophy data (will be replaced with real data later)
@@ -97,21 +98,21 @@ export default function FishingThemedHomeScreen() {
         <View style={styles.header}>
           <View style={styles.headerContent}>
             <Skeleton width={180} height={32} />
-            <Skeleton width={120} height={20} style={{ marginTop: 8 }} />
+            <Skeleton width={120} height={20} style={styles.skeletonSubtitle} />
           </View>
         </View>
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={isMobile ? styles.singleColumn : styles.twoColumn}>
             <View style={styles.leftColumn}>
-              <Skeleton width={150} height={20} style={{ marginBottom: 16 }} />
+              <Skeleton width={150} height={20} style={styles.skeletonLabel} />
               {[1, 2, 3, 4].map((i) => (
-                <Skeleton key={i} height={80} style={{ marginBottom: 12 }} />
+                <Skeleton key={i} height={80} style={styles.skeletonItem} />
               ))}
             </View>
             {!isMobile && (
               <View style={styles.rightColumn}>
                 <Skeleton height={200} />
-                <Skeleton height={180} style={{ marginTop: 16 }} />
+                <Skeleton height={180} style={styles.skeletonRightTop} />
               </View>
             )}
           </View>
@@ -199,7 +200,7 @@ export default function FishingThemedHomeScreen() {
   );
 }
 
-const createStyles = (theme: any) => StyleSheet.create({
+const createStyles = (theme: BrandTheme) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.background,
@@ -211,12 +212,13 @@ const createStyles = (theme: any) => StyleSheet.create({
     paddingBottom: 0,
     backgroundColor: theme.surface,
     borderBottomWidth: 2,
-  borderBottomColor: theme.primary,
-  shadowColor: theme.primary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 3,
+    borderBottomColor: theme.primary,
+    // subtle gold glow instead of heavy shadow
+    shadowColor: theme.glow.subtle.shadowColor,
+    shadowOffset: theme.glow.subtle.shadowOffset,
+    shadowOpacity: theme.glow.subtle.shadowOpacity,
+    shadowRadius: theme.glow.subtle.shadowRadius,
+    elevation: theme.glow.subtle.elevation,
   },
   headerContent: {
     alignItems: 'center',
@@ -225,9 +227,9 @@ const createStyles = (theme: any) => StyleSheet.create({
   logoText: {
     fontSize: theme.typography.sizes.h1,
     fontFamily: theme.typography.family.bold,
-  color: theme.primary,
+    color: theme.primary,
     letterSpacing: 1,
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowColor: theme.shadow,
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 3,
   },
@@ -262,5 +264,18 @@ const createStyles = (theme: any) => StyleSheet.create({
     color: theme.text,
     marginBottom: theme.layout.spacing.lg,
     letterSpacing: 0.5,
+  },
+  // Skeleton spacers (replace inline styles)
+  skeletonSubtitle: {
+    marginTop: theme.layout.spacing.xs,
+  },
+  skeletonLabel: {
+    marginBottom: theme.layout.spacing.md,
+  },
+  skeletonItem: {
+    marginBottom: theme.layout.spacing.sm,
+  },
+  skeletonRightTop: {
+    marginTop: theme.layout.spacing.md,
   },
 });

@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { ColorScheme } from './ThemeContext';
+import type { BrandTheme } from './ThemeContext';
 
 /**
  * Design Tokens for consistent spacing, sizing, and styling
@@ -102,9 +102,9 @@ export const opacity = {
  * Then use inside component: const themedStyles = styles(theme);
  */
 export function makeStyles<T extends StyleSheet.NamedStyles<T>>(
-  styleFactory: (theme: any) => T
-): (theme: any) => T {
-  return (theme: any): T => {
+  styleFactory: (theme: BrandTheme) => T
+): (theme: BrandTheme) => T {
+  return (theme: BrandTheme): T => {
     return StyleSheet.create(styleFactory(theme));
   };
 }

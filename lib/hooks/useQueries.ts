@@ -307,7 +307,7 @@ export function useMultiDayTournamentResults(tournamentCode?: string) {
         if (byId) eventRow = byId;
       }
 
-      const baseName = (eventRow?.tournament_name || tournamentCode || '').replace(/\b\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4}\b/g, '').trim();
+  const baseName = (eventRow?.tournament_name || tournamentCode || '').replace(/\b\d{1,2}[-/]\d{1,2}[-/]\d{2,4}\b/g, '').trim();
       const refDate = eventRow?.event_date ? new Date(eventRow.event_date) : new Date();
       const from = new Date(refDate); from.setDate(refDate.getDate() - 3);
       const to = new Date(refDate); to.setDate(refDate.getDate() + 3);
@@ -550,8 +550,8 @@ export function useGroupedTournaments() {
       tournaments.forEach(tournament => {
         // Extract base name by removing date patterns (e.g., "Norton 8-2-25" → "Norton", "Cedar 5-3-25" → "Cedar")
         const baseName = (tournament.tournament_name || '')
-          .replace(/\b\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4}\b/g, '') // Remove full dates
-          .replace(/\b\d{1,2}[-\/]\d{1,2}\b/g, '') // Remove month-day patterns
+          .replace(/\b\d{1,2}[-/]\d{1,2}[-/]\d{2,4}\b/g, '') // Remove full dates
+          .replace(/\b\d{1,2}[-/]\d{1,2}\b/g, '') // Remove month-day patterns
           .trim();
         
         if (!grouped.has(baseName)) {

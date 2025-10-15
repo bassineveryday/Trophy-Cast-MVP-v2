@@ -77,6 +77,7 @@ export interface ColorScheme {
   
   // UI elements
   border: string;
+  divider: string;
   shadow: string;
   overlay: string;
   
@@ -95,6 +96,23 @@ export interface ColorScheme {
     card: [string, string];
     accent: [string, string];
   };
+  // Effects
+  glow: {
+    subtle: {
+      shadowColor: string;
+      shadowOpacity: number;
+      shadowRadius: number;
+      shadowOffset: { width: number; height: number };
+      elevation: number;
+    };
+    focus: {
+      shadowColor: string;
+      shadowOpacity: number;
+      shadowRadius: number;
+      shadowOffset: { width: number; height: number };
+      elevation: number;
+    };
+  };
 }
 
 // Full brand theme combining colors, typography, and layout
@@ -102,6 +120,13 @@ export interface BrandTheme extends ColorScheme {
   mode: 'light' | 'dark';
   typography: Typography;
   layout: LayoutTokens;
+  components: {
+    button: typeof BRAND_CONFIG.components.button;
+    buttonPrimary: typeof BRAND_CONFIG.components.buttonPrimary;
+    card: typeof BRAND_CONFIG.components.card;
+    input: typeof BRAND_CONFIG.components.input;
+    chipPrimary: typeof BRAND_CONFIG.components.chipPrimary;
+  };
 }
 
 // Shared typography tokens (same for light and dark)
@@ -181,6 +206,7 @@ export const lightTheme: BrandTheme = {
   
   // UI elements - from BRAND_CONFIG
   border: BRAND_CONFIG.lightTheme.border,
+  divider: BRAND_CONFIG.lightTheme.divider,
   shadow: BRAND_CONFIG.lightTheme.shadow,
   overlay: 'rgba(0,0,0,0.5)',
   
@@ -199,10 +225,13 @@ export const lightTheme: BrandTheme = {
     card: [BRAND_CONFIG.lightTheme.surface, BRAND_CONFIG.lightTheme.background] as [string, string],
     accent: BRAND_CONFIG.gradients.accent as [string, string],
   },
+  // Effects
+  glow: BRAND_CONFIG.effects.glow,
   
   // Typography and layout
   typography,
   layout,
+  components: BRAND_CONFIG.components,
 };
 
 // Dark theme now uses brandConfig.ts values - update colors there to change the entire app!
@@ -234,6 +263,7 @@ export const darkTheme: BrandTheme = {
   
   // UI elements - from BRAND_CONFIG
   border: BRAND_CONFIG.darkTheme.border,
+  divider: BRAND_CONFIG.darkTheme.divider,
   shadow: BRAND_CONFIG.darkTheme.shadow,
   overlay: 'rgba(0,0,0,0.7)',
   
@@ -252,10 +282,13 @@ export const darkTheme: BrandTheme = {
     card: [BRAND_CONFIG.darkTheme.surface, BRAND_CONFIG.darkTheme.background] as [string, string],
     accent: BRAND_CONFIG.gradients.accent as [string, string],
   },
+  // Effects
+  glow: BRAND_CONFIG.effects.glow,
   
   // Typography and layout
   typography,
   layout,
+  components: BRAND_CONFIG.components,
 };
 
 interface ThemeContextType {

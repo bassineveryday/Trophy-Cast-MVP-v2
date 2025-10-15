@@ -19,7 +19,9 @@ import { useAuth } from '../lib/AuthContext';
 import { supabase } from '../lib/supabase';
 import { showSuccess, showError } from '../utils/toast';
 import EmptyState from '../components/EmptyState';
-import { fishingTheme, spacing, borderRadius, fontSize, fontWeight, shadows } from '../lib/designTokens';
+import { makeStyles } from '../lib/designTokens';
+import { useTheme } from '../lib/ThemeContext';
+import type { BrandTheme } from '../lib/ThemeContext';
 
 interface CommunityPost {
   id: string;
@@ -60,6 +62,8 @@ const SocialScreen: React.FC = () => {
   const { user } = useAuth();
   const { data: tournaments } = useTournaments();
   const { data: standings } = useAOYStandings();
+  const { theme } = useTheme();
+  const styles = React.useMemo(() => createStyles(theme), [theme]);
   
   const [activeTab, setActiveTab] = useState<'feed' | 'members' | 'chat'>('feed');
   const [posts, setPosts] = useState<CommunityPost[]>([]);
@@ -207,10 +211,10 @@ const SocialScreen: React.FC = () => {
   
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'online': return '#4CAF50';
-      case 'in_tournament': return '#FF9800';
-      case 'offline': return '#757575';
-      default: return '#757575';
+      case 'online': return theme.success;
+      case 'in_tournament': return theme.warning;
+      case 'offline': return theme.textSecondary;
+      default: return theme.textSecondary;
     }
   };
   
@@ -232,7 +236,7 @@ const SocialScreen: React.FC = () => {
       <Ionicons
         name={icon as any}
         size={20}
-        color={activeTab === tab ? fishingTheme.colors.white : '#666'}
+        color={activeTab === tab ? theme.onPrimary : theme.textSecondary}
       />
       <Text style={[styles.tabLabel, activeTab === tab && styles.activeTabLabel]}>
         {label}
@@ -253,7 +257,7 @@ const SocialScreen: React.FC = () => {
           <Text style={styles.postTime}>{formatTimeAgo(post.created_at)}</Text>
         </View>
         <View style={[styles.postTypeBadge, { backgroundColor: getPostTypeColor(post.post_type) }]}>
-          <Ionicons name={getPostTypeIcon(post.post_type) as any} size={12} color={fishingTheme.colors.white} />
+          <Ionicons name={getPostTypeIcon(post.post_type) as any} size={12} color={theme.onPrimary} />
         </View>
       </View>
       
@@ -272,15 +276,15 @@ const SocialScreen: React.FC = () => {
           onPress={() => handleLikePost(post.id)}
         >
           <Ionicons
-            name={post.is_liked ? "heart" : "heart-outline"}
+            name={post.is_liked ? 'heart' : 'heart-outline'}
             size={20}
-            color={post.is_liked ? "#E91E63" : fishingTheme.colors.mutedWhite}
+            color={post.is_liked ? theme.accent : theme.textSecondary}
           />
           <Text style={styles.actionText}>{post.likes_count}</Text>
         </TouchableOpacity>
         
         <TouchableOpacity style={styles.actionButton}>
-          <Ionicons name="chatbubble-outline" size={20} color={fishingTheme.colors.mutedWhite} />
+          <Ionicons name="chatbubble-outline" size={20} color={theme.textSecondary} />
           <Text style={styles.actionText}>{post.comments_count}</Text>
         </TouchableOpacity>
         
@@ -288,7 +292,7 @@ const SocialScreen: React.FC = () => {
           style={styles.actionButton}
           onPress={() => handleSharePost(post)}
         >
-          <Ionicons name="share-outline" size={20} color={fishingTheme.colors.mutedWhite} />
+          <Ionicons name="share-outline" size={20} color={theme.textSecondary} />
           <Text style={styles.actionText}>Share</Text>
         </TouchableOpacity>
       </View>
@@ -316,7 +320,7 @@ const SocialScreen: React.FC = () => {
       </View>
       
       <TouchableOpacity style={styles.connectButton}>
-        <Ionicons name="person-add-outline" size={18} color="#4CAF50" />
+        <Ionicons name="person-add-outline" size={18} color={theme.success} />
       </TouchableOpacity>
     </View>
   );
@@ -339,10 +343,10 @@ const SocialScreen: React.FC = () => {
   
   const getPostTypeColor = (type: string) => {
     switch (type) {
-      case 'photo': return fishingTheme.colors.lightTeal;
-      case 'achievement': return fishingTheme.colors.mutedGold;
-      case 'tournament_update': return fishingTheme.colors.deepOcean;
-      default: return '#9E9E9E';
+      case 'photo': return theme.accent;
+      case 'achievement': return theme.gold;
+      case 'tournament_update': return theme.primaryDark;
+      default: return theme.textSecondary;
     }
   };
   
@@ -362,7 +366,7 @@ const SocialScreen: React.FC = () => {
         style={styles.createPostButton}
         onPress={() => setShowNewPostModal(true)}
       >
-        <Ionicons name="add-circle" size={24} color={fishingTheme.colors.lightTeal} />
+  <Ionicons name="add-circle" size={24} color={theme.accent} />
         <Text style={styles.createPostText}>Share something with the community...</Text>
       </TouchableOpacity>
       
@@ -425,7 +429,7 @@ const SocialScreen: React.FC = () => {
           style={styles.sendButton}
           onPress={handleSendMessage}
         >
-          <Ionicons name="send" size={20} color="#fff" />
+          <Ionicons name="send" size={20} color={theme.onPrimary} />
         </TouchableOpacity>
       </View>
     </View>
@@ -437,7 +441,7 @@ const SocialScreen: React.FC = () => {
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Community</Text>
         <TouchableOpacity style={styles.notificationsButton}>
-          <Ionicons name="notifications-outline" size={24} color="#333" />
+          <Ionicons name="notifications-outline" size={24} color={theme.text} />
           <View style={styles.notificationBadge}>
             <Text style={styles.notificationCount}>3</Text>
           </View>
@@ -460,8 +464,8 @@ const SocialScreen: React.FC = () => {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={handleRefresh}
-            colors={['#4CAF50']}
-            tintColor="#4CAF50"
+            colors={[theme.success]}
+            tintColor={theme.success}
           />
         }
       >
@@ -501,26 +505,26 @@ const SocialScreen: React.FC = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (theme: BrandTheme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: theme.background,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.giant,
-    paddingBottom: spacing.md,
-    backgroundColor: fishingTheme.colors.white,
+    paddingHorizontal: theme.layout.spacing.lg,
+    paddingTop: theme.layout.spacing.xxl,
+    paddingBottom: theme.layout.spacing.md,
+    backgroundColor: theme.surface,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: theme.border,
   },
   headerTitle: {
-    fontSize: fontSize.xxxl,
-    fontWeight: fontWeight.bold as any,
-    color: '#13323b',
+    fontSize: theme.typography.sizes.h1,
+    fontFamily: theme.typography.family.bold,
+    color: theme.text,
   },
   notificationsButton: {
     position: 'relative',
@@ -529,7 +533,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: -5,
     right: -5,
-    backgroundColor: '#E91E63',
+    backgroundColor: theme.accent,
     borderRadius: 10,
     width: 20,
     height: 20,
@@ -537,75 +541,91 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   notificationCount: {
-    color: '#fff',
+    color: theme.onPrimary,
     fontSize: 12,
-    fontWeight: 'bold',
+    fontFamily: theme.typography.family.bold,
   },
   tabNavigation: {
-    backgroundColor: fishingTheme.colors.white,
-    paddingVertical: spacing.sm,
+    backgroundColor: theme.surface,
+    paddingVertical: theme.layout.spacing.sm,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: theme.border,
   },
   tabButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: spacing.xl,
-    paddingVertical: spacing.sm,
-    marginHorizontal: spacing.sm,
-    borderRadius: borderRadius.xxl,
-    backgroundColor: '#f5f5f5',
+    paddingHorizontal: theme.layout.spacing.xl,
+    paddingVertical: theme.layout.spacing.sm,
+    marginHorizontal: theme.layout.spacing.sm,
+    borderRadius: theme.layout.radius.xl,
+    backgroundColor: theme.mode === 'light' ? theme.card : theme.surface,
+    borderWidth: 1,
+    borderColor: theme.border,
   },
   activeTabButton: {
-    backgroundColor: fishingTheme.colors.lightTeal,
+    backgroundColor: theme.components.buttonPrimary.filled.backgroundColor,
+    shadowColor: theme.glow.subtle.shadowColor,
+    shadowOffset: theme.glow.subtle.shadowOffset,
+    shadowOpacity: theme.glow.subtle.shadowOpacity,
+    shadowRadius: theme.glow.subtle.shadowRadius,
+    elevation: theme.glow.subtle.elevation,
   },
   tabLabel: {
-    marginLeft: spacing.sm,
-    fontSize: fontSize.md,
-    fontWeight: fontWeight.medium as any,
-    color: '#666',
+    marginLeft: theme.layout.spacing.sm,
+    fontSize: theme.typography.sizes.body,
+    fontFamily: theme.typography.family.medium,
+    color: theme.textSecondary,
   },
   activeTabLabel: {
-    color: fishingTheme.colors.white,
+    color: theme.onPrimary,
+    fontFamily: theme.typography.family.bold,
   },
   scrollView: {
     flex: 1,
   },
   tabContent: {
-    padding: spacing.xl,
+    padding: theme.layout.spacing.xl,
   },
   createPostButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: fishingTheme.colors.white,
-    padding: spacing.md,
-    borderRadius: borderRadius.md,
-    marginBottom: spacing.xxl,
-    ...shadows.sm,
+    backgroundColor: theme.surface,
+    padding: theme.layout.spacing.md,
+    borderRadius: theme.layout.radius.md,
+    marginBottom: theme.layout.spacing.xxl,
+    shadowColor: theme.glow.subtle.shadowColor,
+    shadowOffset: theme.glow.subtle.shadowOffset,
+    shadowOpacity: theme.glow.subtle.shadowOpacity,
+    shadowRadius: theme.glow.subtle.shadowRadius,
+    elevation: theme.glow.subtle.elevation,
+    borderWidth: 1,
+    borderColor: theme.border,
   },
   createPostText: {
-    marginLeft: spacing.md,
-    fontSize: fontSize.md,
-    color: fishingTheme.colors.mutedWhite,
+    marginLeft: theme.layout.spacing.md,
+    fontSize: theme.typography.sizes.body,
+    color: theme.textSecondary,
     flex: 1,
   },
   postsContainer: {
-    gap: 15,
+    gap: theme.layout.spacing.md,
   },
   postCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 15,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
+    backgroundColor: theme.surface,
+    borderRadius: theme.layout.radius.lg,
+    padding: theme.layout.spacing.lg,
+    shadowColor: theme.glow.subtle.shadowColor,
+    shadowOffset: theme.glow.subtle.shadowOffset,
+    shadowOpacity: theme.glow.subtle.shadowOpacity,
+    shadowRadius: theme.glow.subtle.shadowRadius,
+    elevation: theme.glow.subtle.elevation,
+    borderWidth: 1,
+    borderColor: theme.border,
   },
   postHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: theme.layout.spacing.md,
   },
   avatar: {
     width: 40,
@@ -614,79 +634,85 @@ const styles = StyleSheet.create({
   },
   postHeaderText: {
     flex: 1,
-    marginLeft: 12,
+    marginLeft: theme.layout.spacing.md,
   },
   authorName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
+    fontSize: theme.typography.sizes.body,
+    fontFamily: theme.typography.family.bold,
+    color: theme.text,
   },
   postTime: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: theme.typography.sizes.caption,
+    color: theme.textSecondary,
     marginTop: 2,
   },
   postTypeBadge: {
-    padding: spacing.xs + 2,
-    borderRadius: borderRadius.xl,
+    padding: theme.layout.spacing.xs,
+    borderRadius: theme.layout.radius.xl,
   },
   postContent: {
-    fontSize: 16,
-    color: '#333',
+    fontSize: theme.typography.sizes.body,
+    color: theme.text,
     lineHeight: 24,
-    marginBottom: 12,
+    marginBottom: theme.layout.spacing.md,
   },
   postImage: {
     width: '100%',
     height: 200,
-    borderRadius: 8,
-    marginBottom: 12,
+    borderRadius: theme.layout.radius.md,
+    marginBottom: theme.layout.spacing.md,
   },
   postActions: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingTop: spacing.sm,
+    paddingTop: theme.layout.spacing.sm,
     borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
+    borderTopColor: theme.divider,
   },
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: spacing.xs + 2,
-    paddingHorizontal: spacing.md,
-    marginRight: spacing.lg,
+    paddingVertical: theme.layout.spacing.xs,
+    paddingHorizontal: theme.layout.spacing.md,
+    marginRight: theme.layout.spacing.lg,
   },
   actionText: {
-    marginLeft: spacing.xs,
-    fontSize: fontSize.md,
-    color: fishingTheme.colors.mutedWhite,
+    marginLeft: theme.layout.spacing.xs,
+    fontSize: theme.typography.sizes.body,
+    color: theme.textSecondary,
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 15,
+    marginBottom: theme.layout.spacing.md,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
+    fontSize: theme.typography.sizes.h3,
+    fontFamily: theme.typography.family.bold,
+    color: theme.text,
   },
   memberCount: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: theme.typography.sizes.caption,
+    color: theme.textSecondary,
   },
   membersContainer: {
-    gap: 12,
+    gap: theme.layout.spacing.md,
   },
   memberCard: {
-    backgroundColor: fishingTheme.colors.white,
-    padding: spacing.lg,
-    borderRadius: borderRadius.md,
+    backgroundColor: theme.surface,
+    padding: theme.layout.spacing.lg,
+    borderRadius: theme.layout.radius.md,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    ...shadows.sm,
+    shadowColor: theme.glow.subtle.shadowColor,
+    shadowOffset: theme.glow.subtle.shadowOffset,
+    shadowOpacity: theme.glow.subtle.shadowOpacity,
+    shadowRadius: theme.glow.subtle.shadowRadius,
+    elevation: theme.glow.subtle.elevation,
+    borderWidth: 1,
+    borderColor: theme.border,
   },
   memberInfo: {
     flexDirection: 'row',
@@ -709,71 +735,75 @@ const styles = StyleSheet.create({
     height: 12,
     borderRadius: 6,
     borderWidth: 2,
-    borderColor: '#fff',
+    borderColor: theme.surface,
   },
   memberDetails: {
     flex: 1,
-    marginLeft: 15,
+    marginLeft: theme.layout.spacing.md,
   },
   memberName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
+    fontSize: theme.typography.sizes.body,
+    fontFamily: theme.typography.family.bold,
+    color: theme.text,
     marginBottom: 4,
   },
   memberStatus: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: theme.typography.sizes.caption,
+    color: theme.textSecondary,
     marginBottom: 4,
   },
   memberStats: {
-    fontSize: 12,
-    color: '#999',
+    fontSize: theme.typography.sizes.caption,
+    color: theme.textSecondary,
   },
   connectButton: {
-    padding: spacing.sm,
+    padding: theme.layout.spacing.sm,
   },
   chatHeader: {
-    backgroundColor: fishingTheme.colors.white,
-    padding: spacing.md,
-    borderRadius: borderRadius.md,
-    marginBottom: spacing.md,
+    backgroundColor: theme.surface,
+    padding: theme.layout.spacing.md,
+    borderRadius: theme.layout.radius.md,
+    marginBottom: theme.layout.spacing.md,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: theme.border,
   },
   chatTitle: {
-    fontSize: fontSize.lg,
-    fontWeight: fontWeight.bold as any,
-    color: '#13323b',
+    fontSize: theme.typography.sizes.h3,
+    fontFamily: theme.typography.family.bold,
+    color: theme.text,
   },
   chatSubtitle: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: theme.typography.sizes.caption,
+    color: theme.textSecondary,
     marginTop: 4,
   },
   chatMessages: {
     flex: 1,
-    marginBottom: 15,
+    marginBottom: theme.layout.spacing.md,
   },
   chatMessage: {
     flexDirection: 'row',
-    marginBottom: 15,
+    marginBottom: theme.layout.spacing.md,
   },
   chatAvatar: {
     width: 30,
     height: 30,
     borderRadius: 15,
-    marginRight: 10,
+    marginRight: theme.layout.spacing.sm,
   },
   chatContent: {
     flex: 1,
-    backgroundColor: '#fff',
-    padding: 12,
-    borderRadius: 12,
-    elevation: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 1,
+    backgroundColor: theme.surface,
+    padding: theme.layout.spacing.md,
+    borderRadius: theme.layout.radius.md,
+    shadowColor: theme.glow.subtle.shadowColor,
+    shadowOffset: theme.glow.subtle.shadowOffset,
+    shadowOpacity: theme.glow.subtle.shadowOpacity,
+    shadowRadius: theme.glow.subtle.shadowRadius,
+    elevation: theme.glow.subtle.elevation,
+    borderWidth: 1,
+    borderColor: theme.border,
   },
   chatMessageHeader: {
     flexDirection: 'row',
@@ -782,46 +812,52 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   chatSender: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#333',
+    fontSize: theme.typography.sizes.caption,
+    fontFamily: theme.typography.family.bold,
+    color: theme.text,
   },
   chatTime: {
-    fontSize: 12,
-    color: '#999',
+    fontSize: theme.typography.sizes.caption,
+    color: theme.textSecondary,
   },
   chatText: {
-    fontSize: 14,
-    color: '#333',
+    fontSize: theme.typography.sizes.body,
+    color: theme.text,
     lineHeight: 20,
   },
   chatInputContainer: {
     flexDirection: 'row',
     alignItems: 'flex-end',
-    backgroundColor: fishingTheme.colors.white,
-    borderRadius: borderRadius.xxl,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    ...shadows.sm,
+    backgroundColor: theme.surface,
+    borderRadius: theme.layout.radius.xl,
+    paddingHorizontal: theme.layout.spacing.md,
+    paddingVertical: theme.layout.spacing.sm,
+    shadowColor: theme.glow.subtle.shadowColor,
+    shadowOffset: theme.glow.subtle.shadowOffset,
+    shadowOpacity: theme.glow.subtle.shadowOpacity,
+    shadowRadius: theme.glow.subtle.shadowRadius,
+    elevation: theme.glow.subtle.elevation,
+    borderWidth: 1,
+    borderColor: theme.border,
   },
   chatInputField: {
     flex: 1,
-    fontSize: 16,
+    fontSize: theme.typography.sizes.body,
     maxHeight: 100,
     paddingVertical: 8,
   },
   sendButton: {
-    backgroundColor: fishingTheme.colors.lightTeal,
-    borderRadius: borderRadius.circle,
+    backgroundColor: theme.components.buttonPrimary.filled.backgroundColor,
+    borderRadius: 20,
     width: 40,
     height: 40,
     alignItems: 'center',
     justifyContent: 'center',
-    marginLeft: spacing.md,
+    marginLeft: theme.layout.spacing.md,
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: theme.background,
   },
   modalHeader: {
     flexDirection: 'row',
@@ -830,28 +866,30 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 15,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: theme.divider,
     paddingTop: 50,
+    backgroundColor: theme.surface,
   },
   modalCancel: {
-    fontSize: 16,
-    color: '#666',
+    fontSize: theme.typography.sizes.body,
+    color: theme.textSecondary,
   },
   modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
+    fontSize: theme.typography.sizes.h3,
+    fontFamily: theme.typography.family.bold,
+    color: theme.text,
   },
   modalPost: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#4CAF50',
+    fontSize: theme.typography.sizes.body,
+    fontFamily: theme.typography.family.bold,
+    color: theme.primary,
   },
   postInput: {
     flex: 1,
-    fontSize: 18,
+    fontSize: theme.typography.sizes.body,
     padding: 20,
     textAlignVertical: 'top',
+    color: theme.text,
   },
 });
 

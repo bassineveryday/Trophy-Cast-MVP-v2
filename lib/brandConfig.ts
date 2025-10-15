@@ -49,6 +49,7 @@ export const LIGHT_THEME_COLORS = {
   surface: '#FFFFFF',           // Clean white for cards
   surfaceVariant: '#EEF2F4',    // Alternate light surface
   border: '#DDE2E5',            // Light grey border
+  divider: 'rgba(12, 26, 35, 0.15)', // Subtle deep-navy divider with 15% opacity
   text: '#0C1A23',              // Deep Navy text for high contrast
   textSecondary: '#546674',     // Muted Deep Navy/grey
   shadow: '#000000',            // Shadow color
@@ -62,6 +63,7 @@ export const DARK_THEME_COLORS = {
   surface: '#132532',           // Slightly lighter navy for surfaces
   surfaceVariant: '#1A2C3A',    // Alternate navy for depth
   border: '#3A4C5A',            // Subtle border color
+  divider: 'rgba(212, 175, 55, 0.15)', // Fine gold divider/glow at 15% opacity
   text: '#F5F1E6',              // Off-White/Sand text
   textSecondary: '#C9D3DA',     // Muted Off-White/Sand
   shadow: '#000000',            // Shadow color
@@ -166,6 +168,31 @@ export const ELEVATION = {
 } as const;
 
 // ============================================
+// EFFECTS (Glow/Focus)
+// ============================================
+
+/**
+ * Minimal gold glow effect tokens, used to replace heavy shadows.
+ * Apply via shadow props on iOS and elevation fallback on Android.
+ */
+export const GLOW_EFFECTS = {
+  subtle: {
+    shadowColor: BRAND_COLORS.primary,
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+  },
+  focus: {
+    shadowColor: BRAND_COLORS.primary,
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 3,
+  },
+} as const;
+
+// ============================================
 // ANIMATION & TIMING
 // ============================================
 
@@ -205,6 +232,36 @@ export const BUTTON_DEFAULTS = {
 } as const;
 
 /**
+ * Button component tokens
+ * - outline (default): transparent bg, gold border/text
+ * - filled (primary CTA only): gold bg, onPrimary text
+ */
+export const BUTTON_PRIMARY = {
+  outline: {
+    height: BUTTON_DEFAULTS.height,
+    borderRadius: BUTTON_DEFAULTS.borderRadius,
+    paddingHorizontal: BUTTON_DEFAULTS.paddingHorizontal,
+    borderWidth: 1,
+    borderColor: BRAND_COLORS.primary,
+    backgroundColor: 'transparent',
+    textColor: BRAND_COLORS.primary,
+    fontFamily: BUTTON_DEFAULTS.fontFamily,
+    fontSize: BUTTON_DEFAULTS.fontSize,
+  },
+  filled: {
+    height: BUTTON_DEFAULTS.height,
+    borderRadius: BUTTON_DEFAULTS.borderRadius,
+    paddingHorizontal: BUTTON_DEFAULTS.paddingHorizontal,
+    borderWidth: 1,
+    borderColor: BRAND_COLORS.primary,
+    backgroundColor: BRAND_COLORS.primary,
+    textColor: BRAND_COLORS.onPrimary,
+    fontFamily: BUTTON_DEFAULTS.fontFamily,
+    fontSize: BUTTON_DEFAULTS.fontSize,
+  },
+} as const;
+
+/**
  * Card defaults
  */
 export const CARD_DEFAULTS = {
@@ -224,6 +281,35 @@ export const INPUT_DEFAULTS = {
   borderWidth: 1,
 } as const;
 
+/**
+ * Chip component tokens (primary)
+ * Outline by default; filled reserved for strong emphasis.
+ */
+export const CHIP_PRIMARY = {
+  outline: {
+    height: 34,
+    paddingHorizontal: SPACING.md,
+    borderRadius: BORDER_RADIUS.full,
+    borderWidth: 1,
+    borderColor: BRAND_COLORS.primary,
+    backgroundColor: 'transparent',
+    textColor: BRAND_COLORS.primary,
+    fontFamily: BRAND_FONTS.medium,
+    fontSize: FONT_SIZES.label,
+  },
+  filled: {
+    height: 34,
+    paddingHorizontal: SPACING.md,
+    borderRadius: BORDER_RADIUS.full,
+    borderWidth: 1,
+    borderColor: BRAND_COLORS.primary,
+    backgroundColor: BRAND_COLORS.primary,
+    textColor: BRAND_COLORS.onPrimary,
+    fontFamily: BRAND_FONTS.medium,
+    fontSize: FONT_SIZES.label,
+  },
+} as const;
+
 // ============================================
 // EXPORT ALL
 // ============================================
@@ -237,6 +323,9 @@ export const BRAND_CONFIG = {
   lightTheme: LIGHT_THEME_COLORS,
   darkTheme: DARK_THEME_COLORS,
   gradients: BRAND_GRADIENTS,
+  effects: {
+    glow: GLOW_EFFECTS,
+  },
   fonts: BRAND_FONTS,
   fontSizes: FONT_SIZES,
   fontWeights: FONT_WEIGHTS,
@@ -249,8 +338,10 @@ export const BRAND_CONFIG = {
   },
   components: {
     button: BUTTON_DEFAULTS,
+    buttonPrimary: BUTTON_PRIMARY,
     card: CARD_DEFAULTS,
     input: INPUT_DEFAULTS,
+    chipPrimary: CHIP_PRIMARY,
   },
 } as const;
 
