@@ -1,3 +1,11 @@
+-- DEPRECATED: 2025-10-14
+-- This table is replaced by a computed view `public.aoy_standings`.
+-- Prefer running: db/migrations/2025-10-14_aoy_cleanup.sql
+-- which drops this table (if present) and creates the computed view based on
+-- top-4 tournaments per member per season.
+--
+-- Keep this file only for rollback/reference. Do not use in new setups.
+--
 -- Create table for Angler of the Year standings
 CREATE TABLE public.aoy_standings_rows (
   member_id text NOT NULL,

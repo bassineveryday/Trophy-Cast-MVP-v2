@@ -77,29 +77,12 @@ COMMENT ON TABLE tournament_results_rows IS 'Individual tournament results and p
 
 ---
 
-### Step 2: Create AOY Standings Table
+### Step 2: AOY Standings (Computed View)
 
-```sql
--- ============================================
--- AOY STANDINGS TABLE
--- ============================================
+Use the migration script to create a computed AOY standings view (no table needed):
 
-CREATE TABLE IF NOT EXISTS public.aoy_standings_rows (
-  member_id text NOT NULL PRIMARY KEY,
-  season_year integer DEFAULT EXTRACT(YEAR FROM CURRENT_DATE),
-  aoy_rank integer,
-  member_name text,
-  boater_status text,
-  total_aoy_points integer DEFAULT 0,
-  tournaments_fished integer DEFAULT 0,
-  best_finish integer,
-  updated_at timestamptz DEFAULT now()
-);
-
-CREATE INDEX IF NOT EXISTS idx_aoy_standings_rank ON aoy_standings_rows(aoy_rank);
-CREATE INDEX IF NOT EXISTS idx_aoy_standings_year ON aoy_standings_rows(season_year);
-
-COMMENT ON TABLE aoy_standings_rows IS 'Angler of the Year rankings - calculated from best 4 tournaments';
+```
+Run in Supabase SQL Editor: db/migrations/2025-10-14_aoy_cleanup.sql
 ```
 
 ---
@@ -182,7 +165,10 @@ ALTER TABLE public.club_events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.tournament_members_rows ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.tournament_events_rows ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.tournament_results_rows ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.aoy_standings_rows ENABLE ROW LEVEL SECURITY;
+-- NOTE: AOY standings now use a computed view `public.aoy_standings`.
+-- Views inherit RLS from base tables. Ensure read policies exist on:
+--   - public.tournament_results_rows
+--   - public.tournament_members_rows
 
 -- Profiles: Users can view/edit own profile
 CREATE POLICY "Users can view own profile" ON profiles
@@ -204,8 +190,7 @@ CREATE POLICY "Public read tournament events" ON tournament_events_rows
 CREATE POLICY "Public read tournament results" ON tournament_results_rows
   FOR SELECT USING (true);
 
-CREATE POLICY "Public read AOY standings" ON aoy_standings_rows
-  FOR SELECT USING (true);
+-- No direct policies required on the AOY view in most cases; rely on base tables' RLS
 
 -- Club officers: Public read access
 CREATE POLICY "Public read club officers" ON club_officers
@@ -293,7 +278,7 @@ ON CONFLICT DO NOTHING;
 GRANT SELECT ON tournament_members_rows TO anon, authenticated;
 GRANT SELECT ON tournament_events_rows TO anon, authenticated;
 GRANT SELECT ON tournament_results_rows TO anon, authenticated;
-GRANT SELECT ON aoy_standings_rows TO anon, authenticated;
+-- AOY view grants are handled in the migration; ensure base table grants are present
 GRANT SELECT ON club_officers TO anon, authenticated;
 GRANT SELECT ON club_events TO anon, authenticated;
 
@@ -315,7 +300,7 @@ SELECT 'tournament_events', COUNT(*) FROM tournament_events_rows
 UNION ALL
 SELECT 'tournament_results', COUNT(*) FROM tournament_results_rows
 UNION ALL
-SELECT 'aoy_standings', COUNT(*) FROM aoy_standings_rows
+SELECT 'aoy_standings', COUNT(*) FROM aoy_standings
 UNION ALL
 SELECT 'profiles', COUNT(*) FROM profiles
 UNION ALL
@@ -325,7 +310,7 @@ SELECT 'club_officers', COUNT(*) FROM club_officers;
 SELECT * FROM tournament_results_rows WHERE member_id = 'DBM019' ORDER BY event_date DESC;
 
 -- View AOY standings
-SELECT aoy_rank, member_name, total_aoy_points FROM aoy_standings_rows ORDER BY aoy_rank;
+SELECT aoy_rank, member_name, total_aoy_points FROM aoy_standings ORDER BY aoy_rank;
 
 -- View upcoming tournaments
 SELECT tournament_name, event_date, lake FROM tournament_events_rows 
@@ -343,7 +328,7 @@ ORDER BY event_date;
 DROP TABLE IF EXISTS tournament_results_rows CASCADE;
 DROP TABLE IF EXISTS tournament_events_rows CASCADE;
 DROP TABLE IF EXISTS tournament_members_rows CASCADE;
-DROP TABLE IF EXISTS aoy_standings_rows CASCADE;
+-- AOY view can be dropped/recreated via migration; no table to drop
 DROP TABLE IF EXISTS club_events CASCADE;
 DROP TABLE IF EXISTS club_officers CASCADE;
 DROP TABLE IF EXISTS profiles CASCADE;
@@ -353,7 +338,6 @@ DROP TABLE IF EXISTS profiles CASCADE;
 
 ### Check RLS policies:
 ```sql
--- View all policies
 SELECT schemaname, tablename, policyname, permissive, roles, cmd, qual 
 FROM pg_policies 
 WHERE schemaname = 'public'
@@ -405,6 +389,12 @@ After setup, you should have:
 - **Permissions** are set for both anonymous and authenticated users
 - **Indexes** are created for optimal query performance
 - **Foreign keys** ensure data integrity
+
+### Boater/Co-Angler Status
+- Source of truth: `public.tournament_members_rows.boater_status`
+- Normalization + constraint: run `db/migrations/2025-10-14_membership_boater_status_constraint.sql`
+- Sync from legacy AOY (if present): auto-run inside `db/migrations/2025-10-14_aoy_cleanup.sql`
+- Audit helpers: `db/maintenance/audit_boater_status.sql`
 
 ---
 

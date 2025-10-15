@@ -6,7 +6,7 @@ export async function testConnection() {
     console.log('🔵 Testing Supabase connection...');
       // Try to fetch Justin's record as a connection test
       const { data, error: pingError } = await supabase
-        .from('aoy_standings_rows')
+        .from('aoy_standings')
         .select('*')
         .eq('member_id', 'DBM045')
         .single();    if (pingError) {
