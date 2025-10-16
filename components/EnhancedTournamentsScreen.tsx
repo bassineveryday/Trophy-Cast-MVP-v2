@@ -1,4 +1,4 @@
-/* eslint-disable react-native/no-unused-styles, react-native/no-color-literals, react-native/sort-styles, @typescript-eslint/no-explicit-any */
+/* eslint-disable react-native/no-unused-styles, react-native/sort-styles, @typescript-eslint/no-explicit-any */
 /**
  * EnhancedTournamentsScreen - Tournament list with UX polish
  * ✓ Loading → shows skeletons (no layout shift flashes)
@@ -7,7 +7,7 @@
  * ✓ No changes to data fetching logic or types
  */
 import React, { useState, useMemo } from 'react';
-import { StyleSheet, Text, View, FlatList, RefreshControl, TouchableOpacity, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, FlatList, RefreshControl, TouchableOpacity, ScrollView, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import TournamentStatus, { getTournamentStatusValue, getTournamentStatusText } from './TournamentStatus';
 import { useNavigation } from '@react-navigation/native';
@@ -16,8 +16,6 @@ import { useGroupedTournaments, useTournamentParticipants, useParticipantCounts 
 import { useTheme } from '../lib/ThemeContext';
 import { ListSkeleton } from '../components/Skeleton';
 import { EmptyState } from '../components/EmptyState';
-import TournamentCard from './TournamentCard';
-import TournamentSearch from './TournamentSearch';
 // Removed unused imports
 
 interface FilterOptions {
@@ -105,27 +103,50 @@ export default function EnhancedTournamentsScreen() {
   const renderTournamentCard = ({ item }: { item: TournamentEvent }) => {
     const { status, daysDiff } = getTournamentStatusValue(item.event_date);
     const isExpanded = selectedTournament === item.tournament_code;
+    const attendingCount = participantCounts[item.tournament_code || ''] ?? (isExpanded ? (selectedParticipants?.length ?? 0) : (item.participants || 0));
 
     return (
-      <View>
-        <TouchableOpacity onPress={() => setSelectedTournament(isExpanded ? null : item.tournament_code || null)} activeOpacity={0.8}>
-          <TournamentCard
-            id={item.event_id}
-            title={item.tournament_name || 'Unnamed Tournament'}
-            lake={item.lake || undefined}
-            date={formatDate(item.event_date || '')}
-            attending={participantCounts[item.tournament_code || ''] ?? (isExpanded ? (selectedParticipants?.length ?? 0) : (item.participants || 0))}
-            variant="teal"
-            onPress={() => (navigation as any).navigate('TournamentDetail', { tournamentId: item.event_id })}
-            testID={`tournament.card.${item.event_id || item.tournament_code}`}
-          />
-        </TouchableOpacity>
+      <TouchableOpacity 
+        style={[styles.tournamentCard, isExpanded && styles.expandedCard]}
+        onPress={() => setSelectedTournament(isExpanded ? null : item.tournament_code || null)}
+        activeOpacity={0.7}
+        testID={`tournament.card.${item.event_id || item.tournament_code}`}
+      >
+        {/* Header */}
+        <View style={styles.cardHeader}>
+          <View style={styles.titleContainer}>
+            <Text style={styles.tournamentName} numberOfLines={isExpanded ? undefined : 1}>
+              {item.tournament_name || 'Unnamed Tournament'}
+            </Text>
+            <View style={styles.infoRow}>
+              <Ionicons name="calendar-outline" size={16} color={theme.textSecondary} />
+              <Text style={styles.infoText}>{formatDate(item.event_date || '')}</Text>
+            </View>
+            {!!item.lake && (
+              <View style={styles.infoRow}>
+                <Ionicons name="water-outline" size={16} color={theme.textSecondary} />
+                <Text style={styles.infoText}>{item.lake}</Text>
+              </View>
+            )}
+            {!!item.tournament_code && (
+              <View style={styles.infoRow}>
+                <Ionicons name="qr-code-outline" size={16} color={theme.textSecondary} />
+                <Text style={styles.codeText}>{item.tournament_code}</Text>
+              </View>
+            )}
+          </View>
 
-        {/* Expanded details area (keeps previous layout but visually tied to card) */}
+          {/* Right side: participant badge */}
+          <View style={styles.participantBadge} accessibilityLabel={`${attendingCount} anglers`}>
+            <Text style={styles.participantCount}>{attendingCount}</Text>
+            <Text style={styles.participantLabel}>anglers</Text>
+          </View>
+        </View>
+
+        {/* Expanded details */}
         {isExpanded && (
           <View style={styles.expandedContent}>
             <View style={styles.separator} />
-
             <View style={styles.detailSection}>
               <Text style={styles.sectionTitle}>Tournament Details</Text>
               <View style={styles.detailGrid}>
@@ -135,9 +156,7 @@ export default function EnhancedTournamentsScreen() {
                 </View>
                 <View style={styles.detailItem}>
                   <Text style={styles.detailLabel}>Status</Text>
-                  <Text style={styles.detailValue}>
-                    {getTournamentStatusText(status, daysDiff)}
-                  </Text>
+                  <Text style={styles.detailValue}>{getTournamentStatusText(status, daysDiff)}</Text>
                 </View>
               </View>
             </View>
@@ -146,22 +165,45 @@ export default function EnhancedTournamentsScreen() {
               style={styles.actionButton}
               onPress={() => (navigation as any).navigate('TournamentDetail', { tournamentId: item.event_id })}
             >
-              <Ionicons name="information-circle-outline" size={18} color={theme.onPrimary} />
+              <Ionicons name="information-circle-outline" size={18} color={theme.components.buttonPrimary.outline.textColor} />
               <Text style={styles.actionButtonText}>View Full Details</Text>
             </TouchableOpacity>
           </View>
         )}
-      </View>
+
+        {/* Expand Indicator */}
+        <View style={styles.expandIndicator}>
+          <Ionicons 
+            name={isExpanded ? 'chevron-up' : 'chevron-down'} 
+            size={20} 
+            color={theme.textSecondary} 
+          />
+        </View>
+      </TouchableOpacity>
     );
   };
 
   const renderFilterBar = () => (
     <View style={styles.filterContainer}>
-      {/* Search Input */}
-      <TournamentSearch
-        value={filters.search}
-        onChange={(text) => setFilters(prev => ({ ...prev, search: text }))}
-      />
+      {/* Search Input - match AOY styling */}
+      <View style={styles.searchContainer}>
+        <Ionicons name="search-outline" size={20} color={theme.primary} style={styles.searchIcon} />
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search tournaments..."
+          placeholderTextColor={theme.textSecondary}
+          value={filters.search}
+          onChangeText={(text) => setFilters(prev => ({ ...prev, search: text }))}
+        />
+        {filters.search.length > 0 && (
+          <TouchableOpacity 
+            onPress={() => setFilters(prev => ({ ...prev, search: '' }))}
+            style={styles.clearButton}
+          >
+            <Ionicons name="close-circle" size={20} color={theme.textSecondary} />
+          </TouchableOpacity>
+        )}
+      </View>
 
       {/* Filter Chips */}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipContainer}>
@@ -195,6 +237,32 @@ export default function EnhancedTournamentsScreen() {
     </View>
   );
 
+  const renderHeaderStats = () => {
+    const total = filteredTournaments.length;
+    const upcoming = filteredTournaments.filter(t => {
+      const { status } = getTournamentStatusValue(t.event_date);
+      return status === 'upcoming' || status === 'scheduled';
+    }).length;
+    const season = filteredTournaments[0]?.event_date ? new Date(filteredTournaments[0].event_date).getFullYear() : new Date().getFullYear();
+
+    return (
+      <View style={styles.headerStats}>
+        <View style={styles.statCard}>
+          <Text style={styles.statNumber}>{total}</Text>
+          <Text style={styles.statTitle}>Tournaments</Text>
+        </View>
+        <View style={styles.statCard}>
+          <Text style={styles.statNumber}>{upcoming}</Text>
+          <Text style={styles.statTitle}>Upcoming</Text>
+        </View>
+        <View style={styles.statCard}>
+          <Text style={styles.statNumber}>{season}</Text>
+          <Text style={styles.statTitle}>Season</Text>
+        </View>
+      </View>
+    );
+  };
+
   if (isLoading && !tournaments.length) {
     return (
       <View style={styles.container}>
@@ -226,6 +294,7 @@ export default function EnhancedTournamentsScreen() {
   return (
     <View style={styles.container}>
       {renderFilterBar()}
+      {renderHeaderStats()}
       
       {filteredTournaments.length === 0 ? (
         <EmptyState
@@ -268,22 +337,28 @@ const createStyles = (theme: any) => StyleSheet.create({
     backgroundColor: theme.surface,
     borderBottomColor: theme.divider,
     borderBottomWidth: 1,
-    paddingHorizontal: theme.layout.spacing.lg,
-    paddingVertical: theme.layout.spacing.md,
+    paddingHorizontal: theme.layout.spacing.md,
+    paddingVertical: theme.layout.spacing.sm,
+    // subtle glow instead of heavy shadow (match AOY)
+    shadowColor: theme.glow.subtle.shadowColor,
+    shadowOffset: theme.glow.subtle.shadowOffset,
+    shadowOpacity: theme.glow.subtle.shadowOpacity,
+    shadowRadius: theme.glow.subtle.shadowRadius,
+    elevation: theme.glow.subtle.elevation,
   },
   searchContainer: {
-    alignItems: 'center',
-    backgroundColor: theme.mode === 'light' ? '#f8f8f8' : theme.surface,
-    borderColor: theme.border,
-    borderRadius: theme.layout.radius.md,
-    borderWidth: 1,
     flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: theme.card,
+    borderRadius: theme.layout.radius.md,
+    paddingHorizontal: theme.layout.spacing.sm,
+    marginBottom: theme.layout.spacing.sm,
     height: 44,
-    marginBottom: theme.layout.spacing.md,
-    paddingHorizontal: theme.layout.spacing.md,
+    borderWidth: 1,
+    borderColor: theme.border,
   },
   searchIcon: {
-    marginRight: 8,
+    marginRight: theme.layout.spacing.xs,
   },
   searchInput: {
     flex: 1,
@@ -326,7 +401,40 @@ const createStyles = (theme: any) => StyleSheet.create({
     fontFamily: theme.typography.family.bold,
   },
   listContainer: {
-    padding: theme.layout.spacing.lg,
+    paddingHorizontal: theme.layout.spacing.md,
+    paddingBottom: theme.layout.spacing.lg,
+  },
+  headerStats: {
+    flexDirection: 'row',
+    padding: theme.layout.spacing.md,
+    gap: theme.layout.spacing.sm,
+  },
+  statCard: {
+    flex: 1,
+    backgroundColor: theme.surface,
+    borderRadius: theme.layout.radius.md,
+    padding: theme.layout.spacing.md,
+    alignItems: 'center',
+    // subtle glow
+    shadowColor: theme.glow.subtle.shadowColor,
+    shadowOffset: theme.glow.subtle.shadowOffset,
+    shadowOpacity: theme.glow.subtle.shadowOpacity,
+    shadowRadius: theme.glow.subtle.shadowRadius,
+    elevation: theme.glow.subtle.elevation,
+    borderWidth: 1,
+    borderColor: theme.border,
+  },
+  statNumber: {
+    fontSize: theme.typography.sizes.h2,
+    fontFamily: theme.typography.family.bold,
+    color: theme.primary,
+    marginBottom: 4,
+  },
+  statTitle: {
+    fontSize: theme.typography.sizes.label,
+    fontFamily: theme.typography.family.medium,
+    color: theme.textSecondary,
+    textTransform: 'uppercase',
   },
   tournamentCard: {
     backgroundColor: theme.surface,
@@ -334,8 +442,8 @@ const createStyles = (theme: any) => StyleSheet.create({
     borderRadius: theme.layout.radius.lg,
     borderWidth: 1,
     elevation: theme.glow.subtle.elevation,
-    marginBottom: theme.layout.spacing.md,
-    padding: theme.layout.spacing.lg,
+    marginBottom: theme.layout.spacing.sm,
+    padding: theme.layout.spacing.md,
     // subtle gold glow instead of heavy shadow
     shadowColor: theme.glow.subtle.shadowColor,
     shadowOffset: theme.glow.subtle.shadowOffset,
@@ -383,26 +491,25 @@ const createStyles = (theme: any) => StyleSheet.create({
     marginLeft: theme.layout.spacing.xs,
   },
   participantBadge: {
-    backgroundColor: theme.mode === 'light' ? 'rgba(46,139,87,0.1)' : 'rgba(101,193,140,0.15)',
+    backgroundColor: theme.components.chipPrimary.outline.backgroundColor,
     borderRadius: theme.layout.radius.md,
     paddingHorizontal: theme.layout.spacing.sm,
     paddingVertical: theme.layout.spacing.xs,
     alignItems: 'center',
     minWidth: 60,
+    borderWidth: theme.components.chipPrimary.outline.borderWidth,
+    borderColor: theme.components.chipPrimary.outline.borderColor,
   },
   participantCount: {
     fontSize: theme.typography.sizes.h3,
     fontFamily: theme.typography.family.bold,
-    color: theme.accent,
+    color: theme.components.chipPrimary.outline.textColor,
   },
   participantLabel: {
     fontSize: theme.typography.sizes.caption,
     fontFamily: theme.typography.family.bold,
-    color: theme.textSecondary,
+    color: theme.components.chipPrimary.outline.textColor,
     textTransform: 'uppercase',
-  },
-  infoContainer: {
-    gap: theme.layout.spacing.sm,
   },
   infoRow: {
     flexDirection: 'row',
