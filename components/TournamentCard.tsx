@@ -59,12 +59,26 @@ export default function TournamentCard({
   );
 
   return Platform.OS === 'web' ? (
-    <Pressable onPress={() => onPress?.(id)} testID={testID} style={[styles.container, { backgroundColor: fishingTheme.colors.navyTeal }]}>
+    <Pressable
+      onPress={() => onPress?.(id)}
+      testID={testID}
+      accessibilityRole="button"
+      accessibilityLabel={`${title} tournament card`}
+      accessibilityHint="Opens tournament details"
+      style={[styles.container, { backgroundColor: fishingTheme.colors.navyTeal }]}
+    >
       {content}
     </Pressable>
   ) : (
     <LinearGradient colors={colors} start={[0,0]} end={[1,1]} style={styles.nativeGradient}>
-      <Pressable onPress={() => onPress?.(id)} testID={testID} style={styles.pressable}>
+      <Pressable
+        onPress={() => onPress?.(id)}
+        testID={testID}
+        accessibilityRole="button"
+        accessibilityLabel={`${title} tournament card`}
+        accessibilityHint="Opens tournament details"
+        style={styles.pressable}
+      >
         {content}
       </Pressable>
     </LinearGradient>

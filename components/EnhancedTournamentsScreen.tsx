@@ -95,6 +95,9 @@ export default function EnhancedTournamentsScreen() {
     });
   };
 
+  // Memoize filtered list to avoid recomputation; defined before any early returns
+  const filteredTournaments = useMemo(() => filterTournaments(tournaments), [tournaments, filters]);
+
   const handleRefresh = () => {
     refetch();
   };
@@ -216,7 +219,6 @@ export default function EnhancedTournamentsScreen() {
     );
   }
 
-  const filteredTournaments = filterTournaments(tournaments);
 
   // Fetch participant counts for visible tournaments (support code or event_id)
   // We already call useParticipantCounts earlier with full list (participantCounts variable)

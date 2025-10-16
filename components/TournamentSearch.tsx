@@ -26,7 +26,11 @@ export default function TournamentSearch({ value, onChange, placeholder = 'Searc
   }, [text, value, onChange, debounceMs]);
 
   return (
-    <View style={styles.searchContainer}>
+    <View
+      style={styles.searchContainer}
+      accessibilityRole="search"
+      accessibilityLabel="Search tournaments"
+    >
       <Ionicons name="search-outline" size={20} color={theme.textSecondary} style={styles.searchIcon} />
       <TextInput
         testID={testID || 'tournament.search'}
