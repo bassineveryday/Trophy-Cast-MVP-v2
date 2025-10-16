@@ -13,24 +13,39 @@ interface ChipProps {
   borderColor?: string;
 }
 
+// Helper to apply alpha to a hex color
+const withAlpha = (hexOrRgba: string, alpha: number) => {
+  if (hexOrRgba.startsWith('#')) {
+    const hex = hexOrRgba.replace('#', '');
+    const full = hex.length === 3 ? hex.split('').map(c => c + c).join('') : hex;
+    const bigint = parseInt(full, 16);
+    const r = (bigint >> 16) & 255;
+    const g = (bigint >> 8) & 255;
+    const b = bigint & 255;
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+  return hexOrRgba; // assume already rgba or variable
+};
+
 export const Chip: React.FC<ChipProps> = ({
   icon,
   text,
   style,
   textStyle,
-  iconColor = '#fff',
+  iconColor,
   backgroundColor,
   borderColor,
 }) => {
   const { theme } = useTheme();
+  const resolvedIcon = iconColor ?? theme.onPrimary;
   
   return (
     <View
       style={[
         styles.chip,
         {
-          backgroundColor: backgroundColor || 'rgba(255,255,255,0.12)',
-          borderColor: borderColor || 'rgba(255,255,255,0.35)',
+          backgroundColor: backgroundColor || withAlpha(theme.onPrimary, 0.12),
+          borderColor: borderColor || withAlpha(theme.onPrimary, 0.35),
           borderRadius: theme.layout.radius.md,
           paddingHorizontal: theme.layout.spacing.sm,
           paddingVertical: theme.layout.spacing.xs,
@@ -38,12 +53,12 @@ export const Chip: React.FC<ChipProps> = ({
         style,
       ]}
     >
-      {icon && <Ionicons name={icon} size={14} color={iconColor} />}
+      {icon && <Ionicons name={icon} size={14} color={resolvedIcon} />}
       <Text
         style={[
           styles.chipText,
           {
-            color: '#fff',
+            color: theme.onPrimary,
             fontSize: theme.typography.sizes.label,
             fontFamily: theme.typography.family.bold,
           },

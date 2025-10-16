@@ -2,7 +2,8 @@ import React from 'react';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { fishingTheme } from '../lib/designTokens';
+import { useTheme } from '../lib/ThemeContext';
+import type { BrandTheme } from '../lib/ThemeContext';
 
 export type TournamentCardProps = {
   id?: string | number;
@@ -16,11 +17,18 @@ export type TournamentCardProps = {
   testID?: string;
 };
 
-const VARIANT_COLORS: Record<string, [string, string]> = {
-  gold: ['#F5C842', '#E8A735'],
-  green: ['#7CAA5C', '#5A8A4A'],
-  teal: ['#3EAAA8', '#2A8B89'],
-  blue: ['#4A7FAF', '#35678F'],
+const getVariantGradient = (theme: BrandTheme, variant: string): [string, string] => {
+  switch (variant) {
+    case 'gold':
+      return theme.gradients.accent;
+    case 'green':
+      return [theme.success, theme.primary];
+    case 'teal':
+      return theme.gradients.hero;
+    case 'blue':
+    default:
+      return [theme.primaryLight, theme.primary];
+  }
 };
 
 export default function TournamentCard({
@@ -34,13 +42,15 @@ export default function TournamentCard({
   onPress,
   testID,
 }: TournamentCardProps) {
-  const colors = VARIANT_COLORS[variant] || VARIANT_COLORS.teal;
+  const { theme } = useTheme();
+  const styles = React.useMemo(() => createStyles(theme), [theme]);
+  const colors = getVariantGradient(theme, variant);
 
   const content = (
     <View style={styles.inner}>
       <View style={styles.left}>
         <View style={styles.thumbPlaceholder}>
-          <Ionicons name="fish" size={28} color={fishingTheme.colors.cream} />
+          <Ionicons name="fish" size={28} color={theme.onPrimary} />
         </View>
       </View>
 
@@ -65,7 +75,7 @@ export default function TournamentCard({
       accessibilityRole="button"
       accessibilityLabel={`${title} tournament card`}
       accessibilityHint="Opens tournament details"
-      style={[styles.container, { backgroundColor: fishingTheme.colors.navyTeal }]}
+      style={[styles.container, { backgroundColor: theme.primary }]}
     >
       {content}
     </Pressable>
@@ -85,60 +95,75 @@ export default function TournamentCard({
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    borderRadius: 12,
-    marginBottom: 12,
-    overflow: 'hidden',
-    padding: 12,
-  },
-  nativeGradient: {
-    borderRadius: 12,
-    marginBottom: 12,
-    overflow: 'hidden',
-  },
-  pressable: {
-    padding: 12,
-  },
-  inner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  left: {
-    marginRight: 12,
-  },
-  thumbPlaceholder: {
-    width: 56,
-    height: 56,
-    borderRadius: 8,
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  body: {
-    flex: 1,
-  },
-  title: {
-    color: fishingTheme.colors.deepOcean,
-    fontSize: 16,
-    fontWeight: '700',
-    marginBottom: 4,
-  },
-  meta: {
-    color: fishingTheme.colors.mutedWhite,
-    fontSize: 12,
-  },
-  right: {
-    marginLeft: 8,
-  },
-  attendBadge: {
-    backgroundColor: 'rgba(255,255,255,0.12)',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 20,
-  },
-  attendText: {
-    color: fishingTheme.colors.cream,
-    fontWeight: '700',
-  },
-});
+function withAlpha(hexOrRgb: string, alpha: number) {
+  if (hexOrRgb.startsWith('#')) {
+    const hex = hexOrRgb.replace('#', '');
+    const full = hex.length === 3 ? hex.split('').map(c => c + c).join('') : hex;
+    const bigint = parseInt(full, 16);
+    const r = (bigint >> 16) & 255;
+    const g = (bigint >> 8) & 255;
+    const b = bigint & 255;
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+  return hexOrRgb;
+}
+
+function createStyles(theme: BrandTheme) {
+  return StyleSheet.create({
+    container: {
+      borderRadius: 12,
+      marginBottom: 12,
+      overflow: 'hidden',
+      padding: 12,
+    },
+    nativeGradient: {
+      borderRadius: 12,
+      marginBottom: 12,
+      overflow: 'hidden',
+    },
+    pressable: {
+      padding: 12,
+    },
+    inner: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    left: {
+      marginRight: 12,
+    },
+    thumbPlaceholder: {
+      width: 56,
+      height: 56,
+      borderRadius: 8,
+      backgroundColor: withAlpha(theme.onPrimary, 0.08),
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    body: {
+      flex: 1,
+    },
+    title: {
+      color: theme.onPrimary,
+      fontSize: 16,
+      fontWeight: '700',
+      marginBottom: 4,
+    },
+    meta: {
+      color: withAlpha(theme.onPrimary, 0.85),
+      fontSize: 12,
+    },
+    right: {
+      marginLeft: 8,
+    },
+    attendBadge: {
+      backgroundColor: withAlpha(theme.onPrimary, 0.12),
+      paddingHorizontal: 10,
+      paddingVertical: 6,
+      borderRadius: 20,
+    },
+    attendText: {
+      color: theme.onPrimary,
+      fontWeight: '700',
+    },
+  });
+}

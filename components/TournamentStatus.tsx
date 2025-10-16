@@ -52,8 +52,8 @@ export default function TournamentStatus({ eventDate, style, textStyle, testID }
 
   return (
     <View style={[styles.badge, { backgroundColor: badgeColor }, style]} testID={testID || `status.${status}`}>
-      <Ionicons name={iconName} size={12} color="white" />
-      <Text style={[styles.text, textStyle]}>{text}</Text>
+      <Ionicons name={iconName} size={12} color={theme.onPrimary} />
+      <Text style={[styles.text, { color: theme.onPrimary }, textStyle]}>{text}</Text>
     </View>
   );
 }
@@ -68,7 +68,6 @@ const styles = StyleSheet.create({
     borderRadius: 999,
   },
   text: {
-    color: 'white',
     fontSize: 10,
     fontWeight: '600',
   },

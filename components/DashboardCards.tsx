@@ -17,7 +17,8 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { fishingTheme } from '../lib/designTokens';
+import { useTheme } from '../lib/ThemeContext';
+import type { BrandTheme } from '../lib/ThemeContext';
 
 interface DashboardCardProps {
   icon: keyof typeof Ionicons.glyphMap;
@@ -33,11 +34,18 @@ interface DashboardCardProps {
  */
 function DashboardCard({ icon, title, value, subtitle, gradientColors, onPress }: DashboardCardProps) {
   const isWeb = Platform.OS === 'web';
+  const { theme } = useTheme();
+  const styles = React.useMemo(() => createStyles(theme), [theme]);
 
   const content = (
     <>
       {isWeb ? (
-        <View style={[styles.gradient, { backgroundColor: gradientColors[0] }]} />
+        <View
+          style={[
+            styles.gradient,
+            { background: `linear-gradient(135deg, ${gradientColors[0]} 0%, ${gradientColors[1]} 100%)` } as any,
+          ]}
+        />
       ) : (
         <LinearGradient
           colors={gradientColors}
@@ -48,7 +56,7 @@ function DashboardCard({ icon, title, value, subtitle, gradientColors, onPress }
       )}
       
       <View style={styles.cardContent}>
-        <Ionicons name={icon} size={28} color="#ffffff" style={styles.icon} />
+        <Ionicons name={icon} size={28} color={theme.onPrimary} style={styles.icon} />
         <Text style={styles.value}>{value}</Text>
         <Text style={styles.title}>{title}</Text>
         {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
@@ -95,6 +103,13 @@ export default function DashboardCards({
   onTournamentsPress,
   onNotificationsPress,
 }: DashboardCardsProps) {
+  const { theme } = useTheme();
+  const styles = React.useMemo(() => createStyles(theme), [theme]);
+  // Derive gradients from theme tokens to avoid color literals
+  const gradientA: [string, string] = theme.gradients.accent; // Catches
+  const gradientB: [string, string] = [theme.primaryLight, theme.primary]; // Active Plans
+  const gradientC: [string, string] = [theme.warning, theme.accent]; // Tournaments
+  const gradientD: [string, string] = [theme.success, theme.primary]; // Performance
   return (
     <View style={styles.container}>
       {/* Row 1 */}
@@ -105,7 +120,7 @@ export default function DashboardCards({
           title="Catches This Month"
           value={catchesThisMonth}
           subtitle={catchesChange}
-          gradientColors={['#3EAAA8', '#2A8B89']}
+          gradientColors={gradientA}
           onPress={onCatchesPress}
         />
 
@@ -115,7 +130,7 @@ export default function DashboardCards({
           title={activePlan}
           value="3"
           subtitle={nextTournament ? `Next: ${nextTournament}` : 'Next: Lake Guntersville'}
-          gradientColors={['#4A7FAF', '#35678F']}
+          gradientColors={gradientB}
           onPress={onPlanPress}
         />
       </View>
@@ -128,7 +143,7 @@ export default function DashboardCards({
           title="Tournaments"
           value="3"
           subtitle={nextTournamentDate || '3 Upcoming'}
-          gradientColors={['#F5C842', '#E8A735']}
+          gradientColors={gradientC}
           onPress={onTournamentsPress}
         />
 
@@ -138,7 +153,7 @@ export default function DashboardCards({
           title="Performance"
           value="94%"
           subtitle="Strong trend"
-          gradientColors={['#7CAA5C', '#5A8A4A']}
+          gradientColors={gradientD}
           onPress={onNotificationsPress}
         />
       </View>
@@ -146,58 +161,60 @@ export default function DashboardCards({
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    gap: 16,
-    marginBottom: 20,
-  },
-  row: {
-    flexDirection: 'row',
-    gap: 16,
-  },
-  card: {
-    flex: 1,
-    minHeight: 126,
-    borderRadius: 16,
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  gradient: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
-  },
-  cardContent: {
-    flex: 1,
-    padding: 14,
-    justifyContent: 'space-between',
-  },
-  icon: {
-    marginBottom: 6,
-  },
-  value: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#ffffff',
-    marginBottom: 3,
-  },
-  title: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#ffffff',
-    opacity: 0.9,
-  },
-  subtitle: {
-    fontSize: 11,
-    fontWeight: '500',
-    color: '#ffffff',
-    opacity: 0.7,
-    marginTop: 4,
-  },
-});
+function createStyles(theme: BrandTheme) {
+  return StyleSheet.create({
+    container: {
+      gap: 16,
+      marginBottom: 20,
+    },
+    row: {
+      flexDirection: 'row',
+      gap: 16,
+    },
+    card: {
+      flex: 1,
+      minHeight: 126,
+      borderRadius: 16,
+      overflow: 'hidden',
+      shadowColor: theme.shadow,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.15,
+      shadowRadius: 8,
+      elevation: 4,
+    },
+    gradient: {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      top: 0,
+      bottom: 0,
+    },
+    cardContent: {
+      flex: 1,
+      padding: 14,
+      justifyContent: 'space-between',
+    },
+    icon: {
+      marginBottom: 6,
+    },
+    value: {
+      fontSize: 28,
+      fontWeight: '700',
+      color: theme.onPrimary,
+      marginBottom: 3,
+    },
+    title: {
+      fontSize: 13,
+      fontWeight: '600',
+      color: theme.onPrimary,
+      opacity: 0.9,
+    },
+    subtitle: {
+      fontSize: 11,
+      fontWeight: '500',
+      color: theme.onPrimary,
+      opacity: 0.7,
+      marginTop: 4,
+    },
+  });
+}

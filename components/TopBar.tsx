@@ -30,18 +30,18 @@ export default function TopBar({ title, subtitle, showBack, rightAction, testID 
       <Text accessibilityRole="header" testID="brand-title" style={styles.hiddenBrand}>🏆 Trophy Cast</Text>
       {showBack ? (
         <TouchableOpacity style={styles.back} onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel="Go back">
-          <Ionicons name="arrow-back" size={22} color={theme?.primary || '#007AFF'} />
+          <Ionicons name="arrow-back" size={22} color={theme.primary} />
         </TouchableOpacity>
       ) : <View style={styles.backPlaceholder} />}
 
       <View style={styles.titles}>
         {displayTitle ? <Text style={[styles.title, { color: theme.primary }]}>{displayTitle}</Text> : null}
-        {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
+        {subtitle ? <Text style={[styles.subtitle, { color: theme.textSecondary }]}>{subtitle}</Text> : null}
       </View>
 
       {rightAction ? (
         <TouchableOpacity style={styles.right} onPress={rightAction.onPress} accessibilityRole="button" accessibilityLabel={rightAction.accessibilityLabel || 'Action'}>
-          <Ionicons name={rightAction.icon as any} size={20} color={theme?.primary || '#007AFF'} />
+          <Ionicons name={rightAction.icon as any} size={20} color={theme.primary} />
         </TouchableOpacity>
       ) : (
         <View style={styles.rightPlaceholder} />
@@ -56,7 +56,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 12,
-    backgroundColor: 'transparent',
     borderBottomWidth: 0,
   },
   back: {
@@ -75,11 +74,9 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#222',
   },
   subtitle: {
     fontSize: 12,
-    color: '#666',
   },
   rightPlaceholder: {
     width: 44,
