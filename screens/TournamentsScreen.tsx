@@ -12,8 +12,27 @@ import { TournamentEvent } from '../lib/supabase';
 import { useGroupedTournaments, useTournamentParticipants } from '../lib/hooks/useQueries';
 import { ListSkeleton } from '../components/Skeleton';
 import EmptyState from '../components/EmptyState';
+import TopBar from '../components/TopBar';
+import { useTheme } from '../lib/ThemeContext';
+import type { BrandTheme } from '../lib/ThemeContext';
+
+// Helper to apply alpha to a token color
+function withAlpha(hexOrRgb: string, alpha: number) {
+  if (hexOrRgb.startsWith('#')) {
+    const hex = hexOrRgb.replace('#', '');
+    const full = hex.length === 3 ? hex.split('').map(c => c + c).join('') : hex;
+    const bigint = parseInt(full, 16);
+    const r = (bigint >> 16) & 255;
+    const g = (bigint >> 8) & 255;
+    const b = bigint & 255;
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+  return hexOrRgb;
+}
 
 export default function TournamentsScreen() {
+  const { theme } = useTheme();
+  const styles = React.useMemo(() => createStyles(theme), [theme]);
   const { data: tournaments = [], isLoading, error, refetch, isRefetching } = useGroupedTournaments();
 
   const handleRefresh = () => {
@@ -78,10 +97,7 @@ export default function TournamentsScreen() {
   if (isLoading && !tournaments.length) {
     return (
       <View style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.title}>🏆 Tournaments</Text>
-          <Text style={styles.subtitle}>Upcoming & Recent Events</Text>
-        </View>
+        <TopBar title="Tournaments" subtitle="Upcoming & Recent Events" />
         <ScrollView>
           <ListSkeleton count={5} />
         </ScrollView>
@@ -91,17 +107,19 @@ export default function TournamentsScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>🏆 Tournaments</Text>
-        <Text style={styles.subtitle}>Upcoming & Recent Events</Text>
-      </View>
+      <TopBar title="Tournaments" subtitle="Upcoming & Recent Events" />
 
       <FlatList
         data={tournaments}
         renderItem={renderTournament}
         keyExtractor={(item) => item.event_id}
         refreshControl={
-          <RefreshControl refreshing={isRefetching} onRefresh={handleRefresh} />
+          <RefreshControl 
+            refreshing={isRefetching} 
+            onRefresh={handleRefresh}
+            colors={[theme.primary]}
+            tintColor={theme.primary}
+          />
         }
         ListEmptyComponent={renderEmptyState}
         showsVerticalScrollIndicator={false}
@@ -111,201 +129,102 @@ export default function TournamentsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f8f9fa',
-  },
-  header: {
-    backgroundColor: '#2c3e50',
-    paddingVertical: 20,
-    paddingHorizontal: 20,
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 5,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#ecf0f1',
-  },
-  list: {
-    padding: 16,
-  },
-  emptyList: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  standingItem: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
+function createStyles(theme: BrandTheme) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.background,
     },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  rankContainer: {
-    width: 60,
-    alignItems: 'center',
-  },
-  rankText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#2c3e50',
-  },
-  memberInfo: {
-    flex: 1,
-    marginLeft: 16,
-  },
-  memberName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#2c3e50',
-    marginBottom: 4,
-  },
-  memberId: {
-    fontSize: 12,
-    color: '#7f8c8d',
-    marginBottom: 2,
-  },
-  boaterStatus: {
-    fontSize: 12,
-    color: '#34495e',
-    fontStyle: 'italic',
-  },
-  pointsContainer: {
-    alignItems: 'flex-end',
-  },
-  pointsText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#27ae60',
-  },
-  seasonText: {
-    fontSize: 12,
-    color: '#7f8c8d',
-    marginTop: 2,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f8f9fa',
-  },
-  loadingText: {
-    marginTop: 16,
-    fontSize: 16,
-    color: '#7f8c8d',
-  },
-  emptyContainer: {
-    alignItems: 'center',
-    paddingHorizontal: 32,
-  },
-  emptyTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#2c3e50',
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  emptyDescription: {
-    fontSize: 16,
-    color: '#7f8c8d',
-    textAlign: 'center',
-    lineHeight: 24,
-  },
-  // Tournament-specific styles
-  tournamentCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
+    list: {
+      padding: 16,
     },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  expandedCard: {
-    borderColor: '#007bff',
-    borderWidth: 2,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 12,
-  },
-  tournamentName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#2c3e50',
-    flex: 1,
-    marginRight: 12,
-  },
-  participantBadge: {
-    backgroundColor: '#27ae60',
-    borderRadius: 16,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    alignItems: 'center',
-    minWidth: 60,
-  },
-  participantCount: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#fff',
-  },
-  participantLabel: {
-    fontSize: 10,
-    color: '#fff',
-    textTransform: 'uppercase',
-  },
-  detailsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  detailIcon: {
-    fontSize: 16,
-    marginRight: 8,
-    width: 20,
-  },
-  detailText: {
-    fontSize: 14,
-    color: '#34495e',
-    flex: 1,
-  },
-  codeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 8,
-    paddingTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: '#ecf0f1',
-  },
-  codeLabel: {
-    fontSize: 12,
-    color: '#7f8c8d',
-    marginRight: 8,
-  },
-  codeValue: {
-    fontSize: 12,
-    color: '#2c3e50',
-    fontWeight: '600',
-  },
-});
+    emptyList: {
+      flex: 1,
+      justifyContent: 'center',
+    },
+    // Tournament-specific styles
+    tournamentCard: {
+      backgroundColor: theme.surface,
+      borderRadius: 12,
+      padding: 16,
+      marginBottom: 12,
+      borderWidth: 1,
+      borderColor: theme.border,
+      shadowColor: theme.shadow,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 3,
+    },
+    expandedCard: {
+      borderColor: theme.gold,
+      borderWidth: 2,
+    },
+    cardHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'flex-start',
+      marginBottom: 12,
+    },
+    tournamentName: {
+      fontSize: 18,
+      fontWeight: 'bold',
+      color: theme.text,
+      flex: 1,
+      marginRight: 12,
+    },
+    participantBadge: {
+      backgroundColor: withAlpha(theme.gold, 0.12),
+      borderRadius: 16,
+      paddingHorizontal: 12,
+      paddingVertical: 4,
+      alignItems: 'center',
+      minWidth: 60,
+      borderWidth: 1,
+      borderColor: theme.gold,
+    },
+    participantCount: {
+      fontSize: 16,
+      fontWeight: 'bold',
+      color: theme.gold,
+    },
+    participantLabel: {
+      fontSize: 10,
+      color: theme.gold,
+      textTransform: 'uppercase',
+    },
+    detailsRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 8,
+    },
+    detailIcon: {
+      fontSize: 16,
+      marginRight: 8,
+      width: 20,
+    },
+    detailText: {
+      fontSize: 14,
+      color: theme.textSecondary,
+      flex: 1,
+    },
+    codeRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginTop: 8,
+      paddingTop: 8,
+      borderTopWidth: 1,
+      borderTopColor: theme.divider,
+    },
+    codeLabel: {
+      fontSize: 12,
+      color: theme.textMuted,
+      marginRight: 8,
+    },
+    codeValue: {
+      fontSize: 12,
+      color: theme.text,
+      fontWeight: '600',
+    },
+  });
+}
