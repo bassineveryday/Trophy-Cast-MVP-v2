@@ -129,7 +129,7 @@ export default function FishingThemedHomeScreen() {
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerContent}>
-          <Text style={styles.logoText}>TROPHY CAST</Text>
+          {/* Removed brand title per request */}
           <Text style={styles.tagline}>Where Every Cast Counts</Text>
         </View>
         

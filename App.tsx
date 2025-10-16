@@ -112,7 +112,7 @@ function TabNavigator() {
     >
       <Tab.Screen 
         name="Home" 
-        options={{ title: 'Trophy Cast' }}
+        options={{ headerShown: false, title: '' }}
         component={FishingThemedHomeScreen}
       />
       <Tab.Screen 
