@@ -74,8 +74,8 @@ export const DARK_THEME_COLORS = {
  * Used for hero sections, special cards, etc.
  */
 export const BRAND_GRADIENTS = {
-  // Main hero gradient (Gold tones)
-  hero: ['#E3C04D', '#B8911F'],
+  // Main hero gradient (Greener palette; light-to-mid green for dark text contrast)
+  hero: ['#D9F2E1', '#9FD3A6'],
 
   // Card gradient (subtle navy depth)
   card: ['#132532', '#1A2C3A'],
