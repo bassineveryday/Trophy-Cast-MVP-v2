@@ -94,12 +94,10 @@ describe('TournamentDetailScreen', () => {
     fireEvent.press(getByText('Day 2'));
     expect(getByText('Move')).toBeTruthy();
 
-    // Switch to Final and expect combined headers
+  // Switch to Final and expect empty state since combined is empty
     fireEvent.press(getByText('Final'));
-    expect(getByText('Total Wt')).toBeTruthy();
-    expect(getByText('AOY')).toBeTruthy();
-
-    // Move header should not be in Final view
-    expect(queryByText('Move')).toBeNull();
+  expect(getByText('Final results pending')).toBeTruthy();
+  // Movement header shouldn't appear in Final when showing empty state
+  expect(queryByText('Move')).toBeNull();
   });
 });
