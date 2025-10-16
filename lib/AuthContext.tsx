@@ -20,6 +20,7 @@ interface Profile {
   name: string;
   hometown: string;
   created_at: string;
+  avatar_url?: string;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);

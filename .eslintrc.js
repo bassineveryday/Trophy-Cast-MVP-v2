@@ -42,7 +42,7 @@ module.exports = {
   'react-native/no-unused-styles': 'off',
   'react-native/split-platform-components': 'off',
   'react-native/no-inline-styles': 'off',
-  'react-native/no-color-literals': 'off',
+  'react-native/no-color-literals': 'error',
   'react-native/sort-styles': 'off',
     'react-native/no-raw-text': 'off', // Too restrictive for our use case
     
