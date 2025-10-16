@@ -10,6 +10,20 @@ import { useDashboard, useAOYStandings } from '../lib/hooks/useQueries';
 import { useTheme } from '../lib/ThemeContext';
 import type { BrandTheme } from '../lib/ThemeContext';
 
+// Helper to apply alpha to a token color without inline literals in styles
+function withAlpha(hexOrRgb: string, alpha: number) {
+  if (hexOrRgb.startsWith('#')) {
+    const hex = hexOrRgb.replace('#', '');
+    const full = hex.length === 3 ? hex.split('').map(c => c + c).join('') : hex;
+    const bigint = parseInt(full, 16);
+    const r = (bigint >> 16) & 255;
+    const g = (bigint >> 8) & 255;
+    const b = bigint & 255;
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+  return hexOrRgb;
+}
+
 interface CircleBadgeProps {
   icon: keyof typeof Ionicons.glyphMap;
   value: string | number;
@@ -140,7 +154,9 @@ function HeroBanner({ name, subtitle, tagline }: HeroBannerProps) {
   );
 }
 
-const createStyles = (theme: BrandTheme) => StyleSheet.create({
+const createStyles = (theme: BrandTheme) => {
+  const contentBg = theme.mode === 'dark' ? withAlpha(theme.background, 0) : withAlpha(theme.surface, 0.02);
+  return StyleSheet.create({
   container: {
     borderRadius: 12,
     overflow: 'hidden',
@@ -168,6 +184,7 @@ const createStyles = (theme: BrandTheme) => StyleSheet.create({
   content: {
     padding: 16,
     paddingVertical: 16,
+    backgroundColor: contentBg,
   },
   topRow: {
     flexDirection: 'row',
@@ -257,6 +274,7 @@ const createStyles = (theme: BrandTheme) => StyleSheet.create({
     fontSize: 12,
     fontWeight: '700',
   },
-});
+  });
+};
 
 export default React.memo(HeroBanner);
