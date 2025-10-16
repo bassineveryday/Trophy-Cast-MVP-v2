@@ -13,6 +13,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import TournamentStatus, { getTournamentStatusValue, getTournamentStatusText } from '../components/TournamentStatus';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { useTournaments, useTournamentResults, useTournamentParticipants } from '../lib/hooks/useQueries';
 import { supabase } from '../lib/supabase';
@@ -39,7 +40,7 @@ interface Participant {
   status: 'confirmed' | 'pending' | 'waitlist';
 }
 
-const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
+const TournamentDetailScreen: React.FC = () => {
   const route = useRoute();
   const navigation = useNavigation();
   const { theme } = useTheme();
@@ -257,37 +258,7 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
     }
   };
   
-  const getStatusColor = (date: string | null) => {
-    if (!date) return '#757575';
-    const eventDate = new Date(date);
-    const today = new Date();
-    const diffTime = eventDate.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-    if (diffDays < 0) {
-      return '#2196F3'; // completed - blue
-    } else if (diffDays <= 7) {
-      return '#FF9800'; // upcoming - orange
-    } else {
-      return '#4CAF50'; // scheduled - green
-    }
-  };
-  
-  const getStatusText = (date: string | null) => {
-    if (!date) return 'Pending';
-    const eventDate = new Date(date);
-    const today = new Date();
-    const diffTime = eventDate.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-    if (diffDays < 0) {
-      return 'Completed';
-    } else if (diffDays <= 7) {
-      return diffDays === 0 ? 'Today' : `${diffDays} days away`;
-    } else {
-      return 'Scheduled';
-    }
-  };
+  // Status helpers provided by shared TournamentStatus component
   
   const renderTabButton = (tab: 'overview' | 'participants' | 'results', icon: keyof typeof Ionicons.glyphMap, label: string) => (
     <TouchableOpacity
@@ -311,16 +282,7 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
       {/* Tournament Header */}
       <View style={styles.headerCard}>
         <View style={styles.headerContent}>
-          <View style={[styles.statusBadge, { backgroundColor: getStatusColor(tournament?.event_date || null) }]}>
-            <Ionicons
-              name="calendar"
-              size={16}
-              color={fishingTheme.colors.white}
-            />
-            <Text style={styles.statusText}>
-              {getStatusText(tournament?.event_date || null)}
-            </Text>
-          </View>
+          <TournamentStatus eventDate={tournament?.event_date || null} />
           
           <Text style={styles.tournamentTitle}>{tournament?.tournament_name}</Text>
           <Text style={styles.tournamentDate}>
@@ -394,7 +356,10 @@ const TournamentDetailScreen: React.FC<TournamentDetailScreenProps> = () => {
       
       {/* Action Buttons */}
       <View style={styles.actionButtons}>
-        {!isRegistered && getStatusText(tournament?.event_date || null) !== 'Completed' && (
+        {(() => {
+          const { status } = getTournamentStatusValue(tournament?.event_date || null);
+          return !isRegistered && status !== 'completed';
+        })() && (
           <TouchableOpacity style={styles.registerButton} onPress={handleRegistration}>
             <View style={styles.buttonGradient}>
               <Ionicons name="add-circle" size={20} color={fishingTheme.colors.white} />
