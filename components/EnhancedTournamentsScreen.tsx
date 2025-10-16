@@ -7,23 +7,17 @@
  * ✓ No changes to data fetching logic or types
  */
 import React, { useState, useMemo } from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  FlatList,
-  RefreshControl,
-  TouchableOpacity,
-  TextInput,
-  ScrollView,
-} from 'react-native';
+import { StyleSheet, Text, View, FlatList, RefreshControl, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import TournamentStatus, { getTournamentStatusValue, getTournamentStatusText } from './TournamentStatus';
 import { useNavigation } from '@react-navigation/native';
 import { TournamentEvent } from '../lib/supabase';
 import { useGroupedTournaments, useTournamentParticipants, useParticipantCounts } from '../lib/hooks/useQueries';
 import { useTheme } from '../lib/ThemeContext';
 import { ListSkeleton } from '../components/Skeleton';
 import { EmptyState } from '../components/EmptyState';
+import TournamentCard from './TournamentCard';
+import TournamentSearch from './TournamentSearch';
 // Removed unused imports
 
 interface FilterOptions {
@@ -70,31 +64,7 @@ export default function EnhancedTournamentsScreen() {
     }
   };
 
-  const getTournamentStatus = (tournament: TournamentEvent) => {
-    if (!tournament.event_date) return { status: 'pending', color: theme.primary, icon: 'time-outline' };
-    
-    const eventDate = new Date(tournament.event_date);
-    const today = new Date();
-    const diffTime = eventDate.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-    if (diffDays < 0) {
-      return { status: 'completed', color: theme.primary, icon: 'checkmark-circle-outline' };
-    } else if (diffDays <= 7) {
-      return { status: 'upcoming', color: theme.primary, icon: 'warning-outline' };
-    } else {
-      return { status: 'scheduled', color: theme.primary, icon: 'calendar-outline' };
-    }
-  };
-
-  const getStatusText = (status: string, diffDays?: number) => {
-    switch (status) {
-      case 'completed': return 'Completed';
-      case 'upcoming': return diffDays === 0 ? 'Today' : `${Math.abs(diffDays!)} days ago`;
-      case 'scheduled': return 'Scheduled';
-      default: return 'Pending';
-    }
-  };
+  // Status helpers now provided by TournamentStatus component
 
   const filterTournaments = (tournaments: TournamentEvent[]): TournamentEvent[] => {
     return tournaments.filter(tournament => {
@@ -116,7 +86,7 @@ export default function EnhancedTournamentsScreen() {
 
       // Status filter
       if (filters.status !== 'all') {
-        const { status } = getTournamentStatus(tournament);
+        const { status } = getTournamentStatusValue(tournament.event_date);
         if (filters.status === 'upcoming' && status !== 'upcoming' && status !== 'scheduled') return false;
         if (filters.status === 'completed' && status !== 'completed') return false;
       }
@@ -130,55 +100,22 @@ export default function EnhancedTournamentsScreen() {
   };
 
   const renderTournamentCard = ({ item }: { item: TournamentEvent }) => {
-    const statusInfo = getTournamentStatus(item);
+    const { status, daysDiff } = getTournamentStatusValue(item.event_date);
     const isExpanded = selectedTournament === item.tournament_code;
 
     return (
       <View>
-        {/* Branded summary card */}
-        <TouchableOpacity
-          onPress={() => setSelectedTournament(isExpanded ? null : item.tournament_code || null)}
-          activeOpacity={0.8}
-        >
-          {/* Use the themed card styles for a compact summary */}
-          <View style={[styles.tournamentCard, isExpanded && styles.expandedCard]}>
-            <View style={styles.cardHeader}>
-              <View style={styles.titleContainer}>
-                <Text style={styles.tournamentName} numberOfLines={isExpanded ? undefined : 1}>
-                  {item.tournament_name || 'Unnamed Tournament'}
-                </Text>
-
-                <View style={[styles.statusBadge, { backgroundColor: statusInfo.color }]}>
-                  <Ionicons name={statusInfo.icon as any} size={12} color="white" />
-                  <Text style={styles.statusText}>{getStatusText(statusInfo.status)}</Text>
-                </View>
-              </View>
-
-              <View style={styles.participantBadge}>
-                <Text style={styles.participantCount}>{participantCounts[item.tournament_code || ''] ?? (isExpanded ? (selectedParticipants?.length ?? 0) : (item.participants || 0))}</Text>
-                <Text style={styles.participantLabel}>anglers</Text>
-              </View>
-            </View>
-
-            <View style={styles.infoContainer}>
-              <View style={styles.infoRow}>
-                <Ionicons name="calendar-outline" size={16} color={theme.textSecondary} />
-                <Text style={styles.infoText}>{formatDate(item.event_date || '')}</Text>
-              </View>
-
-              <View style={styles.infoRow}>
-                <Ionicons name="location-outline" size={16} color={theme.textSecondary} />
-                <Text style={styles.infoText}>{item.lake || 'Lake TBD'}</Text>
-              </View>
-
-              {item.tournament_code && (
-                <View style={styles.infoRow}>
-                  <Ionicons name="barcode-outline" size={16} color={theme.primary} />
-                  <Text style={styles.codeText}>{item.tournament_code}</Text>
-                </View>
-              )}
-            </View>
-          </View>
+        <TouchableOpacity onPress={() => setSelectedTournament(isExpanded ? null : item.tournament_code || null)} activeOpacity={0.8}>
+          <TournamentCard
+            id={item.event_id}
+            title={item.tournament_name || 'Unnamed Tournament'}
+            lake={item.lake || undefined}
+            date={formatDate(item.event_date || '')}
+            attending={participantCounts[item.tournament_code || ''] ?? (isExpanded ? (selectedParticipants?.length ?? 0) : (item.participants || 0))}
+            variant="teal"
+            onPress={() => (navigation as any).navigate('TournamentDetail', { tournamentId: item.event_id })}
+            testID={`tournament.card.${item.event_id || item.tournament_code}`}
+          />
         </TouchableOpacity>
 
         {/* Expanded details area (keeps previous layout but visually tied to card) */}
@@ -195,8 +132,8 @@ export default function EnhancedTournamentsScreen() {
                 </View>
                 <View style={styles.detailItem}>
                   <Text style={styles.detailLabel}>Status</Text>
-                  <Text style={[styles.detailValue, { color: statusInfo.color }]}>
-                    {getStatusText(statusInfo.status)}
+                  <Text style={styles.detailValue}>
+                    {getTournamentStatusText(status, daysDiff)}
                   </Text>
                 </View>
               </View>
@@ -218,24 +155,10 @@ export default function EnhancedTournamentsScreen() {
   const renderFilterBar = () => (
     <View style={styles.filterContainer}>
       {/* Search Input */}
-      <View style={styles.searchContainer}>
-  <Ionicons name="search-outline" size={20} color={theme.textSecondary} style={styles.searchIcon} />
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search tournaments..."
-          placeholderTextColor={theme.textSecondary}
-          value={filters.search}
-          onChangeText={(text) => setFilters(prev => ({ ...prev, search: text }))}
-        />
-        {filters.search.length > 0 && (
-          <TouchableOpacity 
-            onPress={() => setFilters(prev => ({ ...prev, search: '' }))}
-            style={styles.clearButton}
-          >
-            <Ionicons name="close-circle" size={20} color={theme.textSecondary} />
-          </TouchableOpacity>
-        )}
-      </View>
+      <TournamentSearch
+        value={filters.search}
+        onChange={(text) => setFilters(prev => ({ ...prev, search: text }))}
+      />
 
       {/* Filter Chips */}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipContainer}>
