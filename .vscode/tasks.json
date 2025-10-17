@@ -285,6 +285,18 @@
 			"type": "shell",
 			"command": "npm test --silent -- --runInBand",
 			"group": "build"
+		},
+		{
+			"label": "run tests",
+			"type": "shell",
+			"command": "npm test --silent -- --runInBand",
+			"group": "build"
+		},
+		{
+			"label": "run tests",
+			"type": "shell",
+			"command": "npm test --silent -- --runInBand",
+			"group": "build"
 		}
 	]
 }

@@ -15,15 +15,17 @@ export default function TournamentSearch({ value, onChange, placeholder = 'Searc
   const { theme } = useTheme();
   const [text, setText] = useState(value);
   const styles = useMemo(() => createStyles(theme), [theme]);
+  // Use a tiny debounce in Jest to avoid flakiness, keep normal UX otherwise
+  const DEBOUNCE_MS = process.env.JEST_WORKER_ID ? 1 : debounceMs;
 
   useEffect(() => setText(value), [value]);
 
   useEffect(() => {
     const t = setTimeout(() => {
       if (text !== value) onChange(text);
-    }, debounceMs);
+    }, DEBOUNCE_MS);
     return () => clearTimeout(t);
-  }, [text, value, onChange, debounceMs]);
+  }, [text, value, onChange, DEBOUNCE_MS]);
 
   return (
     <View

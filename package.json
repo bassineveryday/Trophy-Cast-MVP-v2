@@ -23,6 +23,7 @@
     "build": "expo export --platform web",
     "beta:ping": "node scripts/ping-supabase.js",
     "beta:aoy-audit": "node scripts/aoy-audit.js",
+  "beta:aoy-audit:verbose": "node scripts/aoy-audit.js --verbose --limit-diffs=50",
     "beta:smoke": "npm run lint && npm test --silent -- --runInBand && node scripts/ping-supabase.js",
     "beta:check": "npm run beta:smoke && npm run beta:aoy-audit",
   "beta:publish": "expo publish --release-channel beta",

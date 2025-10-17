@@ -1,6 +1,19 @@
 /* AOY Audit: recompute Best-4 per season from tournament_results and compare to aoy_standings. */
 const { createClient } = require('@supabase/supabase-js');
 
+// --- Arg parsing / flags ---
+const args = process.argv.slice(2);
+const flags = {};
+for (const a of args) {
+  if (a.startsWith('--')) {
+    const [k, v] = a.replace(/^--/, '').split('=');
+    flags[k] = v === undefined ? true : v;
+  }
+}
+const VERBOSE = !!flags.verbose;
+const LIMIT_DIFFS = Number(flags['limit-diffs'] ?? 20);
+const SEASON = Number(flags.season ?? process.env.AOY_SEASON ?? NaN);
+
 const url = process.env.SUPABASE_URL || process.env.EXPO_PUBLIC_SUPABASE_URL;
 const anon = process.env.SUPABASE_ANON_KEY || process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
 if (!url || !anon) {
@@ -15,8 +28,17 @@ function seasonYear(d) {
   return m ? parseInt(m[1], 10) : null;
 }
 
+function toNumberMaybe(x) {
+  if (x == null || x === '') return 0;
+  if (typeof x === 'number') return Number.isFinite(x) ? x : 0;
+  const cleaned = String(x).replace(/[^0-9.\-]+/g, '');
+  const n = cleaned.includes('.') ? parseFloat(cleaned) : parseInt(cleaned, 10);
+  return Number.isFinite(n) ? n : 0;
+}
+
 (async () => {
-  const { data: results, error: resultsError } = await supabase
+  // Load results
+  const { data: results, error: resultsError, count: _ } = await supabase
     .from('tournament_results')
     .select('member_id, aoy_points, points, event_date');
   if (resultsError) {
@@ -24,12 +46,19 @@ function seasonYear(d) {
     process.exit(2);
   }
 
+  if (VERBOSE) {
+    console.log(`Loaded ${results?.length ?? 0} tournament_results rows`);
+  }
+
   // Build map: { season_year -> { member_id -> [pts...] } }
   const map = new Map();
   for (const r of results || []) {
     const year = seasonYear(r.event_date);
     if (!year) continue;
-  const pts = (r.aoy_points != null && r.aoy_points !== '') ? parseInt(r.aoy_points, 10) : (typeof r.points === 'number' ? r.points : parseInt(r.points, 10) || 0);
+    if (!Number.isNaN(SEASON) && year !== SEASON) continue; // season filter
+    const pts = r.aoy_points != null && r.aoy_points !== ''
+      ? toNumberMaybe(r.aoy_points)
+      : toNumberMaybe(r.points);
     if (!map.has(year)) map.set(year, new Map());
     const members = map.get(year);
     if (!members.has(r.member_id)) members.set(r.member_id, []);
@@ -46,6 +75,11 @@ function seasonYear(d) {
     }
   }
 
+  if (VERBOSE) {
+    const seasonMsg = Number.isNaN(SEASON) ? 'all seasons' : `season ${SEASON}`;
+    console.log(`Recomputed ${recomputed.length} member-season totals for ${seasonMsg}`);
+  }
+
   // Load aoy_standings
   const { data: aoy, error: aoyError } = await supabase
     .from('aoy_standings')
@@ -57,7 +91,10 @@ function seasonYear(d) {
 
   // Index aoy
   const idx = new Map(); // key: `${member_id}|${year}` -> total
-  for (const row of aoy || []) idx.set(`${row.member_id}|${row.season_year}`, Number(row.total_aoy_points) || 0);
+  for (const row of aoy || []) {
+    if (!Number.isNaN(SEASON) && Number(row.season_year) !== SEASON) continue;
+    idx.set(`${row.member_id}|${row.season_year}`, toNumberMaybe(row.total_aoy_points));
+  }
 
   // Compare
   const diffs = [];
@@ -71,11 +108,17 @@ function seasonYear(d) {
   }
 
   if (diffs.length) {
-    console.error('AOY-AUDIT FAILED: mismatches detected (showing up to 20):');
-    console.table(diffs.slice(0, 20));
+    const seasonMsg = Number.isNaN(SEASON) ? '' : ` for season ${SEASON}`;
+    console.error(`AOY-AUDIT FAILED: ${diffs.length} mismatch(es) detected${seasonMsg} (showing up to ${LIMIT_DIFFS}):`);
+    console.table(diffs.slice(0, LIMIT_DIFFS));
+    if (VERBOSE) {
+      const sample = diffs[0];
+      console.error('Sample mismatch detail:', sample);
+    }
     process.exit(1);
   } else {
-    console.log('AOY-AUDIT OK: no diffs found.');
+    const seasonMsg = Number.isNaN(SEASON) ? '' : ` for season ${SEASON}`;
+    console.log(`AOY-AUDIT OK: no diffs found${seasonMsg}.`);
     process.exit(0);
   }
 })();

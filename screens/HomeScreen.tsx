@@ -29,15 +29,15 @@ interface TournamentEvent {
 }
 
 export default function HomeScreen() {
-  console.log('🏠 HomeScreen rendering');
+  if (__DEV__) console.log('🏠 HomeScreen rendering');
   
   const { user, profile } = useAuth();
-  console.log('Auth state:', { user: user?.email, profile: profile?.member_code });
+  if (__DEV__) console.log('Auth state:', { user: user?.email, profile: profile?.member_code });
   
   // Use React Query hook for dashboard data (rename `data` to `dashboard` to match TournamentsScreen pattern)
   const { data: dashboard, isLoading, error, refetch, isRefetching } = useDashboard(profile?.member_code);
 
-  console.log('Dashboard query state:', {
+  if (__DEV__) console.log('Dashboard query state:', {
     hasData: !!dashboard,
     isLoading,
     error: error?.message,
@@ -45,13 +45,15 @@ export default function HomeScreen() {
   });
 
   // 🔍 EXPLICIT DEBUG OUTPUT - Check browser console for this
-  console.group('🏠 HomeScreen Data Debug');
-  console.log('Profile:', profile);
-  console.log('Member Code:', profile?.member_code);
-  console.log('Raw dashboard data:', dashboard);
-  console.log('Loading state:', isLoading);
-  console.log('Error:', error);
-  console.groupEnd();
+  if (__DEV__) {
+    console.group('🏠 HomeScreen Data Debug');
+    console.log('Profile:', profile);
+    console.log('Member Code:', profile?.member_code);
+    console.log('Raw dashboard data:', dashboard);
+    console.log('Loading state:', isLoading);
+    console.log('Error:', error);
+    console.groupEnd();
+  }
 
   // Extract data from React Query response
   const lastTournament = dashboard?.lastTournament || null;

@@ -116,7 +116,7 @@ function HeroBanner({ name, subtitle, tagline }: HeroBannerProps) {
             {profile?.avatar_url ? (
               <Image source={{ uri: profile.avatar_url as string }} style={styles.avatarImage} accessibilityLabel="Profile avatar image" />
             ) : (
-              <Text style={styles.avatarText} accessibilityLabel={`Avatar initials ${initials}`}>
+              <Text style={styles.avatarText} accessibilityLabel="Profile avatar">
                 {initials}
               </Text>
             )}
@@ -130,7 +130,7 @@ function HeroBanner({ name, subtitle, tagline }: HeroBannerProps) {
             {typeof days === 'number' && nextTournament?.event_date && (
               <View
                 style={styles.countdownPill}
-                accessibilityLabel={`Next tournament ${days > 0 ? `in ${days} day${days === 1 ? '' : 's'}` : 'today'}`}
+                accessibilityLabel="Next tournament"
                 accessible
               >
                 <Ionicons name="time" size={12} color={theme.onPrimary} />
