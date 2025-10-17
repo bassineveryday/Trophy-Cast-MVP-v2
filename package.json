@@ -20,7 +20,12 @@
     "lint:fix": "eslint . --ext .ts,.tsx,.js,.jsx --fix",
     "type-check": "tsc --noEmit",
     "coverage:check": "jest --coverage --coverageThreshold='{\"global\":{\"statements\":40,\"branches\":35,\"functions\":40,\"lines\":40}}'",
-    "build": "expo export --platform web"
+    "build": "expo export --platform web",
+    "beta:ping": "node scripts/ping-supabase.js",
+    "beta:aoy-audit": "node scripts/aoy-audit.js",
+    "beta:smoke": "npm run lint && npm test --silent -- --runInBand && node scripts/ping-supabase.js",
+    "beta:check": "npm run beta:smoke && npm run beta:aoy-audit",
+    "prepare": "husky install"
   },
   "dependencies": {
     "@expo-google-fonts/inter": "^0.4.2",
@@ -66,6 +71,7 @@
     "@types/jest": "29.5.14",
     "@types/node": "^24.7.1",
     "@types/react": "~19.1.0",
+    "husky": "^9.0.11",
     "@typescript-eslint/eslint-plugin": "^7.2.0",
     "@typescript-eslint/parser": "^7.2.0",
     "babel-plugin-module-resolver": "^5.0.2",
@@ -79,6 +85,9 @@
     "react-test-renderer": "^19.1.0",
     "ts-jest": "^29.4.4",
     "typescript": "~5.9.2"
+  },
+  "husky": {
+    "hooks": {}
   },
   "private": true
 }

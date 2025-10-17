@@ -40,6 +40,7 @@ Trophy Cast is entering a new phase of development focused on long-term maintain
 [![React Native](https://img.shields.io/badge/React%20Native-0.72+-61DAFB.svg)](https://reactnative.dev/)
 [![Supabase](https://img.shields.io/badge/Supabase-Backend-green.svg)](https://supabase.com)
 [![Health Status](https://img.shields.io/badge/Health-Production%20Ready-success)](./docs/README.md)
+[![Beta Check](https://github.com/bassineveryday/Trophy-Cast-MVP-v2/actions/workflows/beta-check.yml/badge.svg)](.github/workflows/beta-check.yml)
 
 A modern, production-ready React Native application for managing fishing tournaments with AI coaching, club management, and comprehensive member tracking. Built for Denver Bassmasters and designed to scale nationwide.
 
@@ -47,6 +48,41 @@ A modern, production-ready React Native application for managing fishing tournam
 
 **Code Quality Score**: 9/10 - Clean, modular, type-safe codebase  
 **Health Check**: All core systems operational and production-ready
+## 🔍 Beta QA
+
+Scripts to validate the beta before merging:
+
+```bash
+npm run beta:ping      # check Supabase views/tables are reachable
+npm run beta:aoy-audit # recompute Best-4 vs aoy_standings; fails on mismatch
+npm run beta:smoke     # lint + unit tests + ping
+npm run beta:check     # smoke + aoy-audit (recommended)
+```
+
+CI: PRs to main/beta run the "Beta Check" workflow. If Supabase secrets are configured in repo Actions, the audit runs against live data.
+
+
+### 🔒 Local pre-push guard (Husky)
+
+The repo includes a `.husky/pre-push` hook that runs:
+
+- `npm run lint`
+- `npm test`
+- `npm run beta:aoy-audit`  (only if SUPABASE_URL / SUPABASE_ANON_KEY are set)
+
+Set envs in your shell before pushing to test live AOY data:
+
+PowerShell
+
+```powershell
+$env:SUPABASE_URL = "https://YOUR.supabase.co"
+$env:SUPABASE_ANON_KEY = "YOUR_ANON"
+git push
+```
+
+If the audit fails (mismatched AOY totals), the push stops until fixed.
+CI re-checks every PR so production rankings stay clean.
+
 
 ---
 
@@ -603,3 +639,47 @@ Trophy Cast is proudly developed for the Denver Bassmasters fishing club, servin
 
 **Built with ❤️ for the fishing community** 🎣  
 *Trophy Cast - Where every catch counts*
+
+---
+
+## Trophy Cast — Beta DB Runbook (Supabase)
+
+Create/refresh required views
+
+1. Open Supabase → SQL Editor
+2. Run `db/migrations/2025-10-16_add_events_public_view.sql`
+3. Run `db/migrations/2025-10-16_add_aoy_view_and_read_policies.sql`
+
+Optional: run the prepared read policies + helpful indexes at the bottom of the AOY SQL.
+
+Verify
+
+```sql
+SELECT to_regclass('public.events_public')  AS events_public_exists,
+       to_regclass('public.aoy_standings') AS aoy_standings_exists;
+
+SELECT 'events_public', count(*) FROM public.events_public
+UNION ALL
+SELECT 'results', count(*) FROM public.tournament_results
+UNION ALL
+SELECT 'aoy', count(*) FROM public.aoy_standings;
+
+SELECT * FROM public.aoy_standings
+WHERE season_year = 2025
+ORDER BY aoy_rank
+LIMIT 25;
+```
+
+Sanity packs (run anytime)
+
+- `db/quality/AOY-AUDIT.sql` → expect 0 rows returned (differences)
+- `db/quality/DATA-FLAGS.sql` → fix any rows surfaced (missing member_id, non-YYYY dates)
+
+Security posture (beta)
+
+- RLS off for `tournament_events` + `tournament_results` (public read)
+- If you later enable RLS, prepared read policies already exist; add write-deny policies for anon to keep read-only
+
+Rollback
+
+- Views are safe to replace. If needed, point UI to `tournament_events` temporarily and re-apply `events_public` afterward.

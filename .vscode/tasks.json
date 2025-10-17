@@ -159,6 +159,108 @@
 			"type": "shell",
 			"command": "npm test --silent -- --runInBand",
 			"group": "build"
+		},
+		{
+			"label": "lint",
+			"type": "shell",
+			"command": "npm run lint",
+			"group": "build"
+		},
+		{
+			"label": "run tests",
+			"type": "shell",
+			"command": "npm test --silent -- --runInBand",
+			"group": "build"
+		},
+		{
+			"label": "lint (batch1 subset)",
+			"type": "shell",
+			"command": "npm run lint",
+			"group": "build"
+		},
+		{
+			"label": "run tests",
+			"type": "shell",
+			"command": "npm test --silent -- --runInBand",
+			"group": "build"
+		},
+		{
+			"label": "lint",
+			"type": "shell",
+			"command": "npm run lint",
+			"group": "build"
+		},
+		{
+			"label": "lint",
+			"type": "shell",
+			"command": "npm run lint",
+			"group": "build"
+		},
+		{
+			"label": "run tests",
+			"type": "shell",
+			"command": "npm test --silent -- --runInBand",
+			"group": "build"
+		},
+		{
+			"label": "lint",
+			"type": "shell",
+			"command": "npm run lint",
+			"group": "build"
+		},
+		{
+			"label": "run tests",
+			"type": "shell",
+			"command": "npm test --silent -- --runInBand",
+			"group": "build"
+		},
+		{
+			"label": "lint",
+			"type": "shell",
+			"command": "npm run lint",
+			"group": "build"
+		},
+		{
+			"label": "run tests",
+			"type": "shell",
+			"command": "npm test --silent -- --runInBand",
+			"group": "build"
+		},
+		{
+			"label": "lint",
+			"type": "shell",
+			"command": "npm run lint",
+			"group": "build"
+		},
+		{
+			"label": "run tests",
+			"type": "shell",
+			"command": "npm test --silent -- --runInBand",
+			"group": "build"
+		},
+		{
+			"label": "run tests",
+			"type": "shell",
+			"command": "npm test --silent -- --runInBand",
+			"group": "build"
+		},
+		{
+			"label": "run tests",
+			"type": "shell",
+			"command": "npm test --silent -- --runInBand",
+			"group": "build"
+		},
+		{
+			"label": "run tests",
+			"type": "shell",
+			"command": "npm test --silent -- --runInBand",
+			"group": "build"
+		},
+		{
+			"label": "run tests",
+			"type": "shell",
+			"command": "npm test --silent -- --runInBand",
+			"group": "build"
 		}
 	]
 }

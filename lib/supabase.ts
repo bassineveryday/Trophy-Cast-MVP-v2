@@ -1,6 +1,7 @@
 import 'react-native-url-polyfill/auto';
 // Use require for better compatibility with current setup
 const { createClient } = require('@supabase/supabase-js');
+import { TABLE_TOURNAMENTS } from './db/tables';
 import { Platform } from 'react-native';
 
 // Load Supabase credentials from environment variables
@@ -288,7 +289,7 @@ export const fetchTournamentEvents = async () => {
     console.log('🔵 Fetching tournament events...');
     
     const { data, error } = await supabase
-      .from('events_public')
+      .from(TABLE_TOURNAMENTS as any)
       .select('*')
       .order('event_date', { ascending: false, nullsFirst: false });
 
@@ -308,7 +309,7 @@ export const fetchTournamentEvents = async () => {
 export const fetchTournamentEventById = async (eventId: string) => {
   try {
     const { data, error } = await supabase
-      .from('tournament_events')
+      .from(TABLE_TOURNAMENTS as any)
       .select('*')
       .eq('event_id', eventId)
       .single();

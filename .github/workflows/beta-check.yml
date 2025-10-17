@@ -1,0 +1,57 @@
+name: Beta Check
+
+on:
+  pull_request:
+    branches: [ main, beta ]
+  push:
+    branches: [ beta ]
+
+jobs:
+  build-and-check:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+      EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install
+        run: npm ci
+
+      - name: Lint
+        id: lint
+        run: npm run lint
+
+      - name: Unit tests
+        id: tests
+        run: npm test -- --ci --reporters=default
+
+      - name: Ping Supabase (tables/views exist & readable)
+        if: ${{ env.SUPABASE_URL != '' && env.SUPABASE_ANON_KEY != '' }}
+        run: npm run beta:ping
+
+      - name: AOY audit (Best-4 guardrail)
+        if: ${{ env.SUPABASE_URL != '' && env.SUPABASE_ANON_KEY != '' }}
+        run: npm run beta:aoy-audit
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "### Beta Check Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- Lint: ${{ steps.lint.outcome || 'ok' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Tests: ${{ steps.tests.outcome || 'ok' }}" >> $GITHUB_STEP_SUMMARY
+          if [ -n "${{ env.SUPABASE_URL }}" ]; then
+            echo "- Supabase ping & AOY audit: ran" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- Supabase ping & AOY audit: **skipped** (no secrets)" >> $GITHUB_STEP_SUMMARY
+          fi

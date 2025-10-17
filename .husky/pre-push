@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+. "$(dirname -- "$0")/_/husky.sh"
+
+npm run lint || exit 1
+npm test || exit 1
+
+# Only run live DB checks if envs present
+if [ -n "$SUPABASE_URL" ] && [ -n "$SUPABASE_ANON_KEY" ]; then
+  npm run beta:aoy-audit || exit 1
+fi

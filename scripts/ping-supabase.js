@@ -16,7 +16,7 @@ async function check(table, columns = '*') {
 
 (async () => {
   const targets = [
-    ['tournament_events', 'event_id, tournament_name, event_date'],
+    ['events_public', 'event_id, tournament_name, event_date'],
     ['tournament_results', 'result_id, member_id, aoy_points, points, event_date'],
     ['aoy_standings', 'member_id, season_year, aoy_rank, total_aoy_points'],
     ['profiles', 'id, member_code, name'],
