@@ -4,11 +4,13 @@ Welcome aboard! Here’s everything you need to install the beta, sign in, and s
 
 ## Install the app
 
-- If invited via Expo:
+- If invited via Expo (recommended):
   - Install Expo Go from the iOS App Store or Google Play
-  - Open the invite link sent by the team and launch the project in Expo Go
+  - Open the project link: https://expo.dev/@YOUR_ORG/YOUR_PROJECT?release-channel=beta
+  - Or scan the QR on the project page to launch in Expo Go
 - If provided a standalone build (APK/IPA/TestFlight):
-  - Follow the link provided in your invite email and install the app
+  - Android (APK/AAB): install from the link provided
+  - iOS (TestFlight): accept the invite and install the latest beta build
 
 ## Sign in
 
@@ -59,3 +61,22 @@ Notes: Happened on LTE only; fine on Wi‑Fi later
 - Email: product@trophycast.app
 
 Thank you for helping keep the rankings clean and the experience smooth. Where Every Cast Counts 🎣
+
+---
+
+Internal publish notes (for maintainers)
+
+- Publish to Expo beta channel:
+
+```bash
+npx expo publish --release-channel beta
+```
+
+- EAS previews (optional):
+
+```bash
+eas build --profile preview --platform android
+eas build --profile preview --platform ios
+```
+
+Share the Expo project link above in your tester invite message.

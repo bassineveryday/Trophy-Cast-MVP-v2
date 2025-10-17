@@ -25,6 +25,7 @@
     "beta:aoy-audit": "node scripts/aoy-audit.js",
     "beta:smoke": "npm run lint && npm test --silent -- --runInBand && node scripts/ping-supabase.js",
     "beta:check": "npm run beta:smoke && npm run beta:aoy-audit",
+  "beta:publish": "expo publish --release-channel beta",
     "prepare": "husky install"
   },
   "dependencies": {
