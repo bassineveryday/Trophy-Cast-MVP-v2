@@ -14,7 +14,7 @@ module.exports = {
   
   // Transform node_modules for React Native
   transformIgnorePatterns: [
-    'node_modules/(?!(react-native|@react-native|@react-navigation|expo|@expo|@supabase|react-native-toast-message|expo-font|@expo/vector-icons)/)'
+    'node_modules/(?!(react-native|@react-native|@react-navigation|expo|@expo|@supabase|react-native-toast-message|expo-font|@expo/vector-icons|expo-linear-gradient)/)'
   ],
   
   // Module name mapper for assets and styles
