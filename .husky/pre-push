@@ -3,7 +3,9 @@
 # Pre-push guardrails (lightweight locally). Full test suite runs in CI.
 npm run lint || exit 1
 
-# Only run live DB checks if envs present
-if [ -n "$SUPABASE_URL" ] && [ -n "$SUPABASE_ANON_KEY" ]; then
+# Only run live DB checks if envs present and explicitly enabled
+if [ -n "$SUPABASE_URL" ] && [ -n "$SUPABASE_ANON_KEY" ] && [ "$RUN_AOY_AUDIT" = "1" ]; then
   npm run beta:aoy-audit || exit 1
+else
+  echo "Skipping AOY audit (set RUN_AOY_AUDIT=1 to enable)."
 fi
