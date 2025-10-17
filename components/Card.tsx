@@ -76,7 +76,9 @@ export default function Card({
     ...themedStyles.card,
     padding: spacing[padding],
     borderRadius: borderRadius[radius],
-    ...elevationValue,
+    ...(Platform.OS === 'web'
+      ? { boxShadow: '0 2px 10px rgba(0,0,0,0.1)' } as any
+      : (elevationValue as any)),
     ...(margin && { margin: spacing[margin] }),
     ...(style as any),
   };
@@ -124,7 +126,9 @@ export function CardPressable({
     ...themedStyles.cardPressable,
     padding: spacing[padding],
     borderRadius: borderRadius[radius],
-    ...elevationValue,
+    ...(Platform.OS === 'web'
+      ? { boxShadow: '0 2px 10px rgba(0,0,0,0.1)' } as any
+      : (elevationValue as any)),
     ...(margin && { margin: spacing[margin] }),
     ...(style as any),
   };

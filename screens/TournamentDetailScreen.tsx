@@ -793,7 +793,22 @@ const TournamentDetailScreen: React.FC = () => {
   );
 };
 
-const createStyles = (theme: BrandTheme) => StyleSheet.create({
+const createStyles = (theme: BrandTheme) => {
+  // Safe fallbacks for deep theme paths used in styles
+  const primaryBG =
+    (theme as any)?.components?.buttonPrimary?.filled?.backgroundColor ??
+    (theme as any)?.palette?.primary?.[600] ??
+    '#2563eb';
+  const glowColor = (theme as any)?.glow?.subtle?.shadowColor ?? 'rgba(0,0,0,0.1)';
+  const glowOffset = (theme as any)?.glow?.subtle?.shadowOffset ?? { width: 0, height: 1 };
+  const glowRadius = (theme as any)?.glow?.subtle?.shadowRadius ?? 6;
+  const glowOpacity = (theme as any)?.glow?.subtle?.shadowOpacity ?? 0.15;
+  const glowElevation = (theme as any)?.glow?.subtle?.elevation ?? 2;
+  const chipPrimaryBG =
+    (theme as any)?.components?.chipPrimary?.filled?.backgroundColor ??
+    theme.surface;
+
+  return StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.background,
@@ -836,12 +851,12 @@ const createStyles = (theme: BrandTheme) => StyleSheet.create({
     backgroundColor: theme.mode === 'light' ? '#f5f5f5' : theme.background,
   },
   activeTabButton: {
-    backgroundColor: theme.components.buttonPrimary.filled.backgroundColor,
+    backgroundColor: primaryBG,
     // focus glow for active tab
-    shadowColor: theme.glow.subtle.shadowColor,
-    shadowOffset: theme.glow.subtle.shadowOffset,
-    shadowOpacity: theme.glow.subtle.shadowOpacity,
-    shadowRadius: theme.glow.subtle.shadowRadius,
+    shadowColor: glowColor,
+    shadowOffset: glowOffset,
+    shadowOpacity: glowOpacity,
+    shadowRadius: glowRadius,
   },
   tabLabel: {
     marginLeft: theme.layout.spacing.sm,
@@ -864,11 +879,11 @@ const createStyles = (theme: BrandTheme) => StyleSheet.create({
     borderRadius: theme.layout.radius.xl,
     backgroundColor: theme.surface,
     // subtle glow
-    shadowColor: theme.glow.subtle.shadowColor,
-    shadowOffset: theme.glow.subtle.shadowOffset,
-    shadowOpacity: theme.glow.subtle.shadowOpacity,
-    shadowRadius: theme.glow.subtle.shadowRadius,
-    elevation: theme.glow.subtle.elevation,
+    shadowColor: glowColor,
+    shadowOffset: glowOffset,
+    shadowOpacity: glowOpacity,
+    shadowRadius: glowRadius,
+    elevation: glowElevation,
   },
   headerContent: {
     padding: theme.layout.spacing.xl,
@@ -913,11 +928,11 @@ const createStyles = (theme: BrandTheme) => StyleSheet.create({
     marginHorizontal: theme.layout.spacing.sm,
     borderRadius: theme.layout.radius.lg,
     alignItems: 'center',
-    shadowColor: theme.glow.subtle.shadowColor,
-    shadowOffset: theme.glow.subtle.shadowOffset,
-    shadowOpacity: theme.glow.subtle.shadowOpacity,
-    shadowRadius: theme.glow.subtle.shadowRadius,
-    elevation: theme.glow.subtle.elevation,
+    shadowColor: glowColor,
+    shadowOffset: glowOffset,
+    shadowOpacity: glowOpacity,
+    shadowRadius: glowRadius,
+    elevation: glowElevation,
     borderWidth: 1,
     borderColor: theme.border,
   },
@@ -940,11 +955,11 @@ const createStyles = (theme: BrandTheme) => StyleSheet.create({
     padding: theme.layout.spacing.lg,
     borderRadius: theme.layout.radius.lg,
     marginBottom: theme.layout.spacing.xl,
-    shadowColor: theme.glow.subtle.shadowColor,
-    shadowOffset: theme.glow.subtle.shadowOffset,
-    shadowOpacity: theme.glow.subtle.shadowOpacity,
-    shadowRadius: theme.glow.subtle.shadowRadius,
-    elevation: theme.glow.subtle.elevation,
+    shadowColor: glowColor,
+    shadowOffset: glowOffset,
+    shadowOpacity: glowOpacity,
+    shadowRadius: glowRadius,
+    elevation: glowElevation,
   },
   sectionTitle: {
     fontSize: theme.typography.sizes.h3,
@@ -1007,7 +1022,7 @@ const createStyles = (theme: BrandTheme) => StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: theme.layout.spacing.md,
     paddingHorizontal: theme.layout.spacing.xl,
-    backgroundColor: theme.components.buttonPrimary.filled.backgroundColor,
+    backgroundColor: primaryBG,
   },
   buttonText: {
     marginLeft: theme.layout.spacing.sm,
@@ -1036,11 +1051,11 @@ const createStyles = (theme: BrandTheme) => StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    shadowColor: theme.glow.subtle.shadowColor,
-    shadowOffset: theme.glow.subtle.shadowOffset,
-    shadowOpacity: theme.glow.subtle.shadowOpacity,
-    shadowRadius: theme.glow.subtle.shadowRadius,
-    elevation: theme.glow.subtle.elevation,
+    shadowColor: glowColor,
+    shadowOffset: glowOffset,
+    shadowOpacity: glowOpacity,
+    shadowRadius: glowRadius,
+    elevation: glowElevation,
     borderWidth: 1,
     borderColor: theme.border,
   },
@@ -1286,7 +1301,7 @@ const createStyles = (theme: BrandTheme) => StyleSheet.create({
     borderWidth: 1,
   },
   resultsTabActive: {
-    backgroundColor: theme.components.chipPrimary.filled.backgroundColor,
+    backgroundColor: chipPrimaryBG,
     borderColor: theme.primary,
   },
   resultsTabInactive: {
@@ -1301,6 +1316,7 @@ const createStyles = (theme: BrandTheme) => StyleSheet.create({
   inlinePad8: {
     padding: 8,
   },
-});
+  });
+};
 
 export default TournamentDetailScreen;

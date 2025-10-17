@@ -35,8 +35,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const checkDevMode = async () => {
       try {
         const devModeBypass = await AsyncStorage.getItem('devModeBypass');
+        // Respect explicit env override
+        const envOverride = (process.env.EXPO_PUBLIC_DEV_LOGIN || '').toLowerCase();
+        if (envOverride === 'false') {
+          // Force disable dev login, clear stored bypass
+          await AsyncStorage.removeItem('devModeBypass');
+        }
         // Auto-enable dev mode in development when no real Supabase backend is configured
-        const shouldEnableDevMode = devModeBypass === 'true' || 
+        const shouldEnableDevMode = envOverride === 'true' || devModeBypass === 'true' ||
           (!process.env.EXPO_PUBLIC_SUPABASE_URL || !process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY);
         
         if (shouldEnableDevMode) {
