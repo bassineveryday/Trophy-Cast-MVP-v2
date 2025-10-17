@@ -114,6 +114,38 @@ function toNumberMaybe(x) {
     if (VERBOSE) {
       const sample = diffs[0];
       console.error('Sample mismatch detail:', sample);
+      // Fetch raw inputs that contributed to recompute for the first mismatch
+      try {
+        const member = sample.member_id;
+        const season = sample.season_year;
+        // Filter tournament_results rows to the same season by applying our seasonYear parser in JS
+        const related = (results || []).filter((r) => r.member_id === member && seasonYear(r.event_date) === season);
+        // Also fetch events' event_date alongside for visibility
+        // Note: For simplicity, re-query Supabase for joined info limited to this member
+        const { data: joinedRows } = await supabase
+          .from('tournament_results')
+          .select('member_id, member_name, event_id, event_date, aoy_points, points')
+          .eq('member_id', member);
+        const joinedMap = new Map();
+        for (const jr of joinedRows || []) {
+          const k = `${jr.member_id}|${jr.event_id}|${jr.event_date}`;
+          joinedMap.set(k, jr);
+        }
+        const considered = related
+          .map((r) => ({
+            member_id: r.member_id,
+            event_date: r.event_date,
+            season_year: seasonYear(r.event_date),
+            aoy_points: r.aoy_points,
+            points: r.points,
+            used_pts: (r.aoy_points != null && r.aoy_points !== '') ? toNumberMaybe(r.aoy_points) : toNumberMaybe(r.points),
+          }))
+          .sort((a, b) => b.used_pts - a.used_pts);
+        console.error('First mismatch raw inputs (top 5 considered points):');
+        console.table(considered.slice(0, 5));
+      } catch (e) {
+        console.error('Failed to print mismatch raw inputs:', e?.message || e);
+      }
     }
     process.exit(1);
   } else {

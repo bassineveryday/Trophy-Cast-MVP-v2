@@ -24,6 +24,7 @@ Where Every Cast Counts.
 ## How to apply (Supabase SQL Editor)
 1) Run db/migrations/2025-10-16_add_aoy_view_and_read_policies.sql
 2) (Optional) Run db/migrations/2025-10-16_archive_legacy_tables.sql
+3) Run db/migrations/2025-10-17_aoy_view_join_events.sql (recreates aoy_standings with robust date parsing)
 
 ## Verify locally
 - PowerShell (Windows):
@@ -33,6 +34,7 @@ Where Every Cast Counts.
 - Expected:
   - aoy_standings returns rows with aoy_rank and total_aoy_points
   - All core objects read OK (no RLS errors on events/results)
+  - If AOY mismatches: run db/diagnostics/AOY-FIND-BAD-DATES.sql in Supabase to identify malformed dates
 
 ## AOY logic
 - season_year: derived via LEFT(event_date, 4) when event_date looks like YYYY-...
