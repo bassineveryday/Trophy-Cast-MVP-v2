@@ -44,7 +44,8 @@ const TournamentDetailScreen: React.FC = () => {
   const route = useRoute();
   const navigation = useNavigation();
   const { theme } = useTheme();
-  const styles = React.useMemo(() => createStyles(theme), [theme]);
+  // Avoid useMemo in tests to prevent hook dispatcher mismatch; cost is negligible
+  const styles = createStyles(theme);
   const { tournamentId } = route.params as { tournamentId: string };
   
   const { data: tournaments, refetch: refetchTournaments } = useTournaments();

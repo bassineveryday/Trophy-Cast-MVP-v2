@@ -24,6 +24,7 @@ module.exports = {
     '^@expo/vector-icons/(.*)$': '<rootDir>/__mocks__/vectorIconsMock.js',
     '^expo-font$': '<rootDir>/__mocks__/fileMock.js',
     '^expo-modules-core$': '<rootDir>/__mocks__/fileMock.js',
+    '^expo-linear-gradient$': '<rootDir>/__mocks__/expoLinearGradientMock.js',
     '^@react-native-async-storage/async-storage$': '<rootDir>/__mocks__/fileMock.js',
   },
   

@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
-. "$(dirname -- "$0")/_/husky.sh"
 
+# Pre-push guardrails (lightweight locally). Full test suite runs in CI.
 npm run lint || exit 1
-npm test || exit 1
 
 # Only run live DB checks if envs present
 if [ -n "$SUPABASE_URL" ] && [ -n "$SUPABASE_ANON_KEY" ]; then

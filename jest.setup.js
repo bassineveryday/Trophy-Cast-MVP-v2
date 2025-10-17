@@ -25,7 +25,7 @@ jest.mock('./lib/supabase', () => {
 
   // create a chainable query builder similar to the lightweight mock in the real module
   const createChain = () => {
-    const chain: any = {};
+  const chain = {};
     const result = { data: [], error: null };
     const returnThis = () => chain;
 
@@ -33,7 +33,7 @@ jest.mock('./lib/supabase', () => {
       if (m === 'maybeSingle' || m === 'single') {
         chain[m] = async () => ({ data: null, error: null });
       } else if (m === 'then') {
-        chain.then = (onFulfilled: any, onRejected: any) => Promise.resolve(result).then(onFulfilled, onRejected);
+  chain.then = (onFulfilled, onRejected) => Promise.resolve(result).then(onFulfilled, onRejected);
       } else {
         chain[m] = jest.fn(returnThis);
       }
@@ -83,9 +83,25 @@ jest.mock('@react-navigation/native', () => ({
 // don't need the real provider. Tests that need specific behavior can still mock this module.
 jest.mock('./lib/ThemeContext', () => {
   const lightTheme = {
+    // palette
+    mode: 'light',
     background: '#fff', surface: '#fff', card: '#fff', text: '#000', textSecondary: '#333', textMuted: '#777',
-    primary: '#4CAF50', primaryLight: '#81C784', primaryDark: '#388E3C', accent: '#2196F3', success: '#4CAF50', warning: '#FF9800', error: '#E91E63',
-    border: '#e0e0e0', shadow: '#000', overlay: 'rgba(0,0,0,0.5)', gold: '#FFD700', silver: '#C0C0C0', bronze: '#CD7F32', active: '#4CAF50', inactive: '#9E9E9E'
+    primary: '#4CAF50', primaryLight: '#81C784', primaryDark: '#388E3C', onPrimary: '#ffffff',
+    accent: '#2196F3', success: '#4CAF50', warning: '#FF9800', error: '#E91E63',
+    border: '#e0e0e0', shadow: '#000', overlay: 'rgba(0,0,0,0.5)',
+    gold: '#FFD700', silver: '#C0C0C0', bronze: '#CD7F32', active: '#4CAF50', inactive: '#9E9E9E',
+    gradients: {
+      hero: ['#00B4DB', '#0083B0'],
+      accent: ['#FFD700', '#FF8C00'],
+    },
+    typography: {
+      sizes: { h1: 28, h2: 22, h3: 18, body: 14, caption: 12 },
+      family: { bold: 'System', regular: 'System' },
+    },
+    layout: {
+      spacing: { xs: 4, sm: 8, md: 12, lg: 16, xl: 20, xxl: 28 },
+      radius: { sm: 6, md: 10, lg: 14, xl: 20 },
+    },
   };
   return {
     ThemeProvider: ({ children }) => children,
@@ -94,11 +110,19 @@ jest.mock('./lib/ThemeContext', () => {
   };
 });
 
+// Mock expo-linear-gradient to avoid native implementation in tests
+jest.mock('expo-linear-gradient', () => {
+  const React = require('react');
+  const { View } = require('react-native');
+  const LinearGradient = ({ children, style }) => React.createElement(View, { style }, children);
+  return { LinearGradient };
+});
+
 // Strengthen the Supabase mock so chained calls (select().ilike().order() etc.) are supported and awaitable.
 jest.mock('./lib/supabase', () => {
   // create a chainable thenable object
   const createChain = () => {
-    const chain: any = {};
+  const chain = {};
     const result = { data: [], error: null };
     const returnThis = () => chain;
 
