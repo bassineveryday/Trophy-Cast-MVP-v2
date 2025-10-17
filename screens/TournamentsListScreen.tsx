@@ -8,14 +8,16 @@ import Card from '../components/Card';
 import ListRow from '../components/ListRow';
 import { useTheme } from '../lib/ThemeContext';
 import { makeStyles } from '../lib/designTokens';
+import { TABLE_TOURNAMENTS } from '../lib/db/tables';
 
-interface Tournament {
-  tournament_id: string;
-  name: string;
+// Align with the central supabase types and data shape
+interface TournamentEvent {
+  event_id: string;
+  tournament_code?: string | null;
+  tournament_name: string;
   lake: string;
   event_date: string;
-  entry_fee: number;
-  club_id: string;
+  participants?: number | null;
 }
 
 type FilterType = 'upcoming' | 'past';
@@ -109,7 +111,7 @@ export default function TournamentsListScreen() {
   const navigation = useNavigation();
   const { theme } = useTheme();
   const themedStyles = styles(theme);
-  const [tournaments, setTournaments] = useState<Tournament[]>([]);
+  const [tournaments, setTournaments] = useState<TournamentEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<FilterType>('upcoming');
 
@@ -117,8 +119,8 @@ export default function TournamentsListScreen() {
     setLoading(true);
     const today = new Date().toISOString().slice(0, 10);
     let query = supabase
-      .from('tournaments')
-      .select('*')
+      .from(TABLE_TOURNAMENTS)
+      .select('event_id, tournament_code, tournament_name, event_date, lake, participants')
       .order('event_date', { ascending: filter === 'upcoming' });
     if (filter === 'upcoming') {
       query = query.gte('event_date', today);
@@ -154,7 +156,7 @@ export default function TournamentsListScreen() {
     return tournamentDate >= today;
   };
 
-  const renderTournament = ({ item }: { item: Tournament }) => {
+  const renderTournament = ({ item }: { item: TournamentEvent }) => {
     const upcoming = isUpcoming(item.event_date);
     const formattedDate = formatDate(item.event_date);
     
@@ -162,22 +164,22 @@ export default function TournamentsListScreen() {
       <View style={themedStyles.cardContainer}>
         <TouchableOpacity
           activeOpacity={0.8}
-          onPress={() => (navigation as any).navigate('TournamentDetail', { tournamentId: item.tournament_id })}
+          onPress={() => (navigation as any).navigate('TournamentDetail', { tournamentId: item.event_id })}
           style={themedStyles.cardWrapper}
           accessible={true}
           accessibilityRole="button"
-          accessibilityLabel={`${item.name} at ${item.lake}, ${formattedDate}, entry fee $${item.entry_fee}`}
+          accessibilityLabel={`${item.tournament_name} at ${item.lake}, ${formattedDate}`}
           accessibilityHint="Tap to view tournament details"
         >
           <Card padding="xs" elevation="sm">
             <ListRow
               icon="trophy"
               iconColor={upcoming ? theme.warning : theme.textMuted}
-              title={item.name}
+              title={item.tournament_name}
               subtitle={`📍 ${item.lake}`}
               metadata={`📅 ${formattedDate}`}
-              rightValue={`$${item.entry_fee}`}
-              rightLabel="entry fee"
+              rightValue={typeof item.participants === 'number' ? String(item.participants) : undefined}
+              rightLabel={typeof item.participants === 'number' ? 'anglers' : undefined}
               rightColor={theme.primary}
               showChevron
             />
@@ -237,7 +239,7 @@ export default function TournamentsListScreen() {
       ) : (
         <FlatList
           data={tournaments}
-          keyExtractor={item => item.tournament_id}
+          keyExtractor={item => item.event_id}
           renderItem={renderTournament}
           ListHeaderComponent={renderStickyHeader}
           stickyHeaderIndices={[0]}

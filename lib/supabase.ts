@@ -288,7 +288,7 @@ export const fetchTournamentEvents = async () => {
     console.log('🔵 Fetching tournament events...');
     
     const { data, error } = await supabase
-      .from('tournament_events')
+      .from('events_public')
       .select('*')
       .order('event_date', { ascending: false, nullsFirst: false });
 

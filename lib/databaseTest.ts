@@ -45,7 +45,7 @@ export const testDatabaseConnection = async (): Promise<DatabaseStatus> => {
     console.log('🔍 Testing Supabase connection...');
     
     // Test each table and count records
-    const tables = ['tournament_events', 'aoy_standings', 'tournament_members', 'profiles'];
+  const tables = ['events_public', 'aoy_standings', 'tournament_members', 'profiles'];
     
     for (const table of tables) {
       try {

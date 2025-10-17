@@ -62,7 +62,7 @@ async function runHealthCheck() {
 
     // Test 1.2: Check tournament_events table
     const { data: eventsData, error: eventsError } = await supabase
-      .from('tournament_events')
+  .from('events_public')
       .select('event_id, tournament_code, tournament_name, event_date, lake')
       .limit(1);
 
@@ -120,7 +120,7 @@ async function runHealthCheck() {
 
   try {
     const { data: events } = await supabase
-      .from('tournament_events')
+  .from('events_public')
       .select('tournament_code, tournament_name, event_date')
       .limit(5);
 
@@ -197,7 +197,7 @@ async function runHealthCheck() {
   try {
     // Find potential multi-day tournaments (same base name, different dates)
     const { data: allEvents } = await supabase
-      .from('tournament_events')
+  .from('events_public')
       .select('tournament_code, tournament_name, event_date')
       .order('event_date', { ascending: false })
       .limit(50);
@@ -291,7 +291,7 @@ async function runHealthCheck() {
 
   try {
     const { data: events } = await supabase
-      .from('tournament_events')
+  .from('events_public')
       .select('tournament_code, tournament_name')
       .limit(3);
 
@@ -384,7 +384,7 @@ async function runHealthCheck() {
 
   try {
     const { data: nortonEvents } = await supabase
-      .from('tournament_events')
+  .from('events_public')
       .select('*')
       .order('event_date', { ascending: true })
       .limit(100);

@@ -145,7 +145,7 @@ export function useDashboard(memberCode: string | undefined) {
 
       // Next tournament
       const { data: nextRaw, error: nextError } = await supabase
-        .from('tournament_events')
+        .from('events_public')
         .select('lake, event_date, tournament_name')
         .gte('event_date', new Date().toISOString().slice(0, 10))
         .order('event_date', { ascending: true })
@@ -293,14 +293,14 @@ export function useMultiDayTournamentResults(tournamentCode?: string) {
       // fetch base event row: try by tournament_code first, then by event_id
       let eventRow: any = null;
       const { data: byCode } = await supabase
-        .from('tournament_events')
+        .from('events_public')
         .select('event_id, tournament_code, tournament_name, event_date, lake')
         .eq('tournament_code', tournamentCode)
         .maybeSingle();
       if (byCode) eventRow = byCode;
       else {
         const { data: byId } = await supabase
-          .from('tournament_events')
+          .from('events_public')
           .select('event_id, tournament_code, tournament_name, event_date, lake')
           .eq('event_id', tournamentCode)
           .maybeSingle();
@@ -313,7 +313,7 @@ export function useMultiDayTournamentResults(tournamentCode?: string) {
       const to = new Date(refDate); to.setDate(refDate.getDate() + 3);
 
       const { data: siblingEvents } = await supabase
-        .from('tournament_events')
+        .from('events_public')
         .select('event_id, tournament_code, tournament_name, event_date, lake')
         .ilike('tournament_name', `%${baseName}%`)
         .gte('event_date', from.toISOString().slice(0,10))

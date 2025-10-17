@@ -67,7 +67,7 @@ describe('🏥 Tournament Health Check Suite', () => {
 
     it('should verify tournament_events table exists with correct columns', async () => {
       const { data, error } = await supabase
-        .from('tournament_events')
+  .from('events_public')
         .select('event_id, tournament_code, tournament_name, event_date, lake')
         .limit(1);
 
@@ -108,7 +108,7 @@ describe('🏥 Tournament Health Check Suite', () => {
     it('should fetch live tournament results for a specific tournament code', async () => {
       // Query for Norton tournament or any available tournament
       const { data: events } = await supabase
-        .from('tournament_events')
+  .from('events_public')
         .select('tournament_code, tournament_name')
         .limit(1);
 

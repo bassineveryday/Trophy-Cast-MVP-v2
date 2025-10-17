@@ -22,6 +22,7 @@ import EnhancedProfileScreen from './components/EnhancedProfileScreen';
 import ComprehensiveMemberProfile from './screens/ComprehensiveMemberProfile';
 import EnhancedAOYScreen from './components/EnhancedAOYScreen';
 import RegisterScreen from './screens/RegisterScreen';
+import RegisterScreenEnhanced from './screens/RegisterScreen_enhanced';
 import ClubScreen from './screens/ClubScreen';
 import TournamentDetailScreen from './screens/TournamentDetailScreen';
 
@@ -48,6 +49,9 @@ type RootStackParamList = {
 const Tab = createBottomTabNavigator<TabParamList>();
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const TournamentStack = createNativeStackNavigator<TournamentStackParamList>();
+
+// Feature flags (flip when ready)
+const ENABLE_ENHANCED_REGISTRATION = false;
 
 function TournamentStackNavigator() {
   return (
@@ -141,6 +145,7 @@ function TabNavigator() {
 
 function Navigation() {
   const { user, profile, loading } = useAuth();
+  const RegisterComponent = ENABLE_ENHANCED_REGISTRATION ? RegisterScreenEnhanced : RegisterScreen;
 
   if (loading) {
     return null; // Or a loading screen
@@ -149,7 +154,7 @@ function Navigation() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       {!user || !profile ? (
-        <Stack.Screen name="Register" component={RegisterScreen} />
+        <Stack.Screen name="Register" component={RegisterComponent} />
       ) : (
         <Stack.Screen name="Main" component={TabNavigator} />
       )}

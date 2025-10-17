@@ -78,6 +78,87 @@
 				"$eslint-stylish"
 			],
 			"group": "build"
+		},
+		{
+			"label": "lint",
+			"type": "shell",
+			"command": "npm run lint",
+			"problemMatcher": [
+				"$eslint-stylish"
+			],
+			"group": "build"
+		},
+		{
+			"label": "run tests",
+			"type": "shell",
+			"command": "npm test --silent -- --runInBand",
+			"group": "build"
+		},
+		{
+			"label": "lint",
+			"type": "shell",
+			"command": "npm run lint",
+			"problemMatcher": [
+				"$eslint-stylish"
+			],
+			"group": "build"
+		},
+		{
+			"label": "run tests",
+			"type": "shell",
+			"command": "npm test --silent -- --runInBand",
+			"group": "build"
+		},
+		{
+			"label": "lint",
+			"type": "shell",
+			"command": "npm run lint",
+			"problemMatcher": [
+				"$eslint-stylish"
+			],
+			"group": "build"
+		},
+		{
+			"label": "run tests",
+			"type": "shell",
+			"command": "npm test --silent -- --runInBand",
+			"group": "build"
+		},
+		{
+			"label": "lint",
+			"type": "shell",
+			"command": "npm run lint",
+			"group": "build"
+		},
+		{
+			"label": "run tests",
+			"type": "shell",
+			"command": "npm test --silent -- --runInBand",
+			"group": "build"
+		},
+		{
+			"label": "lint",
+			"type": "shell",
+			"command": "npm run lint",
+			"group": "build"
+		},
+		{
+			"label": "run tests",
+			"type": "shell",
+			"command": "npm test --silent -- --runInBand",
+			"group": "build"
+		},
+		{
+			"label": "lint",
+			"type": "shell",
+			"command": "npm run lint",
+			"group": "build"
+		},
+		{
+			"label": "run tests",
+			"type": "shell",
+			"command": "npm test --silent -- --runInBand",
+			"group": "build"
 		}
 	]
 }
