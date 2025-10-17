@@ -1,4 +1,9 @@
 /* AOY Audit: recompute Best-4 per season from tournament_results and compare to aoy_standings. */
+// Load env from .env.local and .env if available
+try {
+  require('dotenv').config({ path: '.env.local' });
+  require('dotenv').config();
+} catch (_) {}
 const { createClient } = require('@supabase/supabase-js');
 
 // --- Arg parsing / flags ---

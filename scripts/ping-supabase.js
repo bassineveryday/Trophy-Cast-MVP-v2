@@ -1,4 +1,9 @@
 /* Where Every Cast Counts. */
+// Load env from .env.local and .env if available
+try {
+  require('dotenv').config({ path: '.env.local' });
+  require('dotenv').config();
+} catch (_) {}
 const { createClient } = require('@supabase/supabase-js');
 
 const url = process.env.SUPABASE_URL || process.env.EXPO_PUBLIC_SUPABASE_URL;
