@@ -310,12 +310,6 @@ function MemberCard({ member, sortBy, onPress }: MemberCardProps) {
 
   return (
     <Pressable style={styles.memberCard} onPress={onPress}>
-      {/* Rank Badge with Medal */}
-      <View style={styles.rankBadge}>
-        <Text style={styles.medalIcon}>{getMedalIcon()}</Text>
-        <Text style={styles.rankText}>#{member.rank}</Text>
-      </View>
-
       {/* Image + Info */}
       <View style={styles.memberInfo}>
         {/* Officer Photo */}
@@ -338,6 +332,14 @@ function MemberCard({ member, sortBy, onPress }: MemberCardProps) {
               </Text>
             </View>
           </View>
+
+          {/* Top Finish Badge - 2025 Season */}
+          {member.medal !== 'none' && (
+            <View style={styles.topFinishBadge}>
+              <Text style={styles.medalIcon}>{getMedalIcon()}</Text>
+              <Text style={styles.topFinishText}>Top Finish 2025</Text>
+            </View>
+          )}
 
           <View style={styles.memberStats}>
             <Text style={styles.memberStatText}>🎣 {member.catches}</Text>
@@ -493,26 +495,6 @@ function createStyles() {
       gap: 12,
     },
 
-    rankBadge: {
-      width: 50,
-      height: 50,
-      borderRadius: 25,
-      backgroundColor: COLORS.gold,
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: 2,
-    },
-
-    medalIcon: {
-      fontSize: 18,
-    },
-
-    rankText: {
-      fontSize: 10,
-      fontWeight: '700',
-      color: COLORS.navy,
-    },
-
     // MEMBER INFO
     memberInfo: {
       flex: 1,
@@ -558,6 +540,27 @@ function createStyles() {
     roleText: {
       fontSize: 8,
       fontWeight: '600',
+    },
+
+    // TOP FINISH BADGE - 2025 SEASON
+    topFinishBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+      borderRadius: 4,
+      backgroundColor: 'rgba(201, 166, 70, 0.1)',
+    },
+
+    medalIcon: {
+      fontSize: 14,
+    },
+
+    topFinishText: {
+      fontSize: 9,
+      fontWeight: '600',
+      color: COLORS.gold,
     },
 
     memberStats: {
