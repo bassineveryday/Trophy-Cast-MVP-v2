@@ -57,9 +57,17 @@ export function useBoardAccess() {
         }
 
         if (isMounted) {
-          setIsBoard(!!data);
+          const isboardMember = !!data;
+          setIsBoard(isboardMember);
           setRole(data?.role ?? null);
-          console.log('✅ Board access check:', { isBoard: !!data, role: data?.role ?? null, userId: user.id, data });
+          console.log('✅ Board access check:', { 
+            isBoard: isboardMember, 
+            role: data?.role ?? null, 
+            userId: user.id, 
+            data,
+            queryError: error?.message,
+            dataExists: !!data,
+          });
         }
       } catch (e: any) {
         if (isMounted) {

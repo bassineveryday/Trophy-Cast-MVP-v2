@@ -55,7 +55,6 @@ const BOARD_ROLES: Record<string, string> = {
 
 export function DBMMembersScreen() {
   const navigation = useNavigation();
-  const { isBoard } = useBoardAccess();
   const [members, setMembers] = useState<DBMMember[]>([]);
   const [filteredMembers, setFilteredMembers] = useState<DBMMember[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -189,15 +188,6 @@ export function DBMMembersScreen() {
           <Text style={styles.memberCount}>
             {filteredMembers.length} of {members.length} members
           </Text>
-          {isBoard && (
-            <Pressable
-              onPress={() => (navigation as any).navigate('BoardBackOffice')}
-              style={styles.boardToolsButton}
-            >
-              <Ionicons name="shield-checkmark" size={16} color={COLORS.navy} />
-              <Text style={styles.boardToolsText}>Board Tools</Text>
-            </Pressable>
-          )}
         </View>
       </View>
 
@@ -262,20 +252,8 @@ function createStyles() {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-    },
-    boardToolsButton: {
-      flexDirection: 'row',
-      backgroundColor: COLORS.gold,
-      paddingHorizontal: 12,
-      paddingVertical: 6,
-      borderRadius: 6,
-      alignItems: 'center',
-      gap: 6,
-    },
-    boardToolsText: {
-      color: COLORS.navy,
-      fontWeight: '700',
-      fontSize: 12,
+      gap: 12,
+      minHeight: 44,
     },
     listContent: {
       paddingHorizontal: 16,
