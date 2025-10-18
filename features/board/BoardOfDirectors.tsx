@@ -195,37 +195,11 @@ export function BoardOfDirectors({
       {/* HEADER */}
       <View style={styles.header}>
         <View>
-          <Text style={styles.headerTitle}>🏆 Board of Directors</Text>
-          <Text style={styles.headerSubtitle}>{clubName} 2025</Text>
+          <Text style={styles.headerTitle}>Denver BassMasters 2025</Text>
+          <Text style={styles.headerSubtitle}>🏆 Board of Directors</Text>
         </View>
         <Pressable style={styles.headerIcon} onPress={() => console.log('Filter')}>
           <Ionicons name="funnel" size={24} color={COLORS.gold} />
-        </Pressable>
-      </View>
-
-      {/* CLUB STATS OVERVIEW */}
-      <View style={styles.clubStatsContainer}>
-        <View style={styles.clubStatCard}>
-          <Ionicons name="people" size={24} color={COLORS.gold} />
-          <Text style={styles.clubStatLabel}>Board Members</Text>
-          <Text style={styles.clubStatValue}>{REAL_BOARD_MEMBERS.length}</Text>
-        </View>
-      </View>
-
-      {/* SORT TABS */}
-      <View style={styles.sortTabs}>
-        <Pressable
-          style={[styles.sortTab, sortBy === 'catches' && styles.sortTabActive]}
-          onPress={() => setSortBy('catches')}
-        >
-          <Text
-            style={[
-              styles.sortTabText,
-              sortBy === 'catches' && styles.sortTabTextActive,
-            ]}
-          >
-            🎣 Catches
-          </Text>
         </Pressable>
       </View>
 
@@ -324,16 +298,11 @@ function MemberCard({ member, sortBy, onPress }: MemberCardProps) {
               {member.role}
             </Text>
           </View>
-
-          {/* Top Finish Badge - 2025 Season */}
-          {member.medal !== 'none' && (
-            <View style={styles.topFinishBadge}>
-              <Text style={styles.medalIcon}>{getMedalIcon()}</Text>
-              <Text style={styles.topFinishText}>Top Finish 2025</Text>
-            </View>
-          )}
         </View>
       </View>
+
+      {/* Arrow */}
+      <Ionicons name="chevron-forward" size={20} color={COLORS.gold} />
     </Pressable>
   );
 }
@@ -370,8 +339,8 @@ function createStyles() {
     },
 
     headerSubtitle: {
-      fontSize: 13,
-      fontWeight: '500',
+      fontSize: 18,
+      fontWeight: '600',
       color: COLORS.textGray,
     },
 
@@ -458,21 +427,21 @@ function createStyles() {
       borderWidth: COLORS.border,
       borderColor: COLORS.gold,
       borderRadius: COLORS.radius,
-      padding: 12,
-      gap: 12,
+      padding: 16,
+      gap: 16,
     },
 
     // MEMBER INFO
     memberInfo: {
       flex: 1,
       flexDirection: 'row',
-      gap: 10,
+      gap: 12,
     },
 
     officerPhoto: {
-      width: 50,
-      height: 50,
-      borderRadius: 25,
+      width: 65,
+      height: 65,
+      borderRadius: 32.5,
       backgroundColor: COLORS.navyBorder,
       borderWidth: 2,
       borderColor: COLORS.gold,
@@ -480,7 +449,7 @@ function createStyles() {
 
     memberDetails: {
       flex: 1,
-      gap: 4,
+      gap: 6,
     },
 
     memberHeader: {
@@ -491,7 +460,7 @@ function createStyles() {
     },
 
     memberName: {
-      fontSize: 13,
+      fontSize: 16,
       fontWeight: '700',
       color: COLORS.textLight,
     },
@@ -499,13 +468,13 @@ function createStyles() {
     roleBadge: {
       borderWidth: 1,
       borderRadius: 4,
-      paddingHorizontal: 6,
-      paddingVertical: 2,
+      paddingHorizontal: 8,
+      paddingVertical: 3,
       alignSelf: 'flex-start',
     },
 
     roleText: {
-      fontSize: 8,
+      fontSize: 10,
       fontWeight: '600',
     },
 
