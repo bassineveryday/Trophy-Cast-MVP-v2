@@ -17,6 +17,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { View, Text } from 'react-native';
 import FishingThemedHomeScreen from '../screens/FishingThemedHomeScreen';
+import { BoardOfDirectors } from '../features/board/BoardOfDirectors';
 
 const Tab = createBottomTabNavigator();
 
@@ -115,18 +116,17 @@ export default function BottomTabs() {
         {() => <ComingSoon title="AI Coach" />}
       </Tab.Screen>
 
-      {/* 💬 Community Dock */}
+      {/* 🏆 Board of Directors */}
       <Tab.Screen
-        name="CommunityDock"
+        name="Board"
+        component={BoardOfDirectors}
         options={{
           tabBarIcon: icon('people'),
-          tabBarLabel: 'Community',
+          tabBarLabel: 'Board',
         }}
-      >
-        {() => <ComingSoon title="Community Dock" />}
-      </Tab.Screen>
+      />
 
-      {/* 🏆 Trophy Room */}
+      {/* � Trophy Room */}
       <Tab.Screen
         name="TrophyRoom"
         options={{
