@@ -64,9 +64,18 @@ const COLORS = {
 interface EnhancedDashboardProps {
   loading?: boolean;
   userName?: string;
+  title?: string;
+  subtitle?: string;
+  clubRole?: string;
 }
 
-export function EnhancedDashboard({ loading = false, userName = 'Alex' }: EnhancedDashboardProps) {
+export function EnhancedDashboard({ 
+  loading = false, 
+  userName = 'Alex',
+  title = 'Trophy Cast',
+  subtitle = 'Where Every Cast Counts',
+  clubRole = 'Member',
+}: EnhancedDashboardProps) {
   const styles = useMemo(() => createStyles(), []);
 
   if (loading) {
@@ -79,15 +88,35 @@ export function EnhancedDashboard({ loading = false, userName = 'Alex' }: Enhanc
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-      {/* GREETING */}
-      <View style={styles.greeting}>
-        <Text style={styles.greetingText}>Hello, {userName}!</Text>
+      {/* HERO HEADER - Title, Subtitle, Icons */}
+      <View style={styles.heroHeader}>
+        <View style={styles.heroTitleSection}>
+          <Ionicons name="fish" size={32} color={COLORS.gold} />
+          <View style={styles.titleContent}>
+            <Text style={styles.mainTitle}>{title}</Text>
+            <Text style={styles.subtitle}>{subtitle}</Text>
+          </View>
+        </View>
+        <Pressable style={styles.settingsIcon} onPress={() => console.log('Open settings')}>
+          <Ionicons name="settings" size={24} color={COLORS.gold} />
+        </Pressable>
+      </View>
+
+      {/* USER INFO BAR - Name & Role */}
+      <View style={styles.userInfoBar}>
+        <View style={styles.userInfo}>
+          <Ionicons name="person-circle" size={40} color={COLORS.gold} />
+          <View style={styles.userDetails}>
+            <Text style={styles.userName}>Hello, {userName}!</Text>
+            <Text style={styles.userRole}>{clubRole}</Text>
+          </View>
+        </View>
         <Ionicons name="notifications" size={24} color={COLORS.gold} />
       </View>
 
       {/* LAST CATCH HERO SECTION - Gold Border */}
       <Pressable style={styles.heroCatch} onPress={() => console.log('View last catch details')}>
-        <View style={styles.heroHeader}>
+        <View style={styles.heroCatchHeader}>
           <Text style={styles.heroTitle}>🎣 Last Catch</Text>
           <Ionicons name="arrow-forward" size={16} color={COLORS.gold} />
         </View>
@@ -248,7 +277,83 @@ function createStyles() {
       paddingBottom: 20,
     },
 
-    // GREETING
+    // HERO HEADER - Title + Subtitle + Settings
+    heroHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'flex-start',
+      marginBottom: 20,
+      paddingBottom: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: COLORS.navyBorder,
+    },
+
+    heroTitleSection: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      flex: 1,
+    },
+
+    titleContent: {
+      flex: 1,
+    },
+
+    mainTitle: {
+      fontSize: 28,
+      fontWeight: '700',
+      color: COLORS.gold,
+      marginBottom: 2,
+    },
+
+    subtitle: {
+      fontSize: 12,
+      fontWeight: '500',
+      color: COLORS.textGray,
+    },
+
+    settingsIcon: {
+      padding: 8,
+    },
+
+    // USER INFO BAR
+    userInfoBar: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      backgroundColor: COLORS.navyDark,
+      borderLeftWidth: 3,
+      borderLeftColor: COLORS.gold,
+      paddingVertical: 12,
+      paddingHorizontal: 12,
+      borderRadius: 8,
+      marginBottom: 20,
+    },
+
+    userInfo: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      flex: 1,
+    },
+
+    userDetails: {
+      flex: 1,
+    },
+
+    userName: {
+      fontSize: 14,
+      fontWeight: '700',
+      color: COLORS.textLight,
+    },
+
+    userRole: {
+      fontSize: 12,
+      fontWeight: '500',
+      color: COLORS.gold,
+    },
+
+    // GREETING (old - kept for reference)
     greeting: {
       flexDirection: 'row',
       justifyContent: 'space-between',
@@ -262,7 +367,7 @@ function createStyles() {
       color: COLORS.textLight,
     },
 
-    // HERO CATCH
+    // HERO CATCH (renamed from heroHeader in JSX)
     heroCatch: {
       backgroundColor: COLORS.navyDark,
       borderWidth: COLORS.border,
@@ -273,7 +378,7 @@ function createStyles() {
       overflow: 'hidden',
     },
 
-    heroHeader: {
+    heroCatchHeader: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',

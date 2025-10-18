@@ -12,7 +12,13 @@ export default function FishingThemedHomeScreen() {
 
   return (
     <View style={styles.container}>
-      <EnhancedDashboard userName={profile?.name || 'Angler'} loading={false} />
+      <EnhancedDashboard 
+        userName={profile?.name || 'Angler'} 
+        title="Trophy Cast"
+        subtitle="Where Every Cast Counts"
+        clubRole="Denver Bassmaster Secretary"
+        loading={false} 
+      />
     </View>
   );
 }
