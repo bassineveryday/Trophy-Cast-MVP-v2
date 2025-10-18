@@ -33,55 +33,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check for dev mode bypass in AsyncStorage or auto-enable if no Supabase env vars
-    const checkDevMode = async () => {
-      try {
-        const devModeBypass = await AsyncStorage.getItem('devModeBypass');
-        // Respect explicit env override
-        const envOverride = (process.env.EXPO_PUBLIC_DEV_LOGIN || '').toLowerCase();
-        if (envOverride === 'false') {
-          // Force disable dev login, clear stored bypass
-          await AsyncStorage.removeItem('devModeBypass');
-        }
-        // Auto-enable dev mode in development when no real Supabase backend is configured
-        const shouldEnableDevMode = envOverride === 'true' || devModeBypass === 'true' ||
-          (!process.env.EXPO_PUBLIC_SUPABASE_URL || !process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY);
-        
-        if (shouldEnableDevMode) {
-          const mockUser = {
-            id: '8338ec05-7839-45b5-9b3a-115d6d485603',  // Real Tai Hunt UUID from dbm_board_members
-            email: 'tai.hunt@demo.com',
-            created_at: new Date().toISOString(),
-          };
-          
-          const mockProfile: Profile = {
-            id: '8338ec05-7839-45b5-9b3a-115d6d485603',  // Real Tai Hunt UUID
-            member_code: 'DBM019',
-            name: 'Tai Hunt',
-            hometown: 'Denver, CO',
-            created_at: new Date().toISOString(),
-          };
-          
-          // Set dev mode flag for future use
-          await AsyncStorage.setItem('devModeBypass', 'true');
-          
-          setUser(mockUser);
-          setProfile(mockProfile);
-          setLoading(false);
-          
-          console.log('🎣 Dev mode enabled - logged in as Tai Hunt (DBM019)');
-          return true;
-        }
-        return false;
-      } catch (error) {
-        console.error('Error checking dev mode:', error);
-        return false;
-      }
-    };
-
     const initAuth = async () => {
-      const isDevMode = await checkDevMode();
-      if (isDevMode) return;
+      // Clean up any old dev mode storage
+      await AsyncStorage.removeItem('devModeBypass');
 
       // Check active sessions and subscribe to auth changes
       supabase.auth.getSession().then(({ data: { session } }: any) => {
