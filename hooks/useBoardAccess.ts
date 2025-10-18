@@ -59,6 +59,7 @@ export function useBoardAccess() {
         if (isMounted) {
           setIsBoard(!!data);
           setRole(data?.role ?? null);
+          console.log('✅ Board access check:', { isBoard: !!data, role: data?.role ?? null, userId: user.id, data });
         }
       } catch (e: any) {
         if (isMounted) {

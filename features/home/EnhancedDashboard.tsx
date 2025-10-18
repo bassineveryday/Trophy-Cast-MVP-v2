@@ -22,6 +22,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { TrophyCastLogo } from '../../components/TrophyCastLogo';
+import { useBoardAccess } from '../../hooks/useBoardAccess';
 
 // Mock data - replace with real hooks later
 const MOCK_LAST_CATCH = {
@@ -68,6 +69,7 @@ interface EnhancedDashboardProps {
   title?: string;
   subtitle?: string;
   clubRole?: string;
+  navigation?: any;
 }
 
 export function EnhancedDashboard({ 
@@ -76,8 +78,10 @@ export function EnhancedDashboard({
   title = 'Trophy Cast',
   subtitle = 'Where Every Cast Counts',
   clubRole = 'Member',
+  navigation,
 }: EnhancedDashboardProps) {
   const styles = useMemo(() => createStyles(), []);
+  const { isBoard } = useBoardAccess();
 
   if (loading) {
     return (
@@ -161,6 +165,31 @@ export function EnhancedDashboard({
           </View>
         </View>
       </Pressable>
+
+      {/* BOARD ACCESS SECTION - Visible only for board members */}
+      {isBoard && (
+        <Pressable 
+          style={styles.boardCard} 
+          onPress={() => navigation?.navigate('BoardBackOffice')}
+        >
+          <View style={styles.boardCardHeader}>
+            <View style={styles.boardCardTitle}>
+              <Ionicons name="shield-checkmark" size={22} color={COLORS.gold} />
+              <Text style={styles.boardCardName}>Board Tools</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={COLORS.gold} />
+          </View>
+
+          <Text style={styles.boardCardDescription}>
+            Access board administration tools
+          </Text>
+
+          <View style={styles.boardCardFooter}>
+            <Ionicons name="arrow-forward" size={14} color={COLORS.gold} />
+            <Text style={styles.boardCardAction}>Enter Board Tools</Text>
+          </View>
+        </Pressable>
+      )}
 
       {/* STATS GRID - 2×2 */}
       <View style={styles.statsGrid}>
@@ -538,6 +567,54 @@ function createStyles() {
       justifyContent: 'center',
       width: 80,
       height: 80,
+    },
+
+    // BOARD ACCESS CARD
+    boardCard: {
+      backgroundColor: COLORS.navyDark,
+      borderWidth: COLORS.border,
+      borderColor: COLORS.gold,
+      borderRadius: COLORS.radius,
+      padding: 16,
+      marginBottom: 24,
+      overflow: 'hidden',
+    },
+
+    boardCardHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 12,
+    },
+
+    boardCardTitle: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+    },
+
+    boardCardName: {
+      fontSize: 16,
+      fontWeight: '700',
+      color: COLORS.gold,
+    },
+
+    boardCardDescription: {
+      fontSize: 12,
+      color: COLORS.textGray,
+      marginBottom: 12,
+    },
+
+    boardCardFooter: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+    },
+
+    boardCardAction: {
+      fontSize: 12,
+      fontWeight: '600',
+      color: COLORS.gold,
     },
 
     // STATS GRID

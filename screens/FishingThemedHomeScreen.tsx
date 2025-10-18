@@ -7,7 +7,7 @@ import { View, StyleSheet } from 'react-native';
 import { useAuth } from '../lib/AuthContext';
 import { EnhancedDashboard } from '../features/home/EnhancedDashboard';
 
-export default function FishingThemedHomeScreen() {
+export default function FishingThemedHomeScreen({ navigation }: any) {
   const { profile } = useAuth();
 
   return (
@@ -17,7 +17,8 @@ export default function FishingThemedHomeScreen() {
         title="Trophy Cast"
         subtitle="Where Every Cast Counts"
         clubRole="Denver Bassmaster Secretary"
-        loading={false} 
+        loading={false}
+        navigation={navigation}
       />
     </View>
   );
