@@ -319,18 +319,18 @@ function MemberCard({ member, sortBy, onPress }: MemberCardProps) {
         />
 
         <View style={styles.memberDetails}>
-          <View style={styles.memberHeader}>
-            <Text style={styles.memberName}>{member.name}</Text>
-            <View
-              style={[
-                styles.roleBadge,
-                { borderColor: getRoleColor(member.role) },
-              ]}
-            >
-              <Text style={[styles.roleText, { color: getRoleColor(member.role) }]}>
-                {member.role}
-              </Text>
-            </View>
+          <Text style={styles.memberName}>{member.name}</Text>
+          
+          {/* Title Badge - Under Name */}
+          <View
+            style={[
+              styles.roleBadge,
+              { borderColor: getRoleColor(member.role) },
+            ]}
+          >
+            <Text style={[styles.roleText, { color: getRoleColor(member.role) }]}>
+              {member.role}
+            </Text>
           </View>
 
           {/* Top Finish Badge - 2025 Season */}
@@ -527,7 +527,6 @@ function createStyles() {
       fontSize: 13,
       fontWeight: '700',
       color: COLORS.textLight,
-      flex: 1,
     },
 
     roleBadge: {
@@ -535,6 +534,7 @@ function createStyles() {
       borderRadius: 4,
       paddingHorizontal: 6,
       paddingVertical: 2,
+      alignSelf: 'flex-start',
     },
 
     roleText: {
