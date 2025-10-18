@@ -21,6 +21,8 @@ interface Profile {
   hometown: string;
   created_at: string;
   avatar_url?: string;
+  first_login_at?: string | null;
+  is_complete?: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);

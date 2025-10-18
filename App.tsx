@@ -1,11 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider, toNavigationTheme, useTheme } from './lib/ThemeContext';
-import { AuthProvider } from './lib/AuthContext';
-import FishingThemedHomeScreen from './screens/FishingThemedHomeScreen';
+import { AuthProvider, useAuth } from './lib/AuthContext';
+import { useEntryRoute } from './hooks/useEntryRoute';
+import BottomTabs from './navigation/BottomTabs';
+import OnboardingSheet from './components/OnboardingSheet';
 import TournamentsScreen from './screens/TournamentsScreen';
 import TournamentDetailScreen from './screens/TournamentDetailScreen';
 import ProfileScreen from './screens/ProfileScreen';
@@ -16,15 +18,47 @@ const Stack = createNativeStackNavigator();
 
 function AppNavigator() {
 	const { theme } = useTheme();
+	const { user } = useAuth();
+	const { route, showOnboarding } = useEntryRoute();
+	const [onboardingDismissed, setOnboardingDismissed] = useState(false);
+
+	// If not logged in, show empty screen (or future Auth screens)
+	if (!user) {
+		return (
+			<NavigationContainer theme={toNavigationTheme(theme)}>
+				<Stack.Navigator screenOptions={{ headerShown: false }}>
+					<Stack.Screen 
+						name="Auth" 
+						component={() => <></>} 
+					/>
+				</Stack.Navigator>
+			</NavigationContainer>
+		);
+	}
+
 	return (
 		<NavigationContainer theme={toNavigationTheme(theme)}>
-			<Stack.Navigator initialRouteName="Home" screenOptions={{ headerShown: false }}>
-				<Stack.Screen name="Home" component={FishingThemedHomeScreen} />
-				<Stack.Screen name="Tournaments" component={TournamentsScreen} />
-				<Stack.Screen name="TournamentDetail" component={TournamentDetailScreen} />
-				<Stack.Screen name="Profile" component={ProfileScreen} />
-				<Stack.Screen name="AOY" component={AOYScreen} />
+			<Stack.Navigator screenOptions={{ headerShown: false }}>
+				{/* Main Tab Navigation */}
+				<Stack.Screen 
+					name="MainTabs" 
+					component={BottomTabs}
+				/>
+
+				{/* Overlay screens (modal-style) */}
+				<Stack.Group screenOptions={{ presentation: 'modal' }}>
+					<Stack.Screen name="Tournaments" component={TournamentsScreen} />
+					<Stack.Screen name="TournamentDetail" component={TournamentDetailScreen} />
+					<Stack.Screen name="Profile" component={ProfileScreen} />
+					<Stack.Screen name="AOY" component={AOYScreen} />
+				</Stack.Group>
 			</Stack.Navigator>
+
+			{/* Onboarding Sheet (overlay on top of navigation) */}
+			<OnboardingSheet
+				isVisible={showOnboarding && !onboardingDismissed}
+				onComplete={() => setOnboardingDismissed(true)}
+			/>
 		</NavigationContainer>
 	);
 }
