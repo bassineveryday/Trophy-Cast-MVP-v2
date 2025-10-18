@@ -29,7 +29,7 @@ const REAL_BOARD_MEMBERS = [
   {
     id: 1,
     name: 'Jeremiah Hofstetter',
-    role: 'President',
+    role: 'DBM President',
     imageUrl: '',
     catches: 18,
     personalBest: 6.1,
@@ -43,7 +43,7 @@ const REAL_BOARD_MEMBERS = [
   {
     id: 2,
     name: 'Bobby Martin',
-    role: 'Vice President',
+    role: 'DBM Vice President',
     imageUrl: 'https://lh3.googleusercontent.com/sitesv/AICyYdZ1qaSJrqW7AANY-G2HXt2ZDQgA1Ck3EZwVfEDp0myRAdD-XwWcfkx61mWHb5DmX_dxaci_8p5VBJ-BNbaGmocxXoDiWWTYyWg2kUpI5wfMFVXA3flVoTor5ydBwVq1XUbUq8Ddz7pSR50Lj5Ae2OxLL3XIW1gg5Jf6MXNzOeX3sLAcUSjiVmkdz90Sq9_9vF4BZvgEm3iYVav4pyfCqErUr1Ah2l2DLwq0SD8=w1280',
     catches: 15,
     personalBest: 5.8,
@@ -57,7 +57,7 @@ const REAL_BOARD_MEMBERS = [
   {
     id: 3,
     name: 'Tai Hunt',
-    role: 'Secretary',
+    role: 'DBM Secretary',
     imageUrl: 'https://lh3.googleusercontent.com/sitesv/AICyYdb-e6GkdcQJ7WIWJxtcb222okTNA4HBIT4s89h2WH7lusl2bCIKRCbZDPOM3AjAEzosEYun219J34S7i_D3kBIcjs4xY0oSXonC-lFJlrSOGy-aZ4CyNwQhfCCKAqq4hn3js-bZ9e97NE-dLZTxsriH3K8P6aH6y248xWbcXTfp45y8qVkALwvBCcuwXm8ANZAuQ5rsI80k9GvQpn-_LOnLi_iisLpOV9yX=w1280',
     catches: 12,
     personalBest: 5.2,
@@ -71,7 +71,7 @@ const REAL_BOARD_MEMBERS = [
   {
     id: 4,
     name: 'Gordon Phair',
-    role: 'Treasurer',
+    role: 'DBM Treasurer',
     imageUrl: 'https://lh3.googleusercontent.com/sitesv/AICyYdawwcMINyb6v9yeNV9aXl_nf892bGGSb_wkggmNnWhSHKr7aMGw6lPvX9Opdhnu-KSnDWiw9yHSF6i8WanOYADavpmNIbf0_9cgJ-dGpeMNTEX9c42-CjQZn_dMIn4csW8iulK-iYtBatFKY1dup8T0YexTgNUgDqPn-79lcG8kTQHYUfwo1aJFmiTaJHR31V_PtU9NTC97A9Brx_umfnbggFLfjkFswKUoye4=w1280',
     catches: 14,
     personalBest: 5.5,
@@ -85,7 +85,7 @@ const REAL_BOARD_MEMBERS = [
   {
     id: 5,
     name: 'Howard Binkley',
-    role: 'Tournament Director',
+    role: 'DBM Tournament Director',
     imageUrl: 'https://lh3.googleusercontent.com/sitesv/AICyYdaYKtPuRS3MM1B8ZQcv6Yn6GBxMRpSdy9L2y90zZCdHu01sW2k5kUidqWR9JTXQ8r93rvBB5gztIKSxIN0dQ6PN28kBgK1H4Gr5B3IbR_SeXk3joFjqFF5BWYUgBS5XaIN78ZNuy5dvd8X6MWJ7IWaJkztdI0rzainVyXOETdO4NbPqbqjhUJIHzjc8YwlDk9JeiwxH-g2UpQv7rjDf6UoqBp3hSCSD-506=w1280',
     catches: 9,
     personalBest: 4.9,
@@ -99,7 +99,7 @@ const REAL_BOARD_MEMBERS = [
   {
     id: 6,
     name: 'Justin Apfel',
-    role: 'Conservation Director',
+    role: 'DBM Conservation Director',
     imageUrl: 'https://lh3.googleusercontent.com/sitesv/AICyYdZytGEAKYAn3LXKrdvxB23KJbwB2KOk2F5qswaDGclVNYTARlhewru4tSixNw095TkD7n4XZ5Rfzwl3zQOVXk2xBoWPvvhKksBPHxb1A8Q82qOTjG9jf-dL9k7zKZ7UdUSWUwtWBZn4FybTtSrU3ts2572UHm_DlXRxjt9ztaIfuTP_69LYeJqs8Acgx3V5RDaLsJSCEL51jZLwSInBe-c2YIC4fAAT3SIN=w1280',
     catches: 8,
     personalBest: 4.7,
@@ -113,7 +113,7 @@ const REAL_BOARD_MEMBERS = [
   {
     id: 7,
     name: 'Cliff Purslow',
-    role: 'Juniors Director',
+    role: 'DBM Juniors Director',
     imageUrl: 'https://lh3.googleusercontent.com/sitesv/AICyYdbBv2BDb9lJBpzizCfTltaYfFNLNk7je5bA2mP39BoAxThkgktOZEn_mXD7k5zIYGZTePaotLauw8C1E1Cggx_qRCjDlGxL_igqLQayR3hp-xMVc5PlCDv5AFLnCIKWDvFGkyG6jK_NNqDpwqzBvz_mT8ga6hnLUvySH99oNWJ-quAMAELA_zCC4Qj2ES-1gqRnfQZihucMtU9HpFB01Cb1s8Q5C8sx2czZIB4=w1280',
     catches: 7,
     personalBest: 4.3,
@@ -127,7 +127,7 @@ const REAL_BOARD_MEMBERS = [
   {
     id: 8,
     name: 'Bill Cancellieri',
-    role: 'High School Director',
+    role: 'DBM High School Director',
     imageUrl: 'https://lh3.googleusercontent.com/sitesv/AICyYdZVvj3sbMr7JDvcCGM8kJpCJoMweIiP1yBQF5iBJ06srdS58JgHo9t8YC4JBtzlPLU8VZpsEguSIdAb0s5TxupHD_oPd8GsHY23Wogeq-sqJqrQBYy008SEEjDtYX5Uc_-MbOPNUgEo_df4EqVnQF2AtzNbBX9oAXz9UXor_XCKPMZQsWgNoZpM_LaVSPToSKiciVQvhpILIszOxcvsU8oBVqwuU5VzM1wC5I8=w1280',
     catches: 6,
     personalBest: 4.1,
@@ -209,14 +209,6 @@ export function BoardOfDirectors({
           <Ionicons name="people" size={24} color={COLORS.gold} />
           <Text style={styles.clubStatLabel}>Board Members</Text>
           <Text style={styles.clubStatValue}>{REAL_BOARD_MEMBERS.length}</Text>
-        </View>
-
-        <View style={styles.clubStatCard}>
-          <Ionicons name="fish" size={24} color={COLORS.gold} />
-          <Text style={styles.clubStatLabel}>Total Catches</Text>
-          <Text style={styles.clubStatValue}>
-            {REAL_BOARD_MEMBERS.reduce((sum, m) => sum + m.catches, 0)}
-          </Text>
         </View>
       </View>
 
@@ -340,33 +332,8 @@ function MemberCard({ member, sortBy, onPress }: MemberCardProps) {
               <Text style={styles.topFinishText}>Top Finish 2025</Text>
             </View>
           )}
-
-          <View style={styles.memberStats}>
-            <Text style={styles.memberStatText}>🎣 {member.catches}</Text>
-          </View>
         </View>
       </View>
-
-      {/* Main Value + Trend */}
-      <View style={styles.memberValue}>
-        <Text style={styles.mainValue}>{getMainValue()}</Text>
-        <View style={styles.trendBadge}>
-          <Text style={styles.trendIcon}>{getTrendIcon()}</Text>
-          <Text
-            style={[
-              styles.trendText,
-              member.trend === 'up' && styles.trendUp,
-              member.trend === 'down' && styles.trendDown,
-            ]}
-          >
-            {member.trendPercent > 0 && '+'}
-            {member.trendPercent}%
-          </Text>
-        </View>
-      </View>
-
-      {/* Arrow */}
-      <Ionicons name="chevron-forward" size={18} color={COLORS.gold} />
     </Pressable>
   );
 }
