@@ -18,6 +18,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { View, Text } from 'react-native';
 import FishingThemedHomeScreen from '../screens/FishingThemedHomeScreen';
 import { BoardOfDirectors } from '../features/board/BoardOfDirectors';
+import { ClubInfo } from '../features/club/ClubInfo';
 
 const Tab = createBottomTabNavigator();
 
@@ -126,16 +127,15 @@ export default function BottomTabs() {
         }}
       />
 
-      {/* � Trophy Room */}
+      {/* 🏛️ Club Info */}
       <Tab.Screen
-        name="TrophyRoom"
+        name="Club"
+        component={ClubInfo}
         options={{
-          tabBarIcon: icon('fish'),
-          tabBarLabel: 'Trophy Room',
+          tabBarIcon: icon('information-circle'),
+          tabBarLabel: 'Club',
         }}
-      >
-        {() => <ComingSoon title="Trophy Room" />}
-      </Tab.Screen>
+      />
     </Tab.Navigator>
   );
 }
