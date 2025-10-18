@@ -16,6 +16,7 @@ import { MemberProfileScreen } from './screens/MemberProfileScreen';
 import { DBMMembersScreen } from './screens/DBMMembersScreen';
 import { DBMAOYScreen } from './screens/DBMAOYScreen';
 import { BoardBackOfficeScreen } from './screens/BoardBackOfficeScreen';
+import { BoardAccessDiagnostic } from './components/BoardAccessDiagnostic';
 
 // App entry: make sure no stray SQL or debug text ends up in this TSX file.
 const Stack = createNativeStackNavigator();
@@ -97,6 +98,18 @@ function AppNavigator() {
 					options={{
 						headerShown: true,
 						headerTitle: 'Board Back Office',
+						headerTintColor: '#C9A646',
+						headerStyle: {
+							backgroundColor: '#0B1A2F',
+						},
+					}}
+				/>
+				<Stack.Screen 
+					name="BoardAccessDiagnostic" 
+					component={BoardAccessDiagnostic}
+					options={{
+						headerShown: true,
+						headerTitle: 'Board Access Diagnostic',
 						headerTintColor: '#C9A646',
 						headerStyle: {
 							backgroundColor: '#0B1A2F',
