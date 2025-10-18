@@ -88,30 +88,56 @@ export function EnhancedDashboard({
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-      {/* HERO HEADER - Title, Subtitle, Icons */}
-      <View style={styles.heroHeader}>
-        <View style={styles.heroTitleSection}>
-          <Ionicons name="fish" size={32} color={COLORS.gold} />
-          <View style={styles.titleContent}>
-            <Text style={styles.mainTitle}>{title}</Text>
-            <Text style={styles.subtitle}>{subtitle}</Text>
+      {/* HERO CARD - Welcome Section with Icon Badges */}
+      <View style={styles.heroCard}>
+        {/* Header Row: Avatar + Name/Role + Settings */}
+        <View style={styles.heroHeaderRow}>
+          <View style={styles.avatarPlaceholder}>
+            <Text style={styles.avatarText}>
+              {userName
+                .split(' ')
+                .map((n: string) => n[0])
+                .join('')
+                .substring(0, 2)
+                .toUpperCase()}
+            </Text>
           </View>
-        </View>
-        <Pressable style={styles.settingsIcon} onPress={() => console.log('Open settings')}>
-          <Ionicons name="settings" size={24} color={COLORS.gold} />
-        </Pressable>
-      </View>
+          
+          <View style={styles.heroInfo}>
+            <Text style={styles.heroGreeting}>Welcome back, {userName}!</Text>
+            <Text style={styles.heroRole}>{clubRole}</Text>
+          </View>
 
-      {/* USER INFO BAR - Name & Role */}
-      <View style={styles.userInfoBar}>
-        <View style={styles.userInfo}>
-          <Ionicons name="person-circle" size={40} color={COLORS.gold} />
-          <View style={styles.userDetails}>
-            <Text style={styles.userName}>Hello, {userName}!</Text>
-            <Text style={styles.userRole}>{clubRole}</Text>
+          <Pressable style={styles.heroSettings} onPress={() => console.log('Open settings')}>
+            <Ionicons name="settings" size={24} color={COLORS.gold} />
+          </Pressable>
+        </View>
+
+        {/* Subtitle */}
+        <Text style={styles.heroSubtitle}>{subtitle}</Text>
+
+        {/* Icon Badges Row */}
+        <View style={styles.iconBadgesRow}>
+          <View style={styles.iconBadge}>
+            <Ionicons name="trophy" size={20} color={COLORS.gold} />
+            <Text style={styles.badgeText}>0</Text>
+          </View>
+
+          <View style={styles.iconBadge}>
+            <Ionicons name="fish" size={20} color={COLORS.gold} />
+            <Text style={styles.badgeText}>5</Text>
+          </View>
+
+          <View style={styles.iconBadge}>
+            <Ionicons name="medal" size={20} color={COLORS.gold} />
+            <Text style={styles.badgeText}>0</Text>
+          </View>
+
+          <View style={styles.iconBadge}>
+            <Ionicons name="flame" size={20} color={COLORS.gold} />
+            <Text style={styles.badgeText}>2</Text>
           </View>
         </View>
-        <Ionicons name="notifications" size={24} color={COLORS.gold} />
       </View>
 
       {/* LAST CATCH HERO SECTION - Gold Border */}
@@ -277,6 +303,92 @@ function createStyles() {
       paddingBottom: 20,
     },
 
+    // HERO CARD - Welcome Section
+    heroCard: {
+      backgroundColor: COLORS.navyDark,
+      borderRadius: COLORS.radius,
+      padding: 16,
+      marginBottom: 24,
+      gap: 12,
+    },
+
+    heroHeaderRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+    },
+
+    avatarPlaceholder: {
+      width: 50,
+      height: 50,
+      borderRadius: 25,
+      backgroundColor: COLORS.gold,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderWidth: 2,
+      borderColor: COLORS.textLight,
+    },
+
+    avatarText: {
+      fontSize: 16,
+      fontWeight: '700',
+      color: COLORS.navy,
+    },
+
+    heroInfo: {
+      flex: 1,
+      gap: 2,
+    },
+
+    heroGreeting: {
+      fontSize: 16,
+      fontWeight: '700',
+      color: COLORS.textLight,
+    },
+
+    heroRole: {
+      fontSize: 12,
+      fontWeight: '500',
+      color: COLORS.textGray,
+    },
+
+    heroSettings: {
+      padding: 8,
+    },
+
+    heroSubtitle: {
+      fontSize: 12,
+      fontWeight: '500',
+      color: COLORS.textGray,
+      marginVertical: 4,
+    },
+
+    // ICON BADGES ROW
+    iconBadgesRow: {
+      flexDirection: 'row',
+      justifyContent: 'flex-start',
+      gap: 8,
+    },
+
+    iconBadge: {
+      backgroundColor: COLORS.navy,
+      borderRadius: 12,
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      borderWidth: 1,
+      borderColor: COLORS.navyBorder,
+    },
+
+    badgeText: {
+      fontSize: 14,
+      fontWeight: '700',
+      color: COLORS.textLight,
+    },
+
+    // OLD STYLES (KEEPING FOR REFERENCE)
     // HERO HEADER - Title + Subtitle + Settings
     heroHeader: {
       flexDirection: 'row',
