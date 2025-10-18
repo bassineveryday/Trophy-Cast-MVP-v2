@@ -137,68 +137,62 @@ comment on policy "dbm_board_members_delete_deny" on public.dbm_board_members
 
 ## Step 4: Add DBM Board Members
 
-Still in SQL Editor, first find your users' UUIDs:
-
-```sql
--- Find your users in auth
-select id, email from auth.users limit 10;
-```
-
-**Copy the UUID** of each person you want to add as a board member.
-
-Then insert board members (replace UUIDs with your actual user IDs):
+Add the board members who have already signed up. Currently only **Tai Hunt** (DBM019) is registered.
 
 ```sql
 -- ============================================================
--- Insert DBM Board Members
+-- Insert DBM Board Members (So Far)
 -- Denver Bassmasters Board of Directors
 -- ============================================================
 
 insert into public.dbm_board_members (profile_id, member_id, role)
 values
-  -- Tai Hunt - DBM Secretary (verified user)
-  ('8338ec05-7839-45b5-9b3a-115d6d485603', 'DBM019', 'DBM Secretary'),
-  
-  -- Board Members (add UUIDs when available)
-  -- Jeremiah Hofstetter - DBM President
-  -- ('UUID_JEREMIAH_HERE', 'DBM001', 'DBM President'),
-  
-  -- Bobby Martin - DBM Vice President  
-  -- ('UUID_BOBBY_HERE', 'DBM002', 'DBM Vice President'),
-  
-  -- Gordon Phair - DBM Treasurer
-  -- ('UUID_GORDON_HERE', 'DBM004', 'DBM Treasurer'),
-  
-  -- Howard Binkley - DBM Tournament Director
-  -- ('UUID_HOWARD_HERE', 'DBM005', 'DBM Tournament Director'),
-  
-  -- Justin Apfel - DBM Conservation Director
-  -- ('UUID_JUSTIN_HERE', 'DBM006', 'DBM Conservation Director'),
-  
-  -- Cliff Purslow - DBM Juniors Director
-  -- ('UUID_CLIFF_HERE', 'DBM007', 'DBM Juniors Director'),
-  
-  -- Bill Cancellieri - DBM High School Director
-  -- ('UUID_BILL_HERE', 'DBM008', 'DBM High School Director');
-```
-
-**Next**: Get the UUIDs from your Supabase `auth.users` table and uncomment/fill in the board members above.
-
-**To find UUIDs**:
-```sql
-select id, email from auth.users 
-where email in (
-  'jeremiah@email.com',
-  'bobby@email.com', 
-  'gordon@email.com',
-  'howard@email.com',
-  'justin@email.com',
-  'cliff@email.com',
-  'bill@email.com'
-);
+  -- ✅ Tai Hunt - Already signed up
+  ('8338ec05-7839-45b5-9b3a-115d6d485603', 'DBM019', 'DBM Secretary');
 ```
 
 **Click Run** to execute the insert.
+
+---
+
+### Adding More Board Members (When They Sign Up)
+
+When other board members register in Trophy Cast, they'll get UUIDs. Then:
+
+**Step 1: Find their UUID**
+```sql
+select id, email from auth.users 
+where email = 'their.email@example.com';
+```
+
+**Step 2: Add them to the board**
+```sql
+insert into public.dbm_board_members (profile_id, member_id, role)
+values ('<NEW_UUID>', 'DBMXXX', 'Role Name');
+```
+
+**Example for Jeremiah Hofstetter:**
+```sql
+-- After Jeremiah signs up and you get his UUID:
+insert into public.dbm_board_members (profile_id, member_id, role)
+values ('<JEREMIAH_UUID>', 'DBM001', 'DBM President');
+```
+
+---
+
+### Other 7 Board Members (Awaiting Registration)
+
+These board members will register later:
+
+| Name | Member ID | Role | Status |
+|------|-----------|------|--------|
+| Jeremiah Hofstetter | DBM001 | President | ⏳ Not signed up yet |
+| Bobby Martin | DBM002 | Vice President | ⏳ Not signed up yet |
+| Gordon Phair | DBM004 | Treasurer | ⏳ Not signed up yet |
+| Howard Binkley | DBM005 | Tournament Director | ⏳ Not signed up yet |
+| Justin Apfel | DBM006 | Conservation Director | ⏳ Not signed up yet |
+| Cliff Purslow | DBM007 | Juniors Director | ⏳ Not signed up yet |
+| Bill Cancellieri | DBM008 | High School Director | ⏳ Not signed up yet |
 
 ---
 

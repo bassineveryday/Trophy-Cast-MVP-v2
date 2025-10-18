@@ -1,5 +1,15 @@
 # 🚀 CREATE & DEPLOY DBM BOARD TABLE
 
+## ✅ Current Status
+
+✅ **Table Ready**: `dbm_board_members` created
+✅ **Function Ready**: `is_dbm_board_member()` created  
+✅ **RLS Ready**: All 4 policies configured
+✅ **Tai Hunt**: Already registered (DBM019) - READY TO TEST
+⏳ **Other 7 Board Members**: Awaiting sign-up (will add when they register)
+
+---
+
 ## Ready to Deploy - Copy & Paste
 
 ### Step 1: Go to Supabase
@@ -74,26 +84,15 @@ create policy "dbm_board_members_delete_deny"
   to authenticated
   using (false);
 
--- 4. ADD BOARD MEMBERS
+-- 4. ADD TAI HUNT (Only registered board member so far)
 insert into public.dbm_board_members (profile_id, member_id, role)
 values 
-  -- ✅ Tai Hunt - ACTIVE
-  ('8338ec05-7839-45b5-9b3a-115d6d485603', 'DBM019', 'DBM Secretary'),
-  -- Jeremiah Hofstetter - DBM President (awaiting UUID)
-  -- ('UUID-HERE', 'DBM001', 'DBM President'),
-  -- Bobby Martin - DBM Vice President (awaiting UUID)
-  -- ('UUID-HERE', 'DBM002', 'DBM Vice President'),
-  -- Gordon Phair - DBM Treasurer (awaiting UUID)
-  -- ('UUID-HERE', 'DBM004', 'DBM Treasurer'),
-  -- Howard Binkley - DBM Tournament Director (awaiting UUID)
-  -- ('UUID-HERE', 'DBM005', 'DBM Tournament Director'),
-  -- Justin Apfel - DBM Conservation Director (awaiting UUID)
-  -- ('UUID-HERE', 'DBM006', 'DBM Conservation Director'),
-  -- Cliff Purslow - DBM Juniors Director (awaiting UUID)
-  -- ('UUID-HERE', 'DBM007', 'DBM Juniors Director'),
-  -- Bill Cancellieri - DBM High School Director (awaiting UUID)
-  -- ('UUID-HERE', 'DBM008', 'DBM High School Director')
+  ('8338ec05-7839-45b5-9b3a-115d6d485603', 'DBM019', 'DBM Secretary')
 on conflict (profile_id) do nothing;
+
+-- When other board members sign up, add them:
+-- insert into public.dbm_board_members (profile_id, member_id, role)
+-- values ('<THEIR_UUID>', 'DBMXXX', 'Their Role');
 
 -- 5. VERIFY
 select * from public.dbm_board_members;
@@ -114,28 +113,28 @@ select * from public.dbm_board_members;
 | `is_dbm_board_member()` function | ✅ Created |
 | RLS Policies (4 total) | ✅ Created |
 | Tai Hunt (DBM019) | ✅ Added |
-| Other 7 board members | ⏳ Ready to add |
+| Other 7 board members | ⏳ Will add when they sign up |
 
 ---
 
-## 👥 Board Members
+## 👥 Board Members Status
 
 | # | Name | Member ID | Role | Status |
 |---|------|-----------|------|--------|
-| 1 | Jeremiah Hofstetter | DBM001 | President | ⏳ UUID Pending |
-| 2 | Bobby Martin | DBM002 | Vice President | ⏳ UUID Pending |
+| 1 | Jeremiah Hofstetter | DBM001 | President | ⏳ Not registered yet |
+| 2 | Bobby Martin | DBM002 | Vice President | ⏳ Not registered yet |
 | 3 | **Tai Hunt** | **DBM019** | **Secretary** | ✅ **ACTIVE** |
-| 4 | Gordon Phair | DBM004 | Treasurer | ⏳ UUID Pending |
-| 5 | Howard Binkley | DBM005 | Tournament Director | ⏳ UUID Pending |
-| 6 | Justin Apfel | DBM006 | Conservation Director | ⏳ UUID Pending |
-| 7 | Cliff Purslow | DBM007 | Juniors Director | ⏳ UUID Pending |
-| 8 | Bill Cancellieri | DBM008 | High School Director | ⏳ UUID Pending |
+| 4 | Gordon Phair | DBM004 | Treasurer | ⏳ Not registered yet |
+| 5 | Howard Binkley | DBM005 | Tournament Director | ⏳ Not registered yet |
+| 6 | Justin Apfel | DBM006 | Conservation Director | ⏳ Not registered yet |
+| 7 | Cliff Purslow | DBM007 | Juniors Director | ⏳ Not registered yet |
+| 8 | Bill Cancellieri | DBM008 | High School Director | ⏳ Not registered yet |
 
 ---
 
 ## 🔄 Adding Other Board Members Later
 
-When other board members sign up:
+When board members sign up and register in Trophy Cast:
 
 ### 1. Find their UUID
 ```sql
@@ -148,7 +147,23 @@ insert into public.dbm_board_members (profile_id, member_id, role)
 values ('<UUID>', 'DBMXXX', 'Role Name');
 ```
 
-### 3. Verify
+### 3. Examples
+
+**Jeremiah Hofstetter (when he signs up):**
+```sql
+insert into public.dbm_board_members (profile_id, member_id, role)
+values ('<JEREMIAH_UUID>', 'DBM001', 'DBM President');
+```
+
+**Bobby Martin (when he signs up):**
+```sql
+insert into public.dbm_board_members (profile_id, member_id, role)
+values ('<BOBBY_UUID>', 'DBM002', 'DBM Vice President');
+```
+
+And so on for the other 5...
+
+### 4. Verify
 ```sql
 select * from public.dbm_board_members;
 ```
