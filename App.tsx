@@ -13,6 +13,8 @@ import TournamentDetailScreen from './screens/TournamentDetailScreen';
 import ProfileScreen from './screens/ProfileScreen';
 import AOYScreen from './screens/AOYScreen';
 import { MemberProfileScreen } from './screens/MemberProfileScreen';
+import { DBMMembersScreen } from './screens/DBMMembersScreen';
+import { DBMAOYScreen } from './screens/DBMAOYScreen';
 
 // App entry: make sure no stray SQL or debug text ends up in this TSX file.
 const Stack = createNativeStackNavigator();
@@ -58,6 +60,30 @@ function AppNavigator() {
 					options={{
 						headerShown: true,
 						headerTitle: 'Member Profile',
+						headerTintColor: '#C9A646',
+						headerStyle: {
+							backgroundColor: '#0B1A2F',
+						},
+					}}
+				/>
+				<Stack.Screen 
+					name="DBMMembers" 
+					component={DBMMembersScreen}
+					options={{
+						headerShown: true,
+						headerTitle: 'DBM Members',
+						headerTintColor: '#C9A646',
+						headerStyle: {
+							backgroundColor: '#0B1A2F',
+						},
+					}}
+				/>
+				<Stack.Screen 
+					name="DBMAOY" 
+					component={DBMAOYScreen}
+					options={{
+						headerShown: true,
+						headerTitle: 'Angler of the Year',
 						headerTintColor: '#C9A646',
 						headerStyle: {
 							backgroundColor: '#0B1A2F',

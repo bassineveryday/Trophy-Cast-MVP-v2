@@ -147,23 +147,20 @@ export function ClubInfo({ clubName = 'Denver Bassmasters' }: ClubInfoProps) {
 
       {/* QUICK FACTS */}
       <View style={styles.factsContainer}>
-        <View style={styles.factCard}>
-          <Text style={styles.factIcon}>📅</Text>
-          <Text style={styles.factLabel}>Founded</Text>
-          <Text style={styles.factValue}>Early 1970s</Text>
-        </View>
+        <Pressable style={styles.factCard} onPress={() => navigation.navigate('DBMMembers' as never)}>
+          <Ionicons name="people" size={32} color={COLORS.gold} />
+          <Text style={styles.factLabel}>DBM Members</Text>
+        </Pressable>
 
-        <View style={styles.factCard}>
+        <Pressable style={styles.factCard} onPress={() => navigation.navigate('DBMAOY' as never)}>
           <Text style={styles.factIcon}>🏆</Text>
-          <Text style={styles.factLabel}>Achievement</Text>
-          <Text style={styles.factValue}>CO Bass Club Trophy 2024-2025</Text>
-        </View>
+          <Text style={styles.factLabel}>DBM AOY</Text>
+        </Pressable>
 
-        <View style={styles.factCard}>
-          <Text style={styles.factIcon}>👥</Text>
-          <Text style={styles.factLabel}>Membership</Text>
-          <Text style={styles.factValue}>Boaters & Non-Boaters</Text>
-        </View>
+        <Pressable style={styles.factCard} onPress={() => console.log('DBM Calendar')}>
+          <Text style={styles.factIcon}>📅</Text>
+          <Text style={styles.factLabel}>DBM Calendar</Text>
+        </Pressable>
       </View>
 
       {/* BENEFITS SECTION */}
@@ -396,18 +393,20 @@ function createStyles() {
       borderRadius: 12,
       padding: 12,
       alignItems: 'center',
+      justifyContent: 'center',
     },
 
     factIcon: {
       fontSize: 28,
-      marginBottom: 6,
+      marginBottom: 8,
     },
 
     factLabel: {
-      fontSize: 10,
-      fontWeight: '600',
-      color: COLORS.textGray,
+      fontSize: 13,
+      fontWeight: '700',
+      color: COLORS.gold,
       marginBottom: 4,
+      textAlign: 'center',
     },
 
     factValue: {
