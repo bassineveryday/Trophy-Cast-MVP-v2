@@ -21,6 +21,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { TrophyCastLogo } from '../../components/TrophyCastLogo';
 
 // Mock data - replace with real hooks later
 const MOCK_LAST_CATCH = {
@@ -119,7 +120,7 @@ export function EnhancedDashboard({
         {/* Icon Badges Row */}
         <View style={styles.iconBadgesRow}>
           <View style={styles.iconBadge}>
-            <Ionicons name="trophy" size={20} color={COLORS.gold} />
+            <TrophyCastLogo size={20} color={COLORS.gold} />
             <Text style={styles.badgeText}>0</Text>
           </View>
 
