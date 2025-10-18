@@ -49,13 +49,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         
         if (shouldEnableDevMode) {
           const mockUser = {
-            id: 'dev-mode-user-tai-hunt',
+            id: '8338ec05-7839-45b5-9b3a-115d6d485603',  // Real Tai Hunt UUID from dbm_board_members
             email: 'tai.hunt@demo.com',
             created_at: new Date().toISOString(),
           };
           
           const mockProfile: Profile = {
-            id: 'dev-mode-user-tai-hunt',
+            id: '8338ec05-7839-45b5-9b3a-115d6d485603',  // Real Tai Hunt UUID
             member_code: 'DBM019',
             name: 'Tai Hunt',
             hometown: 'Denver, CO',

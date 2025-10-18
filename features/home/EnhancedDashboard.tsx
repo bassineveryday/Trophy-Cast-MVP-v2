@@ -21,6 +21,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import { TrophyCastLogo } from '../../components/TrophyCastLogo';
 import { useBoardAccess } from '../../hooks/useBoardAccess';
 
@@ -69,7 +70,6 @@ interface EnhancedDashboardProps {
   title?: string;
   subtitle?: string;
   clubRole?: string;
-  navigation?: any;
 }
 
 export function EnhancedDashboard({ 
@@ -78,10 +78,10 @@ export function EnhancedDashboard({
   title = 'Trophy Cast',
   subtitle = 'Where Every Cast Counts',
   clubRole = 'Member',
-  navigation,
 }: EnhancedDashboardProps) {
   const styles = useMemo(() => createStyles(), []);
   const { isBoard } = useBoardAccess();
+  const navigation = useNavigation<any>();
 
   if (loading) {
     return (
@@ -170,7 +170,7 @@ export function EnhancedDashboard({
       {isBoard && (
         <Pressable 
           style={styles.boardCard} 
-          onPress={() => navigation?.navigate('BoardBackOffice')}
+          onPress={() => navigation.navigate('BoardBackOffice')}
         >
           <View style={styles.boardCardHeader}>
             <View style={styles.boardCardTitle}>
