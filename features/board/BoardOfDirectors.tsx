@@ -218,14 +218,6 @@ export function BoardOfDirectors({
             {REAL_BOARD_MEMBERS.reduce((sum, m) => sum + m.catches, 0)}
           </Text>
         </View>
-
-        <View style={styles.clubStatCard}>
-          <Ionicons name="medal" size={24} color={COLORS.gold} />
-          <Text style={styles.clubStatLabel}>Top PB</Text>
-          <Text style={styles.clubStatValue}>
-            {Math.max(...REAL_BOARD_MEMBERS.map(m => m.personalBest)).toFixed(1)} lbs
-          </Text>
-        </View>
       </View>
 
       {/* SORT TABS */}
@@ -241,28 +233,6 @@ export function BoardOfDirectors({
             ]}
           >
             🎣 Catches
-          </Text>
-        </Pressable>
-
-        <Pressable
-          style={[styles.sortTab, sortBy === 'pb' && styles.sortTabActive]}
-          onPress={() => setSortBy('pb')}
-        >
-          <Text
-            style={[styles.sortTabText, sortBy === 'pb' && styles.sortTabTextActive]}
-          >
-            🏅 Personal Best
-          </Text>
-        </Pressable>
-
-        <Pressable
-          style={[styles.sortTab, sortBy === 'avg' && styles.sortTabActive]}
-          onPress={() => setSortBy('avg')}
-        >
-          <Text
-            style={[styles.sortTabText, sortBy === 'avg' && styles.sortTabTextActive]}
-          >
-            📈 Avg Weight
           </Text>
         </Pressable>
       </View>
@@ -311,15 +281,7 @@ function MemberCard({ member, sortBy, onPress }: MemberCardProps) {
   };
 
   const getMainValue = () => {
-    switch (sortBy) {
-      case 'pb':
-        return `${member.personalBest} lbs`;
-      case 'avg':
-        return `${member.avgWeight} lbs`;
-      case 'catches':
-      default:
-        return `${member.catches}`;
-    }
+    return `${member.catches}`;
   };
 
   const getTrendIcon = () => {
@@ -379,8 +341,6 @@ function MemberCard({ member, sortBy, onPress }: MemberCardProps) {
 
           <View style={styles.memberStats}>
             <Text style={styles.memberStatText}>🎣 {member.catches}</Text>
-            <Text style={styles.memberStatText}>🏅 {member.personalBest}</Text>
-            <Text style={styles.memberStatText}>📊 {member.avgWeight}</Text>
           </View>
         </View>
       </View>
