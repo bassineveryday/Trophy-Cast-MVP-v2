@@ -22,6 +22,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../lib/supabase';
+import { useBoardAccess } from '../hooks/useBoardAccess';
 
 // Colors matching Trophy Cast theme
 const COLORS = {
@@ -54,6 +55,7 @@ const BOARD_ROLES: Record<string, string> = {
 
 export function DBMMembersScreen() {
   const navigation = useNavigation();
+  const { isBoard } = useBoardAccess();
   const [members, setMembers] = useState<DBMMember[]>([]);
   const [filteredMembers, setFilteredMembers] = useState<DBMMember[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -183,9 +185,20 @@ export function DBMMembersScreen() {
             </Pressable>
           )}
         </View>
-        <Text style={styles.memberCount}>
-          {filteredMembers.length} of {members.length} members
-        </Text>
+        <View style={styles.headerRow}>
+          <Text style={styles.memberCount}>
+            {filteredMembers.length} of {members.length} members
+          </Text>
+          {isBoard && (
+            <Pressable
+              onPress={() => (navigation as any).navigate('BoardBackOffice')}
+              style={styles.boardToolsButton}
+            >
+              <Ionicons name="shield-checkmark" size={16} color={COLORS.navy} />
+              <Text style={styles.boardToolsText}>Board Tools</Text>
+            </Pressable>
+          )}
+        </View>
       </View>
 
       {/* Members List */}
@@ -244,6 +257,25 @@ function createStyles() {
       color: COLORS.textGray,
       fontSize: 12,
       fontWeight: '600',
+    },
+    headerRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    boardToolsButton: {
+      flexDirection: 'row',
+      backgroundColor: COLORS.gold,
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 6,
+      alignItems: 'center',
+      gap: 6,
+    },
+    boardToolsText: {
+      color: COLORS.navy,
+      fontWeight: '700',
+      fontSize: 12,
     },
     listContent: {
       paddingHorizontal: 16,

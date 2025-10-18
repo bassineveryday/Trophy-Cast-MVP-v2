@@ -15,6 +15,7 @@ import AOYScreen from './screens/AOYScreen';
 import { MemberProfileScreen } from './screens/MemberProfileScreen';
 import { DBMMembersScreen } from './screens/DBMMembersScreen';
 import { DBMAOYScreen } from './screens/DBMAOYScreen';
+import { BoardBackOfficeScreen } from './screens/BoardBackOfficeScreen';
 
 // App entry: make sure no stray SQL or debug text ends up in this TSX file.
 const Stack = createNativeStackNavigator();
@@ -84,6 +85,18 @@ function AppNavigator() {
 					options={{
 						headerShown: true,
 						headerTitle: 'Angler of the Year',
+						headerTintColor: '#C9A646',
+						headerStyle: {
+							backgroundColor: '#0B1A2F',
+						},
+					}}
+				/>
+				<Stack.Screen 
+					name="BoardBackOffice" 
+					component={BoardBackOfficeScreen}
+					options={{
+						headerShown: true,
+						headerTitle: 'Board Back Office',
 						headerTintColor: '#C9A646',
 						headerStyle: {
 							backgroundColor: '#0B1A2F',
