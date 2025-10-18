@@ -5,7 +5,7 @@
  * 1. Home (Dashboard) - entry point
  * 2. Log Catch - coming soon
  * 3. AI Coach - coming soon
- * 4. Community Dock - coming soon
+ * 4. DBM Club Info - Denver Bassmasters club details
  * 5. Trophy Room - coming soon
  * 
  * Fully brand-themed (Navy #0B1A2F + Gold #C9A646)
@@ -17,7 +17,6 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { View, Text } from 'react-native';
 import FishingThemedHomeScreen from '../screens/FishingThemedHomeScreen';
-import { BoardOfDirectors } from '../features/board/BoardOfDirectors';
 import { ClubInfo } from '../features/club/ClubInfo';
 
 const Tab = createBottomTabNavigator();
@@ -117,25 +116,26 @@ export default function BottomTabs() {
         {() => <ComingSoon title="AI Coach" />}
       </Tab.Screen>
 
-      {/* 🏆 Board of Directors */}
+      {/* �️ DBM Club Info */}
       <Tab.Screen
-        name="Board"
-        component={BoardOfDirectors}
-        options={{
-          tabBarIcon: icon('people'),
-          tabBarLabel: 'Board',
-        }}
-      />
-
-      {/* 🏛️ Club Info */}
-      <Tab.Screen
-        name="Club"
+        name="DBM"
         component={ClubInfo}
         options={{
           tabBarIcon: icon('information-circle'),
-          tabBarLabel: 'Club',
+          tabBarLabel: 'DBM',
         }}
       />
+
+      {/* � Trophy Room */}
+      <Tab.Screen
+        name="TrophyRoom"
+        options={{
+          tabBarIcon: icon('trophy'),
+          tabBarLabel: 'Trophy Room',
+        }}
+      >
+        {() => <ComingSoon title="Trophy Room" />}
+      </Tab.Screen>
     </Tab.Navigator>
   );
 }

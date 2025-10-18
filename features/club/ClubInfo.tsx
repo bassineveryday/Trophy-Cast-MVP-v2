@@ -20,6 +20,7 @@ import {
   Linking,
   Image,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 
 // Colors matching Trophy Cast theme
@@ -87,11 +88,24 @@ const BOARD_MEMBERS = [
   },
 ];
 
+// Board member to member ID mapping
+const BOARD_MEMBER_IDS = {
+  'Jeremiah Hofstetter': 'DBM020',
+  'Bobby Martin': 'DBM021',
+  'Tai Hunt': 'DBM019',
+  'Gordon Phair': 'DBM063',
+  'Howard Binkley': 'DBM004',
+  'Justin Apfel': 'DBM045',
+  'Cliff Purslow': 'DBM002',
+  'Bill Cancellieri': 'DBM014',
+};
+
 interface ClubInfoProps {
   clubName?: string;
 }
 
 export function ClubInfo({ clubName = 'Denver Bassmasters' }: ClubInfoProps) {
+  const navigation = useNavigation();
   const styles = useMemo(() => createStyles(), []);
 
   const handlePhonePress = () => {
@@ -245,7 +259,16 @@ export function ClubInfo({ clubName = 'Denver Bassmasters' }: ClubInfoProps) {
 
         <View style={styles.boardGrid}>
           {BOARD_MEMBERS.map((member) => (
-            <BoardMemberCard key={member.id} member={member} />
+            <BoardMemberCard 
+              key={member.id} 
+              member={member}
+              onPress={() => {
+                const memberId = BOARD_MEMBER_IDS[member.name as keyof typeof BOARD_MEMBER_IDS];
+                if (memberId) {
+                  (navigation as any).navigate('MemberProfile', { member_id: memberId, member_name: member.name });
+                }
+              }}
+            />
           ))}
         </View>
       </View>
@@ -267,11 +290,11 @@ function BenefitItem({ text }: { text: string }) {
   );
 }
 
-function BoardMemberCard({ member }: { member: typeof BOARD_MEMBERS[0] }) {
+function BoardMemberCard({ member, onPress }: { member: typeof BOARD_MEMBERS[0]; onPress?: () => void }) {
   const styles = useMemo(() => createStyles(), []);
   
   return (
-    <View style={styles.boardMemberCard}>
+    <Pressable style={styles.boardMemberCard} onPress={onPress}>
       {/* Officer Photo */}
       {member.imageUrl ? (
         <Image
@@ -281,7 +304,7 @@ function BoardMemberCard({ member }: { member: typeof BOARD_MEMBERS[0] }) {
       ) : (
         <View style={[styles.boardMemberPhoto, styles.boardMemberPhotoPlaceholder]}>
           <Text style={styles.boardMemberInitials}>
-            {member.name.split(' ').map(n => n[0]).join('')}
+            {member.name.split(' ').map((n: string) => n[0]).join('')}
           </Text>
         </View>
       )}
@@ -291,7 +314,7 @@ function BoardMemberCard({ member }: { member: typeof BOARD_MEMBERS[0] }) {
         <Text style={styles.boardMemberName}>{member.name}</Text>
         <Text style={styles.boardMemberRole}>{member.role}</Text>
       </View>
-    </View>
+    </Pressable>
   );
 }
 

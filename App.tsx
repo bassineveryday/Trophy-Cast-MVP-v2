@@ -12,6 +12,7 @@ import TournamentsScreen from './screens/TournamentsScreen';
 import TournamentDetailScreen from './screens/TournamentDetailScreen';
 import ProfileScreen from './screens/ProfileScreen';
 import AOYScreen from './screens/AOYScreen';
+import { MemberProfileScreen } from './screens/MemberProfileScreen';
 
 // App entry: make sure no stray SQL or debug text ends up in this TSX file.
 const Stack = createNativeStackNavigator();
@@ -45,13 +46,25 @@ function AppNavigator() {
 					component={BottomTabs}
 				/>
 
-				{/* Overlay screens (modal-style) */}
-				<Stack.Group screenOptions={{ presentation: 'modal' }}>
-					<Stack.Screen name="Tournaments" component={TournamentsScreen} />
-					<Stack.Screen name="TournamentDetail" component={TournamentDetailScreen} />
-					<Stack.Screen name="Profile" component={ProfileScreen} />
-					<Stack.Screen name="AOY" component={AOYScreen} />
-				</Stack.Group>
+			{/* Overlay screens (modal-style) */}
+			<Stack.Group screenOptions={{ presentation: 'modal' }}>
+				<Stack.Screen name="Tournaments" component={TournamentsScreen} />
+				<Stack.Screen name="TournamentDetail" component={TournamentDetailScreen} />
+				<Stack.Screen name="Profile" component={ProfileScreen} />
+				<Stack.Screen name="AOY" component={AOYScreen} />
+				<Stack.Screen 
+					name="MemberProfile" 
+					component={MemberProfileScreen}
+					options={{
+						headerShown: true,
+						headerTitle: 'Member Profile',
+						headerTintColor: '#C9A646',
+						headerStyle: {
+							backgroundColor: '#0B1A2F',
+						},
+					}}
+				/>
+			</Stack.Group>
 			</Stack.Navigator>
 
 			{/* Onboarding Sheet (overlay on top of navigation) */}
