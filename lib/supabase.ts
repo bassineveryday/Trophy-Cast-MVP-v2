@@ -215,19 +215,39 @@ export interface AOYStandingsRow {
  * Returns the current season's AOY standings with member information,
  * total points, and rankings. Results are sorted by rank (best to worst).
  * 
+ * FEATURE FLAG: EXPO_PUBLIC_AOY_ENABLED must be 'true' to enable AOY fetching.
+ * Set to 'false' to disable during database migrations or maintenance.
+ * 
+ * @param season_year - Optional year to filter standings (e.g., 2025)
+ * @param club_id - Optional club ID to filter standings
  * @returns {Promise} Object containing data array or error
  * @example
- * const { data, error } = await fetchAOYStandings();
+ * const { data, error } = await fetchAOYStandings(2025);
  * if (data) {
  *   console.log('Top angler:', data[0].member_name);
  * }
  */
-export const fetchAOYStandings = async () => {
+export const fetchAOYStandings = async (season_year?: number, club_id?: string) => {
+  // Feature flag check - return empty if AOY disabled
+  if (process.env.EXPO_PUBLIC_AOY_ENABLED !== 'true') {
+    console.warn('⚠️  AOY feature is disabled (EXPO_PUBLIC_AOY_ENABLED is not set to true)');
+    return { data: [], error: null };
+  }
+
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from('aoy_standings')
-      .select('*')
-      .order('aoy_rank', { ascending: true, nullsFirst: false });
+      .select('*');
+    
+    // Add optional filters
+    if (season_year) {
+      query = query.eq('season_year', season_year);
+    }
+    if (club_id) {
+      query = query.eq('club_id', club_id);
+    }
+    
+    const { data, error } = await query.order('aoy_rank', { ascending: true, nullsFirst: false });
 
     if (error) {
       console.error('Error fetching AOY standings:', error);

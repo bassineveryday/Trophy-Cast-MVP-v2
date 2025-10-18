@@ -37,7 +37,8 @@ function normalizeName(n: any) {
 
 // Centralized query key management
 export const queryKeys = {
-  aoyStandings: ['aoy-standings'] as const,
+  aoyStandings: (season_year?: number, club_id?: string) => 
+    ['aoy-standings', season_year, club_id] as const,
   tournaments: ['tournaments'] as const,
   tournamentResults: (memberId: string) => ['tournament-results', memberId] as const,
   tournamentParticipants: (eventId: string) => ['tournament-participants', eventId] as const,
@@ -45,15 +46,15 @@ export const queryKeys = {
   profile: (userId: string) => ['profile', userId] as const,
 };
 
-export function useAOYStandings() {
+export function useAOYStandings(options?: { season_year?: number; club_id?: string }) {
   return useQuery({
-    queryKey: queryKeys.aoyStandings,
+    queryKey: queryKeys.aoyStandings(options?.season_year, options?.club_id),
     queryFn: async () => {
       // require at runtime so test mocks that replace the module are respected
       // when Jest replaces the implementation via jest.mock
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       const { fetchAOYStandings: fetchFn } = require('../supabase');
-      const { data, error } = await fetchFn();
+      const { data, error } = await fetchFn(options?.season_year, options?.club_id);
       if (error) throw error;
       return (data || []) as AOYStandingsRow[];
     },
@@ -123,23 +124,26 @@ export function useDashboard(memberCode: string | undefined) {
           }
         : null;
 
-      // AOY standing
-      const { data: aoyRaw, error: aoyError } = await supabase
+      // AOY standing - get current season AOY rank for member (filter by current year)
+      const currentYear = new Date().getFullYear();
+      const { data: aoyRaws, error: aoyError } = await supabase
         .from('aoy_standings')
-        .select('aoy_rank, total_aoy_points')
+        .select('aoy_rank, total_aoy_points, season_year')
         .eq('member_id', memberCode)
+        .eq('season_year', currentYear)
         .maybeSingle();
       if (aoyError) throw aoyError;
-      const aoyData = aoyRaw
-        ? { aoy_rank: aoyRaw.aoy_rank ?? null, total_aoy_points: toNumber(aoyRaw.total_aoy_points, 0) }
+      const aoyData = aoyRaws
+        ? { aoy_rank: aoyRaws.aoy_rank ?? null, total_aoy_points: toNumber(aoyRaws.total_aoy_points, 0) }
         : null;
 
-      // Earnings for 2025
+      // Earnings for current season
+      const seasonStartDate = `${currentYear}-01-01`;
       const { data: earningsRows, error: earningsError } = await supabase
         .from('tournament_results')
         .select('cash_payout, payout')
         .eq('member_id', memberCode)
-        .gte('event_date', '2025-01-01');
+        .gte('event_date', seasonStartDate);
       if (earningsError) throw earningsError;
       const earnings = (earningsRows || []).reduce((sum: number, r: any) => sum + normalizePayout(r.cash_payout ?? r.payout), 0);
 
@@ -159,7 +163,7 @@ export function useDashboard(memberCode: string | undefined) {
         .from('tournament_results')
         .select('place, weight_lbs, big_fish, cash_payout, payout')
         .eq('member_id', memberCode)
-        .gte('event_date', '2025-01-01');
+        .gte('event_date', seasonStartDate);
       if (statsError) throw statsError;
 
       const seasonStats = {

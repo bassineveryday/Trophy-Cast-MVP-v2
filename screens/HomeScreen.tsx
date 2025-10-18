@@ -2,10 +2,12 @@
 import React from 'react';
 import { StyleSheet, Text, View, ScrollView, RefreshControl, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../lib/AuthContext';
 import { useDashboard, useRecentTournamentResults } from '../lib/hooks/useQueries';
 import { DashboardSkeleton } from '../components/Skeleton';
 import AnimatedCard from '../components/AnimatedCard';
+import TopBar from '../components/TopBar';
 
 interface TournamentResult {
   event_date: string;
@@ -31,6 +33,7 @@ interface TournamentEvent {
 export default function HomeScreen() {
   if (__DEV__) console.log('🏠 HomeScreen rendering');
   
+  const navigation = useNavigation();
   const { user, profile } = useAuth();
   if (__DEV__) console.log('Auth state:', { user: user?.email, profile: profile?.member_code });
   
@@ -79,24 +82,76 @@ export default function HomeScreen() {
   // Loading state
   if (isLoading && !dashboard) {
     return (
-      <ScrollView style={styles.container}>
-        <View style={styles.card}>
-          <Text style={styles.title}>Loading your dashboard...</Text>
+      <View style={styles.screenContainer}>
+        <TopBar title="Trophy Cast" subtitle="Home" />
+        <View style={styles.navMenu}>
+          <TouchableOpacity 
+            style={styles.navButton}
+            onPress={() => (navigation as any).navigate('Tournaments')}
+          >
+            <Ionicons name="calendar" size={20} color="#0066CC" />
+            <Text style={styles.navButtonText}>Tournaments</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={styles.navButton}
+            onPress={() => (navigation as any).navigate('Profile')}
+          >
+            <Ionicons name="person" size={20} color="#0066CC" />
+            <Text style={styles.navButtonText}>Profile</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={styles.navButton}
+            onPress={() => (navigation as any).navigate('AOY')}
+          >
+            <Ionicons name="trophy" size={20} color="#0066CC" />
+            <Text style={styles.navButtonText}>AOY</Text>
+          </TouchableOpacity>
         </View>
-        <DashboardSkeleton />
-      </ScrollView>
+        <ScrollView style={styles.container}>
+          <View style={styles.card}>
+            <Text style={styles.title}>Loading your dashboard...</Text>
+          </View>
+          <DashboardSkeleton />
+        </ScrollView>
+      </View>
     );
   }
 
   // Error state
   if (error && !dashboard) {
     return (
-      <View style={styles.loadingContainer}>
-        <Text style={styles.errorText}>Error: {error.message}</Text>
-        <Text style={styles.tourneyText}>Check the console for details (F12)</Text>
-        <TouchableOpacity onPress={() => refetch()} style={styles.retryBtn}>
-          <Text style={styles.retryText}>Retry</Text>
-        </TouchableOpacity>
+      <View style={styles.screenContainer}>
+        <TopBar title="Trophy Cast" subtitle="Home" />
+        <View style={styles.navMenu}>
+          <TouchableOpacity 
+            style={styles.navButton}
+            onPress={() => (navigation as any).navigate('Tournaments')}
+          >
+            <Ionicons name="calendar" size={20} color="#0066CC" />
+            <Text style={styles.navButtonText}>Tournaments</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={styles.navButton}
+            onPress={() => (navigation as any).navigate('Profile')}
+          >
+            <Ionicons name="person" size={20} color="#0066CC" />
+            <Text style={styles.navButtonText}>Profile</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={styles.navButton}
+            onPress={() => (navigation as any).navigate('AOY')}
+          >
+            <Ionicons name="trophy" size={20} color="#0066CC" />
+            <Text style={styles.navButtonText}>AOY</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.loadingContainer}>
+          <Text style={styles.errorText}>Error: {error.message}</Text>
+          <Text style={styles.tourneyText}>Check the console for details (F12)</Text>
+          <TouchableOpacity onPress={() => refetch()} style={styles.retryBtn}>
+            <Text style={styles.retryText}>Retry</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     );
   }
@@ -106,136 +161,222 @@ export default function HomeScreen() {
   // caused valid AOY/earnings to be hidden. Only bail out if `data` is falsy.
   if (!dashboard) {
     return (
-      <ScrollView style={styles.container}>
-        <View style={styles.card}>
-          <Text style={styles.title}>⚠️ No Dashboard Data</Text>
-          <Text style={styles.tourneyText}>
-            Your query returned no results. Check the browser console (F12) for details.
-          </Text>
-          <Text style={[styles.tourneyText, { marginTop: 12 }]}>
-            Member Code: {profile?.member_code || 'NOT SET'}
-          </Text>
-          <Text style={styles.tourneyText}>
-            Database may be empty or RLS policies may be blocking access.
-          </Text>
-          <TouchableOpacity onPress={() => refetch()} style={styles.retryBtn}>
-            <Text style={styles.retryText}>Retry</Text>
+      <View style={styles.screenContainer}>
+        <TopBar title="Trophy Cast" subtitle="Home" />
+        <View style={styles.navMenu}>
+          <TouchableOpacity 
+            style={styles.navButton}
+            onPress={() => (navigation as any).navigate('Tournaments')}
+          >
+            <Ionicons name="calendar" size={20} color="#0066CC" />
+            <Text style={styles.navButtonText}>Tournaments</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={styles.navButton}
+            onPress={() => (navigation as any).navigate('Profile')}
+          >
+            <Ionicons name="person" size={20} color="#0066CC" />
+            <Text style={styles.navButtonText}>Profile</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={styles.navButton}
+            onPress={() => (navigation as any).navigate('AOY')}
+          >
+            <Ionicons name="trophy" size={20} color="#0066CC" />
+            <Text style={styles.navButtonText}>AOY</Text>
           </TouchableOpacity>
         </View>
-      </ScrollView>
+        <ScrollView style={styles.container}>
+          <View style={styles.card}>
+            <Text style={styles.title}>⚠️ No Dashboard Data</Text>
+            <Text style={styles.tourneyText}>
+              Your query returned no results. Check the browser console (F12) for details.
+            </Text>
+            <Text style={[styles.tourneyText, { marginTop: 12 }]}>
+              Member Code: {profile?.member_code || 'NOT SET'}
+            </Text>
+            <Text style={styles.tourneyText}>
+              Database may be empty or RLS policies may be blocking access.
+            </Text>
+            <TouchableOpacity onPress={() => refetch()} style={styles.retryBtn}>
+              <Text style={styles.retryText}>Retry</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </View>
     );
   }
 
   return (
-    <ScrollView
-      style={styles.container}
-      refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={onRefresh} />}
-      contentContainerStyle={{ paddingBottom: 32 }}
-    >
-      {/* Welcome */}
-      <AnimatedCard style={styles.card} delay={0} animation="slideUp">
-        <Text style={styles.title}>Welcome back, {profile?.name || user?.email}!</Text>
-        <Text style={styles.memberCode}>Member: {profile?.member_code}</Text>
-      </AnimatedCard>
+    <View style={styles.screenContainer}>
+      <TopBar title="Trophy Cast" subtitle="Home" />
+      
+      {/* Navigation Menu */}
+      <View style={styles.navMenu}>
+        <TouchableOpacity 
+          style={styles.navButton}
+          onPress={() => (navigation as any).navigate('Tournaments')}
+        >
+          <Ionicons name="calendar" size={20} color="#0066CC" />
+          <Text style={styles.navButtonText}>Tournaments</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={styles.navButton}
+          onPress={() => (navigation as any).navigate('Profile')}
+        >
+          <Ionicons name="person" size={20} color="#0066CC" />
+          <Text style={styles.navButtonText}>Profile</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={styles.navButton}
+          onPress={() => (navigation as any).navigate('AOY')}
+        >
+          <Ionicons name="trophy" size={20} color="#0066CC" />
+          <Text style={styles.navButtonText}>AOY</Text>
+        </TouchableOpacity>
+      </View>
 
-      {/* Club Card */}
-      <TouchableOpacity
-        style={[styles.card, styles.clubCard]}
-        onPress={handleClubPress}
-        accessibilityRole="button"
-        accessibilityLabel="View Denver Bassmasters club details"
-        accessibilityHint={`Shows your AOY rank of ${aoy?.aoy_rank ?? 'N/A'}, ${aoy?.total_aoy_points ?? 'N/A'} points, and $${earningsNumber.toFixed(2)} earnings`}
+      <ScrollView
+        style={styles.container}
+        refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={onRefresh} />}
+        contentContainerStyle={{ paddingBottom: 32 }}
       >
-        <AnimatedCard style={{ margin: 0 }} delay={60} animation="slideUp" enabled>
+        {/* Welcome */}
+        <AnimatedCard style={styles.card} delay={0} animation="slideUp">
+          <Text style={styles.title}>Welcome back, {profile?.name || user?.email}!</Text>
+          <Text style={styles.memberCode}>Member: {profile?.member_code}</Text>
+        </AnimatedCard>
+
+        {/* Club Card */}
+        <TouchableOpacity
+          style={[styles.card, styles.clubCard]}
+          onPress={handleClubPress}
+          accessibilityRole="button"
+          accessibilityLabel="View Denver Bassmasters club details"
+          accessibilityHint={`Shows your AOY rank of ${aoy?.aoy_rank ?? 'N/A'}, ${aoy?.total_aoy_points ?? 'N/A'} points, and $${earningsNumber.toFixed(2)} earnings`}
+        >
+          <AnimatedCard style={{ margin: 0 }} delay={60} animation="slideUp" enabled>
+            <View style={styles.cardTitleRow}>
+              <Ionicons name="trophy" size={24} color="#f39c12" />
+              <Text style={styles.clubTitle}>Denver Bassmasters</Text>
+            </View>
+            <Text style={styles.clubSubtext}>Tap to view club details →</Text>
+            <View style={styles.clubStatsRow}>
+              <View style={styles.clubStat}><Text style={styles.clubStatLabel}>AOY Rank</Text><Text style={styles.clubStatValue}>{aoy?.aoy_rank ?? 'N/A'}</Text></View>
+              <View style={styles.clubStat}><Text style={styles.clubStatLabel}>Points</Text><Text style={styles.clubStatValue}>{aoy?.total_aoy_points ?? 'N/A'}</Text></View>
+              <View style={styles.clubStat}><Text style={styles.clubStatLabel}>2025 $</Text><Text style={styles.clubStatValue}>${earnings}</Text></View>
+            </View>
+          </AnimatedCard>
+        </TouchableOpacity>
+
+        {/* Last Tournament */}
+        <AnimatedCard style={styles.card} delay={120} animation="slideUp">
           <View style={styles.cardTitleRow}>
-            <Ionicons name="trophy" size={24} color="#f39c12" />
-            <Text style={styles.clubTitle}>Denver Bassmasters</Text>
+            <Ionicons name="fish" size={20} color="#3498db" />
+            <Text style={styles.sectionTitle}>Last Tournament</Text>
           </View>
-          <Text style={styles.clubSubtext}>Tap to view club details →</Text>
-          <View style={styles.clubStatsRow}>
-            <View style={styles.clubStat}><Text style={styles.clubStatLabel}>AOY Rank</Text><Text style={styles.clubStatValue}>{aoy?.aoy_rank ?? 'N/A'}</Text></View>
-            <View style={styles.clubStat}><Text style={styles.clubStatLabel}>Points</Text><Text style={styles.clubStatValue}>{aoy?.total_aoy_points ?? 'N/A'}</Text></View>
-            <View style={styles.clubStat}><Text style={styles.clubStatLabel}>2025 $</Text><Text style={styles.clubStatValue}>${earnings}</Text></View>
-          </View>
+          {lastTournament ? (
+            <>
+              <Text style={styles.tourneyText}>{lastTournament.lake} - {lastTournament.event_date}</Text>
+              <Text style={styles.tourneyText}>Placement: {lastTournament.place ?? 'N/A'}</Text>
+              <Text style={styles.tourneyText}>Weight: {lastTournament.weight_lbs ?? 'N/A'} lbs</Text>
+              <Text style={styles.tourneyText}>Points: {lastTournament.aoy_points ?? 'N/A'}</Text>
+              <Text style={styles.tourneyText}>Payout: ${(() => {
+                const lt: any = lastTournament as any;
+                const raw = lt?.payout != null ? lt.payout : lt?.cash_payout;
+                const n = raw == null ? 0 : Number(String(raw).replace(/[^0-9.-]+/g, ''));
+                return Number.isFinite(n) ? n : 0;
+              })()}</Text>
+            </>
+          ) : <Text style={styles.tourneyText}>No tournaments found.</Text>}
         </AnimatedCard>
-      </TouchableOpacity>
 
-      {/* Last Tournament */}
-      <AnimatedCard style={styles.card} delay={120} animation="slideUp">
-        <View style={styles.cardTitleRow}>
-          <Ionicons name="fish" size={20} color="#3498db" />
-          <Text style={styles.sectionTitle}>Last Tournament</Text>
-        </View>
-        {lastTournament ? (
-          <>
-            <Text style={styles.tourneyText}>{lastTournament.lake} - {lastTournament.event_date}</Text>
-            <Text style={styles.tourneyText}>Placement: {lastTournament.place ?? 'N/A'}</Text>
-            <Text style={styles.tourneyText}>Weight: {lastTournament.weight_lbs ?? 'N/A'} lbs</Text>
-            <Text style={styles.tourneyText}>Points: {lastTournament.aoy_points ?? 'N/A'}</Text>
-            <Text style={styles.tourneyText}>Payout: ${(() => {
-              const lt: any = lastTournament as any;
-              const raw = lt?.payout != null ? lt.payout : lt?.cash_payout;
-              const n = raw == null ? 0 : Number(String(raw).replace(/[^0-9.-]+/g, ''));
-              return Number.isFinite(n) ? n : 0;
-            })()}</Text>
-          </>
-        ) : <Text style={styles.tourneyText}>No tournaments found.</Text>}
-      </AnimatedCard>
-
-      {/* Dev-only debug panel showing raw dashboard payload to diagnose blank-screen */}
-      {typeof __DEV__ !== 'undefined' && __DEV__ && (
-        <AnimatedCard style={styles.card} delay={180} animation="fade" enabled>
-          <Text style={[styles.sectionTitle, { fontSize: 14 }]}>Debug (dev only)</Text>
-          <ScrollView style={{ maxHeight: 160 }}>
-            <Text style={styles.tourneyText}>{JSON.stringify(dashboard, null, 2)}</Text>
-          </ScrollView>
-        </AnimatedCard>
-      )}
-
-      {/* Recent Results (dev QA) */}
-      <AnimatedCard style={styles.card} delay={200} animation="slideUp">
-        <View style={styles.cardTitleRow}>
-          <Ionicons name="list" size={18} color="#2c3e50" />
-          <Text style={styles.sectionTitle}>Recent Results (QA)</Text>
-        </View>
-        {recentResults && recentResults.length > 0 ? (
-          recentResults.map((r: any, idx: number) => (
-            <Text key={idx} style={styles.tourneyText}>{r.event_date} — {r.tournament_name} @ {r.lake} — {r.weight_lbs || '0'} lbs</Text>
-          ))
-        ) : (
-          <Text style={styles.tourneyText}>No recent results found.</Text>
+        {/* Dev-only debug panel showing raw dashboard payload to diagnose blank-screen */}
+        {typeof __DEV__ !== 'undefined' && __DEV__ && (
+          <AnimatedCard style={styles.card} delay={180} animation="fade" enabled>
+            <Text style={[styles.sectionTitle, { fontSize: 14 }]}>Debug (dev only)</Text>
+            <ScrollView style={{ maxHeight: 160 }}>
+              <Text style={styles.tourneyText}>{JSON.stringify(dashboard, null, 2)}</Text>
+            </ScrollView>
+          </AnimatedCard>
         )}
-      </AnimatedCard>
 
-      {/* Next Tournament */}
-      <AnimatedCard style={styles.card} delay={240} animation="slideUp">
-        <View style={styles.cardTitleRow}>
-          <Ionicons name="calendar" size={20} color="#3498db" />
-          <Text style={styles.sectionTitle}>Next Tournament</Text>
-        </View>
-        {nextTournament ? (
-          <>
-            <Text style={styles.tourneyText}>{nextTournament.lake} - {nextTournament.event_date}</Text>
-          </>
-        ) : <Text style={styles.tourneyText}>No upcoming tournaments.</Text>}
-      </AnimatedCard>
+        {/* Recent Results (dev QA) */}
+        <AnimatedCard style={styles.card} delay={200} animation="slideUp">
+          <View style={styles.cardTitleRow}>
+            <Ionicons name="list" size={18} color="#2c3e50" />
+            <Text style={styles.sectionTitle}>Recent Results (QA)</Text>
+          </View>
+          {recentResults && recentResults.length > 0 ? (
+            recentResults.map((r: any, idx: number) => (
+              <Text key={idx} style={styles.tourneyText}>{r.event_date} — {r.tournament_name} @ {r.lake} — {r.weight_lbs || '0'} lbs</Text>
+            ))
+          ) : (
+            <Text style={styles.tourneyText}>No recent results found.</Text>
+          )}
+        </AnimatedCard>
 
-      {/* Season Stats */}
-      <AnimatedCard style={styles.card} delay={300} animation="slideUp">
-        <View style={styles.cardTitleRow}>
-          <Ionicons name="stats-chart" size={20} color="#3498db" />
-          <Text style={styles.sectionTitle}>2025 Season Stats</Text>
-        </View>
-        <Text style={styles.tourneyText}>Tournaments Fished: {seasonStats.tournaments}</Text>
-        <Text style={styles.tourneyText}>Best Finish: {seasonStats.bestFinish ?? 'N/A'}</Text>
-        <Text style={styles.tourneyText}>Total Weight: {seasonStats.totalWeight} lbs</Text>
-        <Text style={styles.tourneyText}>Big Fish: {seasonStats.bigFish} lbs</Text>
-      </AnimatedCard>
-    </ScrollView>
+        {/* Next Tournament */}
+        <AnimatedCard style={styles.card} delay={240} animation="slideUp">
+          <View style={styles.cardTitleRow}>
+            <Ionicons name="calendar" size={20} color="#3498db" />
+            <Text style={styles.sectionTitle}>Next Tournament</Text>
+          </View>
+          {nextTournament ? (
+            <>
+              <Text style={styles.tourneyText}>{nextTournament.lake} - {nextTournament.event_date}</Text>
+            </>
+          ) : <Text style={styles.tourneyText}>No upcoming tournaments.</Text>}
+        </AnimatedCard>
+
+        {/* Season Stats */}
+        <AnimatedCard style={styles.card} delay={300} animation="slideUp">
+          <View style={styles.cardTitleRow}>
+            <Ionicons name="stats-chart" size={20} color="#3498db" />
+            <Text style={styles.sectionTitle}>2025 Season Stats</Text>
+          </View>
+          <Text style={styles.tourneyText}>Tournaments Fished: {seasonStats.tournaments}</Text>
+          <Text style={styles.tourneyText}>Best Finish: {seasonStats.bestFinish ?? 'N/A'}</Text>
+          <Text style={styles.tourneyText}>Total Weight: {seasonStats.totalWeight} lbs</Text>
+          <Text style={styles.tourneyText}>Big Fish: {seasonStats.bigFish} lbs</Text>
+        </AnimatedCard>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  screenContainer: {
+    flex: 1,
+    backgroundColor: '#f4f6fa',
+  },
+  navMenu: {
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+    paddingHorizontal: 8,
+    paddingVertical: 8,
+  },
+  navButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+    marginHorizontal: 4,
+    borderRadius: 8,
+    backgroundColor: '#f0f4f9',
+  },
+  navButtonText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#0066CC',
+    marginLeft: 6,
+  },
   container: {
     flex: 1,
     backgroundColor: '#f4f6fa',
@@ -275,12 +416,9 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 18,
     marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 2,
-  },
+    borderWidth: 1,
+    borderColor: '#f0f0f0',
+  } as any,
   cardTitleRow: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -5,7 +5,7 @@
  * ✓ Cards/rows feel tactile on hover/press
  * ✓ No changes to data fetching logic or types
  */
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -148,7 +148,18 @@ const styles = makeStyles((theme) => ({
 export default function AOYScreen() {
   const { theme } = useTheme();
   const themedStyles = styles(theme);
-  const { data: standings = [], isLoading, error, refetch, isRefetching } = useAOYStandings();
+  
+  // Feature flag check
+  const aoyEnabled = process.env.EXPO_PUBLIC_AOY_ENABLED === 'true';
+  
+  // Season selection state
+  const currentYear = new Date().getFullYear();
+  const [selectedSeason, setSelectedSeason] = useState<number>(currentYear);
+  const availableSeasons = [currentYear - 2, currentYear - 1, currentYear];
+  
+  const { data: standings = [], isLoading, error, refetch, isRefetching } = useAOYStandings({ 
+    season_year: selectedSeason 
+  });
 
   const handleRefresh = () => {
     refetch();
@@ -321,9 +332,57 @@ export default function AOYScreen() {
     );
   }
 
+  // Feature flag disabled state
+  if (!aoyEnabled) {
+    return (
+      <View style={themedStyles.container}>
+        <TopBar title="Angler of the Year" subtitle="Coming Soon" />
+        <View style={themedStyles.emptyList}>
+          <EmptyState
+            icon="trophy-outline"
+            title="AOY Feature Disabled"
+            message="Angler of the Year feature is currently disabled. Check back soon!"
+            testID="empty.aoy-disabled"
+          />
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View style={themedStyles.container}>
-      <TopBar title="Angler of the Year" subtitle="Current Season Standings" />
+      <TopBar 
+        title="Angler of the Year" 
+        subtitle={`Season ${selectedSeason} Standings`}
+      />
+
+      {/* Season Selector */}
+      <View style={{ paddingHorizontal: spacing.lg, paddingVertical: spacing.md, flexDirection: 'row', gap: spacing.sm }}>
+        {availableSeasons.map((season) => (
+          <TouchableOpacity
+            key={season}
+            onPress={() => setSelectedSeason(season)}
+            style={{
+              paddingHorizontal: spacing.md,
+              paddingVertical: spacing.sm,
+              borderRadius: borderRadius.md,
+              backgroundColor: selectedSeason === season ? theme.primary : theme.background,
+              borderWidth: 1,
+              borderColor: selectedSeason === season ? theme.primary : theme.border,
+            }}
+          >
+            <Text
+              style={{
+                color: selectedSeason === season ? '#fff' : theme.text,
+                fontSize: fontSize.sm,
+                fontWeight: fontWeight.semibold,
+              }}
+            >
+              {season}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
 
       <FlatList
         data={enhancedStandings}
