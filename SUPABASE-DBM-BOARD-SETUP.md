@@ -151,23 +151,54 @@ Then insert board members (replace UUIDs with your actual user IDs):
 ```sql
 -- ============================================================
 -- Insert DBM Board Members
--- Replace the UUID values with actual auth.users.id values
+-- Denver Bassmasters Board of Directors
 -- ============================================================
 
 insert into public.dbm_board_members (profile_id, member_id, role)
 values
-  -- Example: replace 'YOUR_PRESIDENT_UUID_HERE' with actual UUID
-  ('YOUR_PRESIDENT_UUID_HERE', 'DBM020', 'DBM President'),
-  ('YOUR_VP_UUID_HERE', 'DBM021', 'DBM Vice President'),
-  ('YOUR_SECRETARY_UUID_HERE', 'DBM019', 'DBM Secretary'),
-  ('YOUR_TREASURER_UUID_HERE', 'DBM063', 'DBM Treasurer'),
-  ('YOUR_TOURNAMENT_DIR_UUID_HERE', 'DBM004', 'DBM Tournament Director'),
-  ('YOUR_CONSERVATION_DIR_UUID_HERE', 'DBM045', 'DBM Conservation Director'),
-  ('YOUR_JUNIORS_DIR_UUID_HERE', 'DBM002', 'DBM Juniors Director'),
-  ('YOUR_HS_DIR_UUID_HERE', 'DBM014', 'DBM High School Director');
+  -- Tai Hunt - DBM Secretary (verified user)
+  ('8338ec05-7839-45b5-9b3a-115d6d485603', 'DBM019', 'DBM Secretary'),
+  
+  -- Board Members (add UUIDs when available)
+  -- Jeremiah Hofstetter - DBM President
+  -- ('UUID_JEREMIAH_HERE', 'DBM001', 'DBM President'),
+  
+  -- Bobby Martin - DBM Vice President  
+  -- ('UUID_BOBBY_HERE', 'DBM002', 'DBM Vice President'),
+  
+  -- Gordon Phair - DBM Treasurer
+  -- ('UUID_GORDON_HERE', 'DBM004', 'DBM Treasurer'),
+  
+  -- Howard Binkley - DBM Tournament Director
+  -- ('UUID_HOWARD_HERE', 'DBM005', 'DBM Tournament Director'),
+  
+  -- Justin Apfel - DBM Conservation Director
+  -- ('UUID_JUSTIN_HERE', 'DBM006', 'DBM Conservation Director'),
+  
+  -- Cliff Purslow - DBM Juniors Director
+  -- ('UUID_CLIFF_HERE', 'DBM007', 'DBM Juniors Director'),
+  
+  -- Bill Cancellieri - DBM High School Director
+  -- ('UUID_BILL_HERE', 'DBM008', 'DBM High School Director');
 ```
 
-**Click Run** to execute.
+**Next**: Get the UUIDs from your Supabase `auth.users` table and uncomment/fill in the board members above.
+
+**To find UUIDs**:
+```sql
+select id, email from auth.users 
+where email in (
+  'jeremiah@email.com',
+  'bobby@email.com', 
+  'gordon@email.com',
+  'howard@email.com',
+  'justin@email.com',
+  'cliff@email.com',
+  'bill@email.com'
+);
+```
+
+**Click Run** to execute the insert.
 
 ---
 
@@ -451,11 +482,24 @@ create policy "dbm_board_members_delete_deny"
   to authenticated
   using (false);
 
--- ============================================================
--- Setup complete! Now add board members:
--- ============================================================
+-- 4. Add Board Members
+-- Tai Hunt - verified user (already has UUID)
+insert into public.dbm_board_members (profile_id, member_id, role)
+values
+  ('8338ec05-7839-45b5-9b3a-115d6d485603', 'DBM019', 'DBM Secretary');
+
+-- To add other board members, get their UUIDs first:
+-- select id, email from auth.users;
+-- Then uncomment and fill in:
 -- insert into public.dbm_board_members (profile_id, member_id, role)
--- values ('<UUID_HERE>', 'DBM020', 'DBM President');
+-- values
+--   ('<UUID_JEREMIAH>', 'DBM001', 'DBM President'),
+--   ('<UUID_BOBBY>', 'DBM002', 'DBM Vice President'),
+--   ('<UUID_GORDON>', 'DBM004', 'DBM Treasurer'),
+--   ('<UUID_HOWARD>', 'DBM005', 'DBM Tournament Director'),
+--   ('<UUID_JUSTIN>', 'DBM006', 'DBM Conservation Director'),
+--   ('<UUID_CLIFF>', 'DBM007', 'DBM Juniors Director'),
+--   ('<UUID_BILL>', 'DBM008', 'DBM High School Director');
 ```
 
 ---
